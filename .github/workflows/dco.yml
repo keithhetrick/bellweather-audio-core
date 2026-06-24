@@ -1,0 +1,44 @@
+name: DCO
+
+# Enforce the Developer Certificate of Origin: every commit in a pull request
+# must carry a Signed-off-by line (see CONTRIBUTING.md). Add it with `git commit -s`.
+on:
+  pull_request:
+
+jobs:
+  dco:
+    name: Signed-off-by
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Check Signed-off-by on every PR commit
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          missing=0
+          for c in $(git rev-list "$BASE".."$HEAD"); do
+            author="$(git log -1 --format='%an <%ae>' "$c")"
+            committer="$(git log -1 --format='%cn <%ce>' "$c")"
+            signoffs="$(git log -1 --format=%B "$c" | sed -n 's/^[Ss]igned-off-by:[[:space:]]*//p')"
+            if [ -z "$signoffs" ]; then
+              echo "::error::commit $c is missing a Signed-off-by line (DCO). Use 'git commit -s'."
+              missing=1
+              continue
+            fi
+            if ! printf '%s\n' "$signoffs" | grep -Fxq "$author" \
+              && ! printf '%s\n' "$signoffs" | grep -Fxq "$committer"; then
+              echo "::error::commit $c has a Signed-off-by line, but it does not match the author or committer identity."
+              echo "author: $author"
+              echo "committer: $committer"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "DCO check failed - see CONTRIBUTING.md."
+            exit 1
+          fi
+          echo "All commits signed off."

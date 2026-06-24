@@ -1,0 +1,186 @@
+{
+  "_meta": {
+    "schemaVersion": 1,
+    "locale": "zh-CN",
+    "owner": "bw_ui",
+    "kind": "shared"
+  },
+  "strings": {
+    "knob.tooltip.footer": {
+      "value": "Cmd+拖动：微调\nAlt+单击：重置\n双击：文本输入",
+      "description": "Canonical key-command footer appended to every knob tooltip"
+    },
+    "knob.tooltip.footer.withDefault": {
+      "value": "Cmd+拖动：微调\nAlt+单击：重置为 {default}\n双击：文本输入",
+      "description": "Knob tooltip footer variant carrying the parameter's default value"
+    },
+    "common.ok": {
+      "value": "确定",
+      "description": "Generic dismiss action"
+    },
+    "dialog.preset.path.title": {
+      "value": "预设保存路径",
+      "description": "Title for dialog showing the current preset save directory"
+    },
+    "common.cancel": {
+      "value": "取消",
+      "description": "Generic cancel action"
+    },
+    "common.save": {
+      "value": "保存",
+      "description": "Generic save action"
+    },
+    "dialog.savepreset.title": {
+      "value": "保存预设",
+      "description": "Title for dialog that saves the current preset"
+    },
+    "dialog.savepreset.subtitle": {
+      "value": "将当前状态保存为用户预设。",
+      "description": "Subtitle explaining that the current state will be saved as a user preset"
+    },
+    "field.name": {
+      "value": "名称",
+      "description": "Label for a name text field"
+    },
+    "field.category": {
+      "value": "类别",
+      "description": "Label for a category text field"
+    },
+    "action.update": {
+      "value": "更新",
+      "description": "Action label for updating an existing item"
+    },
+    "action.rename": {
+      "value": "重命名",
+      "description": "Action label for renaming an existing item"
+    },
+    "action.delete": {
+      "value": "删除",
+      "description": "Action label for deleting an existing item"
+    },
+    "common.close": {
+      "value": "关闭",
+      "description": "Generic close action"
+    },
+    "dialog.managepresets.menuitem": {
+      "value": "管理用户预设...",
+      "description": "Settings menu item that opens the user preset management dialog"
+    },
+    "dialog.managepresets.title.main": {
+      "value": "管理用户预设",
+      "description": "Title for the user preset management dialog main mode"
+    },
+    "dialog.managepresets.title.delete": {
+      "value": "删除预设？",
+      "description": "Title for delete confirmation mode in the user preset management dialog"
+    },
+    "dialog.managepresets.title.rename": {
+      "value": "重命名预设",
+      "description": "Title for rename mode in the user preset management dialog"
+    },
+    "dialog.managepresets.title.update": {
+      "value": "更新预设？",
+      "description": "Title for update confirmation mode in the user preset management dialog"
+    },
+    "dialog.managepresets.prompt.delete": {
+      "value": "要删除 '{presetName}' 吗？\n此操作无法撤销。",
+      "description": "Delete confirmation prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "dialog.managepresets.prompt.rename": {
+      "value": "为 '{presetName}' 输入新名称:",
+      "description": "Rename prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "dialog.managepresets.prompt.update": {
+      "value": "用当前设置覆盖 '{presetName}' 吗？",
+      "description": "Update confirmation prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "preset.none": {
+      "value": "-- 无预设 --",
+      "description": "Displayed in the preset header when no preset is selected"
+    },
+    "action.undo": {
+      "value": "撤销",
+      "description": "Generic undo action tooltip"
+    },
+    "action.undo.named": {
+      "value": "撤销 {action}",
+      "description": "Undo tooltip with the next undo action name. {action} is a literal action label."
+    },
+    "action.undo.empty": {
+      "value": "没有可撤销的操作",
+      "description": "Disabled undo tooltip"
+    },
+    "action.redo": {
+      "value": "重做",
+      "description": "Generic redo action tooltip"
+    },
+    "action.redo.named": {
+      "value": "重做 {action}",
+      "description": "Redo tooltip with the next redo action name. {action} is a literal action label."
+    },
+    "action.redo.empty": {
+      "value": "没有可重做的操作",
+      "description": "Disabled redo tooltip"
+    },
+    "about.menu.manual": {
+      "value": "打开 {productName} 手册",
+      "description": "Settings menu item that opens the product manual. {productName} is the product name."
+    },
+    "about.menu.about": {
+      "value": "关于 {productName}",
+      "description": "Settings menu item that opens the product about overlay. {productName} is the product name."
+    },
+    "about.license.licensed": {
+      "value": "已授权",
+      "description": "About overlay license status for an activated product"
+    },
+    "about.license.trial": {
+      "value": "试用版",
+      "description": "About overlay license status for a trial product"
+    },
+    "preset.browser.search.placeholder": {
+      "value": "搜索预设...",
+      "description": "Placeholder text for the shared preset browser search field"
+    },
+    "preset.browser.filter.all": {
+      "value": "全部",
+      "description": "Preset browser filter showing all presets"
+    },
+    "preset.browser.filter.favorites": {
+      "value": "收藏",
+      "description": "Preset browser filter showing favorite presets"
+    },
+    "preset.browser.filter.cleanstarters": {
+      "value": "干净起点",
+      "description": "Preset browser filter showing clean starter presets"
+    },
+    "preset.browser.badge.startup": {
+      "value": "启动",
+      "description": "Preset browser badge for the preset used at startup"
+    },
+    "preset.browser.badge.user": {
+      "value": "用户",
+      "description": "Preset browser badge for user-created presets"
+    },
+    "preset.browser.metadata.cleanstarter": {
+      "value": "干净起点",
+      "description": "Preset browser metadata label for a clean starter preset"
+    },
+    "preset.intensity.subtle": {
+      "value": "细腻",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.balanced": {
+      "value": "均衡",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.assertive": {
+      "value": "强烈",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.extreme": {
+      "value": "极端",
+      "description": "Preset metadata intensity label"
+    }
+  }
+}

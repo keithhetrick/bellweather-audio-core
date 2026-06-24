@@ -1,0 +1,187 @@
+{
+  "_meta": {
+    "schemaVersion": 1,
+    "locale": "qps-ploc",
+    "owner": "bw_ui",
+    "kind": "shared",
+    "generatedFrom": "en-US"
+  },
+  "strings": {
+    "knob.tooltip.footer": {
+      "value": "[Ċṁd+Ďṛåġ: Ƒïñè ådĵüṡṫ\nÀłṫ+Ċłïċḳ: Ṛèṡèṫ\nĎöüƀłè-Ċłïċḳ: Ṫèẋṫ èñṫṛÿ]",
+      "description": "Canonical key-command footer appended to every knob tooltip"
+    },
+    "knob.tooltip.footer.withDefault": {
+      "value": "[Ċṁd+Ďṛåġ: Ƒïñè ådĵüṡṫ\nÀłṫ+Ċłïċḳ: Ṛèṡèṫ ṫö {default}\nĎöüƀłè-Ċłïċḳ: Ṫèẋṫ èñṫṛÿ]",
+      "description": "Knob tooltip footer variant carrying the parameter's default value"
+    },
+    "common.ok": {
+      "value": "[!! ØK åå !!]",
+      "description": "Generic dismiss action"
+    },
+    "dialog.preset.path.title": {
+      "value": "[!! Þŕëšëŧ Šåvë Þåŧĥ åååååå !!]",
+      "description": "Title for dialog showing the current preset save directory"
+    },
+    "common.cancel": {
+      "value": "[!! Çåñçëļ åå !!]",
+      "description": "Generic cancel action"
+    },
+    "common.save": {
+      "value": "[!! Šåvë åå !!]",
+      "description": "Generic save action"
+    },
+    "dialog.savepreset.title": {
+      "value": "[!! Šåvë Þŕëšëŧ åååå !!]",
+      "description": "Title for dialog that saves the current preset"
+    },
+    "dialog.savepreset.subtitle": {
+      "value": "[!! Šåvë ŧĥë çûŕŕëñŧ šŧåŧë åš å ûšëŕ þŕëšëŧ. åååååååååååå !!]",
+      "description": "Subtitle explaining that the current state will be saved as a user preset"
+    },
+    "field.name": {
+      "value": "[!! Ñåmë åå !!]",
+      "description": "Label for a name text field"
+    },
+    "field.category": {
+      "value": "[!! Çåŧëĝøŕý ååå !!]",
+      "description": "Label for a category text field"
+    },
+    "action.update": {
+      "value": "[!! Ûþðåŧë ååå !!]",
+      "description": "Action label for updating an existing item"
+    },
+    "action.rename": {
+      "value": "[!! Ŕëñåmë ååå !!]",
+      "description": "Action label for renaming an existing item"
+    },
+    "action.delete": {
+      "value": "[!! Ðëļëŧë ååå !!]",
+      "description": "Action label for deleting an existing item"
+    },
+    "common.close": {
+      "value": "[!! Çļøšë åå !!]",
+      "description": "Generic close action"
+    },
+    "dialog.managepresets.menuitem": {
+      "value": "[!! Måñåĝë Ûšëŕ Þŕëšëŧš... åååååå !!]",
+      "description": "Settings menu item that opens the user preset management dialog"
+    },
+    "dialog.managepresets.title.main": {
+      "value": "[!! Måñåĝë Ûšëŕ Þŕëšëŧš åååååå !!]",
+      "description": "Title for the user preset management dialog main mode"
+    },
+    "dialog.managepresets.title.delete": {
+      "value": "[!! Ðëļëŧë Þŕëšëŧ? åååå !!]",
+      "description": "Title for delete confirmation mode in the user preset management dialog"
+    },
+    "dialog.managepresets.title.rename": {
+      "value": "[!! Ŕëñåmë Þŕëšëŧ åååå !!]",
+      "description": "Title for rename mode in the user preset management dialog"
+    },
+    "dialog.managepresets.title.update": {
+      "value": "[!! Ûþðåŧë Þŕëšëŧ? åååå !!]",
+      "description": "Title for update confirmation mode in the user preset management dialog"
+    },
+    "dialog.managepresets.prompt.delete": {
+      "value": "[!! Ðëļëŧë '{presetName}'?\nŦĥïš çåññøŧ ƀë ûñðøñë. åååååååå !!]",
+      "description": "Delete confirmation prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "dialog.managepresets.prompt.rename": {
+      "value": "[!! Ëñŧëŕ å ñëŵ ñåmë ƒøŕ '{presetName}': åååååååå !!]",
+      "description": "Rename prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "dialog.managepresets.prompt.update": {
+      "value": "[!! Øvëŕŵŕïŧë '{presetName}' ŵïŧĥ çûŕŕëñŧ šëŧŧïñĝš? åååååååå !!]",
+      "description": "Update confirmation prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "preset.none": {
+      "value": "[!! -- Ñø Þŕëšëŧ -- åååå !!]",
+      "description": "Displayed in the preset header when no preset is selected"
+    },
+    "action.undo": {
+      "value": "[!! Ûñðø åå !!]",
+      "description": "Generic undo action tooltip"
+    },
+    "action.undo.named": {
+      "value": "[!! Ûñðø {action} åååå !!]",
+      "description": "Undo tooltip with the next undo action name. {action} is a literal action label."
+    },
+    "action.undo.empty": {
+      "value": "[!! Ñøŧĥïñĝ ŧø ûñðø ååååå !!]",
+      "description": "Disabled undo tooltip"
+    },
+    "action.redo": {
+      "value": "[!! Ŕëðø åå !!]",
+      "description": "Generic redo action tooltip"
+    },
+    "action.redo.named": {
+      "value": "[!! Ŕëðø {action} åååå !!]",
+      "description": "Redo tooltip with the next redo action name. {action} is a literal action label."
+    },
+    "action.redo.empty": {
+      "value": "[!! Ñøŧĥïñĝ ŧø ŕëðø ååååå !!]",
+      "description": "Disabled redo tooltip"
+    },
+    "about.menu.manual": {
+      "value": "[!! Øþëñ {productName} Måñûåļ ååååå !!]",
+      "description": "Settings menu item that opens the product manual. {productName} is the product name."
+    },
+    "about.menu.about": {
+      "value": "[!! Åβøûŧ {productName} åååå !!]",
+      "description": "Settings menu item that opens the product about overlay. {productName} is the product name."
+    },
+    "about.license.licensed": {
+      "value": "[!! Ļïçëñšëð ååå !!]",
+      "description": "About overlay license status for an activated product"
+    },
+    "about.license.trial": {
+      "value": "[!! Ŧŕïåļ åå !!]",
+      "description": "About overlay license status for a trial product"
+    },
+    "preset.browser.search.placeholder": {
+      "value": "[!! Šëåŕçĥ þŕëšëŧš... åååå !!]",
+      "description": "Placeholder text for the shared preset browser search field"
+    },
+    "preset.browser.filter.all": {
+      "value": "[!! Åļļ åå !!]",
+      "description": "Preset browser filter showing all presets"
+    },
+    "preset.browser.filter.favorites": {
+      "value": "[!! Fåvøŕïŧëš ååå !!]",
+      "description": "Preset browser filter showing favorite presets"
+    },
+    "preset.browser.filter.cleanstarters": {
+      "value": "[!! Çļëåñ Šŧåŕŧëŕš åååå !!]",
+      "description": "Preset browser filter showing clean starter presets"
+    },
+    "preset.browser.badge.startup": {
+      "value": "[!! Šŧåŕŧûþ ååå !!]",
+      "description": "Preset browser badge for the preset used at startup"
+    },
+    "preset.browser.badge.user": {
+      "value": "[!! Ûšëŕ åå !!]",
+      "description": "Preset browser badge for user-created presets"
+    },
+    "preset.browser.metadata.cleanstarter": {
+      "value": "[!! Çļëåñ šŧåŕŧëŕ åååå !!]",
+      "description": "Preset browser metadata label for a clean starter preset"
+    },
+    "preset.intensity.subtle": {
+      "value": "[!! Šûƀŧļë åå !!]",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.balanced": {
+      "value": "[!! Båļåñçëð ååå !!]",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.assertive": {
+      "value": "[!! Åššëŕŧïvë ååå !!]",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.extreme": {
+      "value": "[!! Ëxŧŕëmë åå !!]",
+      "description": "Preset metadata intensity label"
+    }
+  }
+}

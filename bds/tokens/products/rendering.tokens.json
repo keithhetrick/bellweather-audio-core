@@ -1,0 +1,28 @@
+{
+  "$schema": "../bellweather.tokens.schema.json",
+  "meta": {
+    "product": "rendering",
+    "version": "1.0.0",
+    "platform": "cpp",
+    "source": "ShadowTokens.h elevation/inner/glow/coloredGlow banks - mixed-field (int offset + float blur + ARGB colour) render tokens"
+  },
+  "shadows": {
+    "$struct": "ShadowToken",
+    "elevationNone": { "offsetX": 0, "offsetY": 0, "blur": 0.0, "color": "#00000000" },
+    "elevationLow": { "offsetX": 0, "offsetY": 2, "blur": 4.0, "color": "#1A000000" },
+    "elevationMedium": { "offsetX": 0, "offsetY": 4, "blur": 8.0, "color": "#26000000" },
+    "elevationHigh": { "offsetX": 0, "offsetY": 8, "blur": 16.0, "color": "#33000000" },
+    "elevationExtreme": { "offsetX": 0, "offsetY": 16, "blur": 32.0, "color": "#40000000" },
+    "innerSubtle": { "offsetX": 0, "offsetY": 1, "blur": 2.0, "color": "#0D000000" },
+    "innerMedium": { "offsetX": 0, "offsetY": 2, "blur": 4.0, "color": "#1A000000" },
+    "innerStrong": { "offsetX": 0, "offsetY": 4, "blur": 8.0, "color": "#26000000" },
+    "glowSubtle": { "offsetX": 0, "offsetY": 0, "blur": 4.0, "color": "#33FFFFFF" },
+    "glowMedium": { "offsetX": 0, "offsetY": 0, "blur": 8.0, "color": "#4DFFFFFF" },
+    "glowStrong": { "offsetX": 0, "offsetY": 0, "blur": 16.0, "color": "#66FFFFFF" },
+    "coloredGlowAccent": { "offsetX": 0, "offsetY": 0, "blur": 12.0, "color": "#662563eb" },
+    "coloredGlowSuccess": { "offsetX": 0, "offsetY": 0, "blur": 12.0, "color": "#6610b981" },
+    "coloredGlowWarning": { "offsetX": 0, "offsetY": 0, "blur": 12.0, "color": "#66f59e0b" },
+    "coloredGlowDanger": { "offsetX": 0, "offsetY": 0, "blur": 12.0, "color": "#66ef4444" },
+    "coloredGlowSubtle": { "offsetX": 0, "offsetY": 0, "blur": 8.0, "color": "#4D1A1A1A" }
+  }
+}

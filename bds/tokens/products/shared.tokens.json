@@ -1,0 +1,911 @@
+{
+  "$schema": "../bellweather.tokens.schema.json",
+  "meta": {
+    "product": "shared",
+    "version": "1.0.0",
+    "platform": "cpp",
+    "source": "WeatherConstants.h (Brass namespace) + BellweatherColors.h \u2014 cross-product shared tokens"
+  },
+  "colors": {
+    "bg": {
+      "base": "#0F172A",
+      "surface": "#1E293B",
+      "elevated": "#0F172A"
+    },
+    "text": {
+      "primary": "#94A3B8",
+      "secondary": "#64748B",
+      "disabled": "#64748B"
+    },
+    "border": {
+      "outline": "#334155"
+    },
+    "accent": {
+      "primary": "#F6C344",
+      "secondary": "#F6C344"
+    },
+    "envelope": {
+      "trace": {
+        "cold": "#F6C344",
+        "hot": "#F6C344"
+      }
+    },
+    "dynamicsWash": {
+      "stableMid": "#5A9880",
+      "working": "#B89060",
+      "heavy": "#C07040"
+    },
+    "envelopeChrome": {
+      "panel": "#1A1A20",
+      "outline": "#666666",
+      "grid": "#666666",
+      "gridFill": "#505868",
+      "rangeFloor": "#B89060",
+      "autoReleaseBand": "#D4A574",
+      "curve": "#D0D4DC",
+      "curveGlow": "#D4A574",
+      "markerBase": "#A89968",
+      "threshold": "#B89060"
+    },
+    "primitive": {
+      "amber600": "#b89060"
+    },
+    "semantic": {
+      "ok": "#10B981",
+      "warn": "#F59E0B",
+      "danger": "#EF4444",
+      "warmAmber": "{colors.primitive.amber600}"
+    },
+    "component": {
+      "inlineSlider": {
+        "warmAmber": "{colors.semantic.warmAmber}"
+      }
+    }
+  },
+  "brass": {
+    "colors": {
+      "accent": "#D4AF37",
+      "glow": "#59D4AF37",
+      "dim": "#99D4AF37",
+      "bgMain": "#1A1A1A",
+      "bgRaised": "#2A2A2A",
+      "bgElevated": "#3A3A3A",
+      "bgInput": "#252525",
+      "borderLight": "#4A4A4A",
+      "borderDark": "#1A1A1A",
+      "textPrimary": "#FEFEF0",
+      "textSecondary": "#AAAAAA",
+      "textTertiary": "#888888",
+      "textDisabled": "#666666",
+      "linkBlue": "#4A90D9"
+    },
+    "surface": {
+      "primary": "#A89968",
+      "highlight": "#C0A575",
+      "dark": "#8B7F6A",
+      "frameDark": "#5A4A2F"
+    },
+    "panel": {
+      "deeper": "#0F0F0F",
+      "nearBlack": "#0A0A0A",
+      "darkPanel": "#151515",
+      "ledBorder": "#1F1F1F"
+    },
+    "radii": {
+      "small": 2.0,
+      "medium": 4.0,
+      "large": 6.0
+    },
+    "componentSizes": {
+      "abToggleWidth": 52,
+      "abToggleHeight": 22,
+      "toggleSize": 24,
+      "toggleGap": 8,
+      "sliderWidth": 120,
+      "sliderHeight": 24,
+      "presetWidth": 140,
+      "presetHeight": 22
+    }
+  },
+  "stability": {
+    "stableGreen": "#7AB892",
+    "workingBrass": "#D4A574",
+    "heavyOrange": "#D97545"
+  },
+  "atmospheric": {
+    "deep": "#0D0D0D",
+    "mid": "#1A1A1A",
+    "light": "#2A2A2A"
+  },
+  "equilibrium": {
+    "signalRed": "#C62828",
+    "chromeScrim": "#CC0D0D0D",
+    "indicatorHover": "#C0C0C0"
+  },
+  "brandText": {
+    "primary": "#F5F0E8",
+    "secondary": "#CCCCCC",
+    "tertiary": "#999999",
+    "quaternary": "#666666",
+    "disabled": "#444444"
+  },
+  "brandBorder": {
+    "subtle": "#333333"
+  },
+  "ui": {
+    "textBright": "#E0E0E0",
+    "precisionBlue": "#60C0E0",
+    "trimYellow": "#FFCC00",
+    "tickMark": "#6A6A6A",
+    "gainGold": "#D4A843",
+    "gainLabelCream": "#EEDDCC"
+  },
+  "typography": {
+    "sizes": {
+      "micro": 7.5,
+      "tiny": 8,
+      "small": 9,
+      "body": 10,
+      "label": 11,
+      "display": 12,
+      "heading": 13,
+      "title": 14,
+      "hero": 19
+    },
+    "tracking": {
+      "tight": 0.02,
+      "normal": 0.04,
+      "wide": 0.08,
+      "brand": 0.12
+    }
+  },
+  "header": {
+    "height": 32,
+    "brandZoneWidth": 120,
+    "iconSize": 16,
+    "iconPadding": 8,
+    "nameIconGap": 4,
+    "nameRightPad": 8,
+    "nameCategoryGap": 2,
+    "funcLeftOffset": 10,
+    "navWidth": 22,
+    "saveWidth": 28,
+    "abWidth": 36,
+    "settingsWidth": 22,
+    "rightInset": 8,
+    "gap": 6,
+    "renamePadV": 4
+  },
+  "spacing": {
+    "xxs": 2,
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "xxl": 32
+  },
+  "gridCell": {
+    "minSize": 48,
+    "maxSize": 160
+  },
+  "surfaces": {
+    "radiusSm": 4.0,
+    "radiusMd": 9.0,
+    "radiusLg": 14.0,
+    "strokeHairline": 0.9,
+    "strokeThin": 1.1,
+    "strokeMed": 1.8,
+    "elevationFlat": 0.0,
+    "elevationRaised": 5.0,
+    "elevationHero": 9.0
+  },
+  "knobs": {
+    "$struct": "UiKnobMetricsTokens",
+    "hero": {
+      "diameter": 190.0,
+      "ringThickness": 10.0,
+      "arcThickness": 5.0,
+      "pointerLength": 20.0,
+      "pointerThickness": 3.0,
+      "labelPadding": 10.0,
+      "readoutPadding": 12.0,
+      "hitPadding": 6.0
+    },
+    "primary": {
+      "diameter": 142.0,
+      "ringThickness": 8.0,
+      "arcThickness": 4.0,
+      "pointerLength": 16.0,
+      "pointerThickness": 2.5,
+      "labelPadding": 8.0,
+      "readoutPadding": 10.0,
+      "hitPadding": 5.0
+    },
+    "secondary": {
+      "diameter": 118.0,
+      "ringThickness": 7.0,
+      "arcThickness": 3.2,
+      "pointerLength": 14.0,
+      "pointerThickness": 2.2,
+      "labelPadding": 7.0,
+      "readoutPadding": 9.0,
+      "hitPadding": 4.0
+    }
+  },
+  "dropdowns": {
+    "$struct": "UiDropdownMetricsTokens",
+    "standard": {
+      "height": 36.0,
+      "padding": 12.0,
+      "arrowBoxWidth": 28.0,
+      "cornerRadius": 8.0,
+      "outlineThickness": 1.2,
+      "popupFontScale": 0.98,
+      "minPopupWidth": 128.0,
+      "rowHeightFactor": 1.8,
+      "tickGlyphFactor": 0.22,
+      "minTickGlyphRadius": 1.5,
+      "separatorInsetX": 8.0,
+      "shadowAlpha": 0.36,
+      "shadowBlur": 10.0,
+      "shadowOffsetY": 2.0
+    },
+    "utilityMenu": {
+      "height": 30.0,
+      "padding": 8.0,
+      "arrowBoxWidth": 22.0,
+      "cornerRadius": 7.0,
+      "outlineThickness": 1.0,
+      "popupFontScale": 0.94,
+      "minPopupWidth": 112.0,
+      "rowHeightFactor": 1.55,
+      "tickGlyphFactor": 0.22,
+      "minTickGlyphRadius": 1.5,
+      "separatorInsetX": 8.0,
+      "shadowAlpha": 0.36,
+      "shadowBlur": 10.0,
+      "shadowOffsetY": 2.0
+    },
+    "compact": {
+      "height": 32.0,
+      "padding": 10.0,
+      "arrowBoxWidth": 24.0,
+      "cornerRadius": 7.0,
+      "outlineThickness": 1.1,
+      "popupFontScale": 0.94,
+      "minPopupWidth": 128.0,
+      "rowHeightFactor": 1.8,
+      "tickGlyphFactor": 0.22,
+      "minTickGlyphRadius": 1.5,
+      "separatorInsetX": 8.0,
+      "shadowAlpha": 0.36,
+      "shadowBlur": 10.0,
+      "shadowOffsetY": 2.0
+    },
+    "overlay": {
+      "height": 22.0,
+      "padding": 6.0,
+      "arrowBoxWidth": 14.0,
+      "cornerRadius": 4.0,
+      "outlineThickness": 0.6,
+      "popupFontScale": 1.0,
+      "minPopupWidth": 128.0,
+      "rowHeightFactor": 1.8,
+      "tickGlyphFactor": 0.22,
+      "minTickGlyphRadius": 1.5,
+      "separatorInsetX": 8.0,
+      "shadowAlpha": 0.36,
+      "shadowBlur": 10.0,
+      "shadowOffsetY": 2.0
+    }
+  },
+  "tooltips": {
+    "$struct": "UiTooltipMetricsTokens",
+    "standard": {
+      "minWidth": 150.0,
+      "maxWidth": 240.0,
+      "maxWidthRatio": 0.34,
+      "fontScale": 0.94,
+      "paddingX": 6.0,
+      "paddingY": 4.0,
+      "offsetX": 14.0,
+      "offsetY": 4.0,
+      "minTextWidth": 40.0,
+      "parentInset": 2.0,
+      "cornerRadiusScale": 1.0,
+      "shadowAlpha": 0.22,
+      "shadowBlur": 6.0,
+      "shadowOffsetY": 1.0
+    }
+  },
+  "readouts": {
+    "$struct": "UiReadoutMetricsTokens",
+    "standard": {
+      "minWidth": 88.0,
+      "height": 32.0,
+      "paddingX": 11.0,
+      "paddingY": 4.0,
+      "cornerRadius": 8.0,
+      "outlineThickness": 1.15
+    },
+    "compact": {
+      "minWidth": 72.0,
+      "height": 22.0,
+      "paddingX": 8.0,
+      "paddingY": 2.0,
+      "cornerRadius": 0.0,
+      "outlineThickness": 1.0
+    }
+  },
+  "readoutDerivation": {
+    "note": "Geometry coefficients applied to readout metrics at paint time.",
+    "pillInset": 0.5,
+    "compactCornerFactor": 0.28,
+    "verticalSafetyCompactFactor": 1.25,
+    "verticalSafetyStandardFactor": 2.0,
+    "shellPaddingXAdd": 5.0,
+    "minShellWidthFactor": 1.15,
+    "compactVerticalPadFactor": 0.5,
+    "underlineWidthFactor": 0.52,
+    "underlineYOffsetFactor": 0.4,
+    "underlineThicknessFactor": 0.72,
+    "selectionCornerFactor": 0.22,
+    "caretHeightFactor": 0.9
+  },
+  "tabs": {
+    "$struct": "UiTabMetricsTokens",
+    "standard": {
+      "height": 34.0,
+      "paddingX": 12.0,
+      "cornerRadius": 8.0,
+      "outlineThickness": 1.15
+    }
+  },
+  "opacity": {
+    "outline": {
+      "hairline": 0.25,
+      "divider": 0.35,
+      "standard": 0.6,
+      "emphasized": 0.7,
+      "bold": 0.8
+    },
+    "text": {
+      "sectionHeader": 0.85
+    },
+    "scrollbar": {
+      "track": 0.15,
+      "thumb": 0.55
+    },
+    "dropdown": {
+      "selectedItemHighlight": 0.15
+    },
+    "badge": {
+      "neutralFill": 0.88,
+      "neutralBorder": 0.3,
+      "neutralText": 0.66,
+      "subtleFill": 0.68,
+      "subtleBorder": 0.18,
+      "subtleText": 0.48,
+      "accentFill": 0.18,
+      "accentBorder": 0.3,
+      "accentText": 0.82,
+      "statusFill": 0.28,
+      "statusBorder": 0.42,
+      "statusText": 0.92
+    },
+    "chip": {
+      "fillSelected": 0.22,
+      "fillUnselected": 0.88,
+      "borderSelectedFocused": 0.58,
+      "borderSelectedDefault": 0.34,
+      "borderUnselectedHover": 0.3,
+      "borderUnselectedDefault": 0.18,
+      "textBright": 0.96,
+      "textUnselectedHover": 0.86,
+      "textUnselectedDefault": 0.72,
+      "accentStroke": 0.46,
+      "disabledFillMult": 0.55,
+      "disabledBorderMult": 0.5,
+      "disabledTextMult": 0.55
+    },
+    "card": {
+      "shadow": 0.22,
+      "hairline": 0.012,
+      "surface": 0.88,
+      "border": 0.2,
+      "textureStripe": 0.05
+    },
+    "row": {
+      "hoverBg": 0.12,
+      "pressedBg": 0.26,
+      "hairline": 0.035,
+      "selectedIndicator": 0.92,
+      "secondaryText": 0.38,
+      "favouriteEnabled": 0.22,
+      "favouriteDisabled": 0.12,
+      "titleHighlighted": 0.96,
+      "titleDefault": 0.82
+    },
+    "dialog": {
+      "backdrop": 0.8,
+      "outlineSubtle": 0.2,
+      "outlineAccent": 0.46,
+      "secondaryText": 0.72
+    },
+    "search": {
+      "highlight": 0.18,
+      "caret": 0.95,
+      "chromeFill": 0.96,
+      "chromeBorder": 0.22,
+      "chromeFocus": 0.56,
+      "emptyText": 0.28
+    },
+    "header": {
+      "chipSelected": 0.18,
+      "chipUnselected": 0.78,
+      "accentWashDim": 0.12,
+      "accentWashBright": 0.45,
+      "accentWashGlow": 0.76,
+      "accentEdge": 0.95,
+      "hairline": 0.05,
+      "rowHover": 0.08,
+      "caption": 0.24,
+      "borderOpen": 0.42,
+      "borderClosed": 0.22,
+      "abDividerSuspended": 0.18,
+      "abDividerActive": 0.35,
+      "abInactive": 0.3,
+      "abSeparatorSuspended": 0.18,
+      "abSeparatorActive": 0.3,
+      "navHovered": 0.9,
+      "navIdle": 0.4,
+      "saveSuspended": 0.22,
+      "saveIdle": 0.84,
+      "settingsSuspended": 0.18,
+      "settingsHovered": 0.72,
+      "settingsIdle": 0.42
+    },
+    "grMeter": {
+      "bgIdle": 0.85,
+      "bgActive": 0.7,
+      "accentGrid": 0.4,
+      "accentWashSubtle": 0.06,
+      "threshold": 0.5,
+      "thresholdDrag": 0.8,
+      "thresholdHover": 0.4,
+      "textPrimary": 0.9,
+      "ledUnlit": 0.3,
+      "traceGrid": 0.2,
+      "traceFillTop": 0.1,
+      "thresholdLine": 0.7,
+      "peakText": 0.7
+    },
+    "knob": {
+      "accentWash": 0.3
+    },
+    "strip": {
+      "accentGlowDim": 0.3,
+      "accentGlowBright": 0.5,
+      "glowDim": 0.1,
+      "selectedFill": 0.15,
+      "normalFill": 0.08,
+      "selectedText": 0.7,
+      "borderDefault": 0.4,
+      "secondaryText": 0.6,
+      "accentEdge": 0.6,
+      "separator": 0.2,
+      "bgExpansionBase": 0.95,
+      "borderExpansionBase": 0.4,
+      "borderExpansionFaded": 0.3
+    },
+    "panel": {
+      "glowWash": 0.15,
+      "accentEdge": 0.6,
+      "border": 0.4,
+      "bgExpansionBase": 0.95,
+      "borderExpansionBase": 0.4
+    },
+    "lamp": {
+      "glowCenter": 0.3,
+      "highlightCap": 0.3
+    },
+    "iris": {
+      "borderMult": 0.5,
+      "glowPulseSubtle": 0.35,
+      "glowPulseMedium": 0.7,
+      "closingMult": 0.3,
+      "labelMult": 0.9,
+      "hoverGlow": 0.2,
+      "accentFull": 0.6,
+      "borderDark": 0.5,
+      "ringMult": 0.3,
+      "tickMult": 0.4
+    },
+    "curve": {
+      "gradientCenter": 0.15,
+      "gradientEdge": 0.05,
+      "stroke": 0.3,
+      "strokeBright": 0.6,
+      "strokeMid": 0.5
+    },
+    "window": {
+      "dropIndicator": 0.3,
+      "accentBorder": 0.7,
+      "backdropFlash": 0.7,
+      "backdropIdle": 0.6,
+      "accentPulseMult": 0.9,
+      "whiteBoost": 0.2,
+      "textSecondary": 0.7
+    },
+    "display": {
+      "borderStandard": 0.3,
+      "borderFaded": 0.12,
+      "accentWash": 0.15,
+      "borderSubtle": 0.15,
+      "accentDim": 0.1,
+      "accentBright": 0.5
+    },
+    "tab": {
+      "focusRing": 0.74,
+      "focusRingIdle": 0.62,
+      "bgRaisedMult": 0.9,
+      "borderMultFocused": 0.74,
+      "borderMultIdle": 0.42,
+      "textMultEnabled": 0.92,
+      "textMultDisabled": 0.55
+    },
+    "shadow": {
+      "soft": 0.05,
+      "drop": 0.5,
+      "highlight": 0.15,
+      "subtle": 0.08,
+      "surfaceHigh": 0.6,
+      "surfaceSubtle": 0.15,
+      "bgMult": 0.95,
+      "borderMult": 0.8,
+      "whiteMuted": 0.6,
+      "whiteStrong": 0.95
+    },
+    "uiPanel": {
+      "matteMid": 0.95,
+      "matteOutline": 0.55,
+      "stripeVertical": 0.05,
+      "stripeHorizontal": 0.08,
+      "bedGradientStart": 0.06,
+      "bedGradientEnd": 0.1,
+      "bedGradientMid": 0.02,
+      "bedTopEdge": 0.04,
+      "bedBottomShade": 0.05
+    },
+    "uiTabs": {
+      "fillOn": 0.9,
+      "fillOff": 0.95,
+      "outline": 0.7,
+      "bg": 0.92,
+      "ambientOutline": 0.6
+    },
+    "uiButton": {
+      "ghostBase": 0.9,
+      "ghostHover": 0.12,
+      "ghostActive": 0.2,
+      "ghostOutline": 0.8,
+      "textHover": 0.1,
+      "textPressed": 0.16,
+      "disabledBg": 0.15,
+      "disabledOutline": 0.35,
+      "focusRing": 0.7
+    },
+    "uiToggle": {
+      "trackOffIdle": 0.18,
+      "trackOffHover": 0.25,
+      "trackOffPressed": 0.35,
+      "outlineOn": 0.45,
+      "disabledTrack": 0.16,
+      "disabledOutline": 0.18,
+      "focusRing": 0.65
+    },
+    "uiReadout": {
+      "fillNormal": 0.9,
+      "fillHover": 0.94,
+      "fillActive": 0.97,
+      "outlineHover": 0.18,
+      "outlineActive": 0.3,
+      "textCompactBase": 0.96,
+      "underlineCompactBase": 0.18,
+      "underlineHoverCoeff": 0.24,
+      "underlineActiveCoeff": 0.32,
+      "selectionHighlight": 0.24,
+      "caret": 0.9,
+      "placeholder": 0.6
+    },
+    "tabBar": {
+      "selectedFill": 0.9,
+      "pressedFillBase": 0.1,
+      "pressedFillOverlay": 0.18,
+      "outline": 0.6,
+      "focusRing": 0.65
+    },
+    "uiMeter": {
+      "trackDisabled": 0.2,
+      "trackOutlineDefault": 0.55,
+      "trackOutlineDisabled": 0.25,
+      "accentDisabled": 0.6,
+      "accentSecondary": 0.7
+    },
+    "uiSlider": {
+      "trackBg": 0.85,
+      "thumbOutline": 0.8,
+      "fill": 0.95
+    },
+    "graphPanel": {
+      "outline": 0.6,
+      "divider": 0.35
+    },
+    "knobChrome": {
+      "faceBgIdle": 0.9,
+      "faceBgLocked": 0.82,
+      "ringIdle": 0.8,
+      "ringLocked": 0.42,
+      "guideArcIdle": 0.24,
+      "guideArcLocked": 0.12,
+      "activeArcIdle": 0.9,
+      "activeArcLocked": 0.26,
+      "pointerIdle": 1.0,
+      "pointerLocked": 0.34
+    },
+    "knobLighting": {
+      "highlightTopCoeff": 0.22,
+      "highlightMidCoeff": 0.05,
+      "shadowTopCoeff": 0.035,
+      "shadowMidCoeff": 0.14,
+      "dropShadow": 0.18
+    },
+    "inlineSlider": {
+      "labelHeroDisabled": 0.7,
+      "labelSupportingDisabled": 0.54,
+      "labelHeroIdle": 0.92,
+      "labelSupportingIdle": 0.72,
+      "laneTopHeroDisabled": 0.74,
+      "laneTopSupportingDisabled": 0.58,
+      "laneTopHeroIdle": 0.94,
+      "laneTopSupportingIdle": 0.76,
+      "coolBaseDisabled": 0.08,
+      "coolBaseHero": 0.22,
+      "coolBaseDefault": 0.12,
+      "coolBrightDisabled": 0.14,
+      "coolBrightHero": 0.34,
+      "coolBrightDefault": 0.16,
+      "warmAccentDragging": 0.045,
+      "warmAccentIdle": 0.022,
+      "topHairlineDisabled": 0.05,
+      "topHairlineHero": 0.1,
+      "topHairlineDefault": 0.03,
+      "lowerShadeDisabled": 0.08,
+      "lowerShadeHero": 0.18,
+      "lowerShadeDefault": 0.05,
+      "fillBaseCoolHero": 0.12,
+      "fillBaseCoolDefault": 0.08,
+      "fillBaseWarmDragging": 0.34,
+      "fillBaseWarmDefault": 0.18,
+      "fillBaseCool2Hero": 0.28,
+      "fillBaseCool2Default": 0.15,
+      "fillBrightCoolHero": 0.16,
+      "fillBrightCoolDefault": 0.1,
+      "fillBrightWarmDragging": 0.5,
+      "fillBrightWarmDefault": 0.28,
+      "fillBrightCool2Hero": 0.36,
+      "fillBrightCool2Default": 0.18,
+      "handleBgCoolHero": 0.16,
+      "handleBgCoolDefault": 0.1,
+      "handleAccentWarmFocused": 0.64,
+      "handleAccentWarmDefault": 0.52,
+      "handleAccentCoolHero": 0.34,
+      "handleAccentCoolDefault": 0.18
+    },
+    "texture": {
+      "scratch": 0.3
+    },
+    "equilibrium": {
+      "lowEndBand": 0.4,
+      "calibLabel": 0.6,
+      "lockedPulseHalo": 0.3
+    },
+    "editorRecipe": {
+      "peakStroke": 0.7,
+      "curveStroke": 0.8
+    },
+    "resizeCorner": {
+      "hover": 0.92,
+      "idle": 0.62
+    },
+    "aboutOverlay": {
+      "accentBorder": 0.6
+    },
+    "correlationMeter": {
+      "centerLine": 0.5,
+      "peakHold": 0.8,
+      "needleShadow": 0.3,
+      "peakNeedle": 0.5,
+      "histBar": 0.8,
+      "histCenterLine": 0.3,
+      "scaleLabel": 0.6,
+      "axisLabelDim": 0.4,
+      "scaleTick": 0.7,
+      "arcSegment": 0.4,
+      "badgeBgActive": 0.2,
+      "badgeBgIdle": 0.3,
+      "badgeTextIdle": 0.4
+    },
+    "goniometer": {
+      "gridAxis": 0.3,
+      "gridDiagonal": 0.2,
+      "gridCircle": 0.15,
+      "boundary": 0.4,
+      "diagonalLabel": 0.6,
+      "dotBase": 0.8,
+      "lineTrace": 0.7,
+      "persistCore": 0.9,
+      "persistGlow": 0.3,
+      "balanceBorder": 0.5,
+      "balanceLabel": 0.6
+    },
+    "levelMeter": {
+      "gainOverlayWash": 0.06,
+      "trackBorder": 0.5,
+      "gridLine": 0.2,
+      "scaleMarker": 0.5,
+      "readoutBg": 0.5,
+      "peakLabelText": 0.7,
+      "peakHoldText": 0.7,
+      "gainLineDrag": 0.8,
+      "gainLineHover": 0.4,
+      "gainLineIdle": 0.25,
+      "gainLabelText": 0.9
+    },
+    "loudnessMeter": {
+      "readoutSublabel": 0.6,
+      "meterLabel": 0.7,
+      "scaleGridLine": 0.3,
+      "targetLine": 0.6,
+      "historyTrace": 0.5,
+      "silenceDim": 0.5
+    },
+    "spectrumAnalyzer": {
+      "inputDefault": 0.15,
+      "outputDefault": 0.4,
+      "tracePath": 0.5,
+      "traceFill": 0.3
+    },
+    "waveform": {
+      "panelBorder": 0.5,
+      "gridLine": 0.15,
+      "centerLine": 0.3,
+      "rightChannelTrace": 0.7,
+      "traceFill": 0.2,
+      "traceStroke": 0.9,
+      "triggerLine": 0.5,
+      "envelopeFill": 0.4,
+      "envelopeStroke": 0.8,
+      "lissajousCrosshair": 0.2,
+      "lissajousTrace": 0.7,
+      "noSignalText": 0.35
+    },
+    "arcKnob": {
+      "lockedDim": 0.55,
+      "hoverGlow": 0.15,
+      "trimTrackDim": 0.5,
+      "readoutText": 0.95,
+      "trimPreviewText": 0.7,
+      "fineBadgeText": 0.85,
+      "inlineEditorBg": 0.95,
+      "inlineEditorBorder": 0.6,
+      "inlineEditorHighlight": 0.4
+    },
+    "uiTheme": {
+      "textDisabled": 0.45,
+      "glowAccent": 0.32
+    },
+    "weatherEnvelope": {
+      "panelFill": 0.5,
+      "panelOutline": 0.38,
+      "grid": 0.08,
+      "gridFill": 0.1,
+      "axisLabel": 0.72,
+      "rangeFloor": 0.35,
+      "autoReleaseBand": 0.08,
+      "targetCurveFill": 0.045,
+      "targetCurveGlow": 0.1,
+      "targetCurveStroke": 0.95,
+      "sweepCore": 0.98,
+      "sweepGlow": 0.28,
+      "traceHeadHalo": 0.24,
+      "markerBase": 0.42,
+      "markerActive": 0.85,
+      "thresholdMarker": 0.48,
+      "thresholdActiveBand": 0.09,
+      "markerActiveGlowLine": 0.18,
+      "grabBarActiveBand": 0.1,
+      "grabBarTickInactive": 0.72,
+      "labelTextActive": 0.95,
+      "labelTextThresholdIdle": 0.8,
+      "labelTextIdle": 0.86
+    },
+    "weatherControlSurface": {
+      "disabledFill": 0.72,
+      "disabledBorder": 0.55,
+      "disabledDivider": 0.45,
+      "disabledText": 0.5,
+      "selectedBorderFocused": 0.95,
+      "selectedBorder": 0.82,
+      "selectedDivider": 0.22,
+      "hoveredBorder": 0.78,
+      "focusRing": 0.68,
+      "disabledFocusMult": 0.35,
+      "togglePillSelectedBorderFocused": 0.78,
+      "togglePillSelectedBorder": 0.64,
+      "togglePillPressedFill": 0.96,
+      "togglePillIdleFill": 0.88,
+      "togglePillHoveredBorder": 0.72,
+      "togglePillIdleBorder": 0.46,
+      "togglePillIdleText": 0.94,
+      "actionPillPressedFill": 0.97,
+      "actionPillIdleFill": 0.9,
+      "actionPillHoveredBorder": 0.74,
+      "actionPillIdleBorder": 0.5,
+      "actionPillText": 0.96,
+      "utilityPressedFill": 0.82,
+      "utilityHoveredFill": 0.68,
+      "utilityHoveredBorder": 0.32,
+      "utilityHoveredText": 0.98,
+      "utilityIdleText": 0.8,
+      "splitComparePressedFill": 0.72,
+      "splitCompareHoveredFill": 0.52,
+      "splitCompareHoveredBorder": 0.34,
+      "splitCompareIdleBorder": 0.16,
+      "splitCompareHoveredText": 0.94,
+      "splitCompareIdleText": 0.86,
+      "compactDisabledFill": 0.52,
+      "compactFocusRing": 0.66
+    },
+    "transferCurve": {
+      "plotAreaFill": 0.5,
+      "unityLine": 0.4,
+      "axisLabel": 0.7,
+      "trailDot": 0.6,
+      "dotGlowOuter": 0.3,
+      "dotGlowInner": 0.15,
+      "thresholdLine": 0.6,
+      "ratioIndicator": 0.8,
+      "kneeGlow": 0.2,
+      "popupBg": 0.95,
+      "diagnosticOverlay": 0.5,
+      "spectrumInputFill": 0.08,
+      "spectrumInputStroke": 0.4,
+      "spectrumOutputStroke": 0.9,
+      "diagnosticSectionLabel": 0.8,
+      "compactValueText": 0.9,
+      "spectrumGrid": 0.2,
+      "spectrumLabel": 0.6,
+      "spectrumUnitLabel": 0.4,
+      "modeIndicator": 0.7,
+      "clickHint": 0.4,
+      "dualDotGlow": 0.1
+    }
+  },
+  "discovery": {
+    "shadow": "#05060A",
+    "hairline": "#D9DEE7"
+  },
+  "presetBrowser": {
+    "background": "#16161A",
+    "outline": "#55FFFFFF",
+    "focusOutline": "#88FFFFFF"
+  },
+  "geometry": {
+    "strokeHalfPx": 0.5,
+    "strokeFullPx": 1.0,
+    "strokeOneHalfPx": 1.5,
+    "strokeThreeQuarterPx": 0.75
+  }
+}

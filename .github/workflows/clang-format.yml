@@ -1,0 +1,50 @@
+name: clang-format
+
+# Enforces the project C++ formatting standard (Allman; see .clang-format). The
+# whole tree is formatted, so this checks every tracked C++ file with
+# --dry-run --Werror (clang-format honours .clang-format-ignore for vendored /
+# generated paths). Cheap - no build required. This is the gate that is safe to
+# mark "required" on this public repo.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: clang-format-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.x"
+
+      - name: Install clang-format at the pinned LLVM major
+        run: |
+          set -euo pipefail
+          major="$(grep -oE 'BWS_LLVM_PINNED_MAJOR[^0-9]*[0-9]+' cmake/BwsVersions.cmake | grep -oE '[0-9]+$')"
+          echo "Pinned LLVM major: ${major}"
+          pip install "clang-format>=${major},<$((major + 1))"
+          clang-format --version
+
+      - name: Check formatting (whole tree, honours .clang-format-ignore)
+        run: |
+          set -euo pipefail
+          files="$(git ls-files '*.cpp' '*.cc' '*.cxx' '*.h' '*.hpp' '*.hxx' '*.ipp')"
+          if [ -z "${files}" ]; then echo "no C++ files"; exit 0; fi
+          echo "Checking $(printf '%s\n' "${files}" | wc -l | tr -d ' ') C++ files..."
+          # shellcheck disable=SC2086
+          printf '%s\n' "${files}" | xargs clang-format --dry-run --Werror
+          echo "clang-format: clean ✓"

@@ -1,0 +1,186 @@
+{
+  "_meta": {
+    "schemaVersion": 1,
+    "locale": "en-US",
+    "owner": "bw_ui",
+    "kind": "shared"
+  },
+  "strings": {
+    "knob.tooltip.footer": {
+      "value": "Cmd+Drag: Fine adjust\nAlt+Click: Reset\nDouble-Click: Text entry",
+      "description": "Canonical key-command footer appended to every knob tooltip"
+    },
+    "knob.tooltip.footer.withDefault": {
+      "value": "Cmd+Drag: Fine adjust\nAlt+Click: Reset to {default}\nDouble-Click: Text entry",
+      "description": "Knob tooltip footer variant carrying the parameter's default value (e.g., '35%', '0 dB')"
+    },
+    "common.ok": {
+      "value": "OK",
+      "description": "Generic dismiss action"
+    },
+    "dialog.preset.path.title": {
+      "value": "Preset Save Path",
+      "description": "Title for dialog showing the current preset save directory"
+    },
+    "common.cancel": {
+      "value": "Cancel",
+      "description": "Generic cancel action"
+    },
+    "common.save": {
+      "value": "Save",
+      "description": "Generic save action"
+    },
+    "dialog.savepreset.title": {
+      "value": "Save Preset",
+      "description": "Title for dialog that saves the current preset"
+    },
+    "dialog.savepreset.subtitle": {
+      "value": "Save the current state as a user preset.",
+      "description": "Subtitle explaining that the current state will be saved as a user preset"
+    },
+    "field.name": {
+      "value": "Name",
+      "description": "Label for a name text field"
+    },
+    "field.category": {
+      "value": "Category",
+      "description": "Label for a category text field"
+    },
+    "action.update": {
+      "value": "Update",
+      "description": "Action label for updating an existing item"
+    },
+    "action.rename": {
+      "value": "Rename",
+      "description": "Action label for renaming an existing item"
+    },
+    "action.delete": {
+      "value": "Delete",
+      "description": "Action label for deleting an existing item"
+    },
+    "common.close": {
+      "value": "Close",
+      "description": "Generic close action"
+    },
+    "dialog.managepresets.menuitem": {
+      "value": "Manage User Presets...",
+      "description": "Settings menu item that opens the user preset management dialog"
+    },
+    "dialog.managepresets.title.main": {
+      "value": "Manage User Presets",
+      "description": "Title for the user preset management dialog main mode"
+    },
+    "dialog.managepresets.title.delete": {
+      "value": "Delete Preset?",
+      "description": "Title for delete confirmation mode in the user preset management dialog"
+    },
+    "dialog.managepresets.title.rename": {
+      "value": "Rename Preset",
+      "description": "Title for rename mode in the user preset management dialog"
+    },
+    "dialog.managepresets.title.update": {
+      "value": "Update Preset?",
+      "description": "Title for update confirmation mode in the user preset management dialog"
+    },
+    "dialog.managepresets.prompt.delete": {
+      "value": "Delete '{presetName}'?\nThis cannot be undone.",
+      "description": "Delete confirmation prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "dialog.managepresets.prompt.rename": {
+      "value": "Enter a new name for '{presetName}':",
+      "description": "Rename prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "dialog.managepresets.prompt.update": {
+      "value": "Overwrite '{presetName}' with current settings?",
+      "description": "Update confirmation prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "preset.none": {
+      "value": "-- No Preset --",
+      "description": "Displayed in the preset header when no preset is selected"
+    },
+    "action.undo": {
+      "value": "Undo",
+      "description": "Generic undo action tooltip"
+    },
+    "action.undo.named": {
+      "value": "Undo {action}",
+      "description": "Undo tooltip with the next undo action name. {action} is a literal action label."
+    },
+    "action.undo.empty": {
+      "value": "Nothing to undo",
+      "description": "Disabled undo tooltip"
+    },
+    "action.redo": {
+      "value": "Redo",
+      "description": "Generic redo action tooltip"
+    },
+    "action.redo.named": {
+      "value": "Redo {action}",
+      "description": "Redo tooltip with the next redo action name. {action} is a literal action label."
+    },
+    "action.redo.empty": {
+      "value": "Nothing to redo",
+      "description": "Disabled redo tooltip"
+    },
+    "about.menu.manual": {
+      "value": "Open {productName} Manual",
+      "description": "Settings menu item that opens the product manual. {productName} is the product name."
+    },
+    "about.menu.about": {
+      "value": "About {productName}",
+      "description": "Settings menu item that opens the product about overlay. {productName} is the product name."
+    },
+    "about.license.licensed": {
+      "value": "Licensed",
+      "description": "About overlay license status for an activated product"
+    },
+    "about.license.trial": {
+      "value": "Trial",
+      "description": "About overlay license status for a trial product"
+    },
+    "preset.browser.search.placeholder": {
+      "value": "Search presets...",
+      "description": "Placeholder text for the shared preset browser search field"
+    },
+    "preset.browser.filter.all": {
+      "value": "All",
+      "description": "Preset browser filter showing all presets"
+    },
+    "preset.browser.filter.favorites": {
+      "value": "Favorites",
+      "description": "Preset browser filter showing favorite presets"
+    },
+    "preset.browser.filter.cleanstarters": {
+      "value": "Clean Starters",
+      "description": "Preset browser filter showing clean starter presets"
+    },
+    "preset.browser.badge.startup": {
+      "value": "Startup",
+      "description": "Preset browser badge for the preset used at startup"
+    },
+    "preset.browser.badge.user": {
+      "value": "User",
+      "description": "Preset browser badge for user-created presets"
+    },
+    "preset.browser.metadata.cleanstarter": {
+      "value": "Clean starter",
+      "description": "Preset browser metadata label for a clean starter preset"
+    },
+    "preset.intensity.subtle": {
+      "value": "Subtle",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.balanced": {
+      "value": "Balanced",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.assertive": {
+      "value": "Assertive",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.extreme": {
+      "value": "Extreme",
+      "description": "Preset metadata intensity label"
+    }
+  }
+}

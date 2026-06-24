@@ -1,0 +1,186 @@
+{
+  "_meta": {
+    "schemaVersion": 1,
+    "locale": "ko-KR",
+    "owner": "bw_ui",
+    "kind": "shared"
+  },
+  "strings": {
+    "knob.tooltip.footer": {
+      "value": "Cmd+드래그: 미세 조정\nAlt+클릭: 재설정\n더블 클릭: 텍스트 입력",
+      "description": "Canonical key-command footer appended to every knob tooltip"
+    },
+    "knob.tooltip.footer.withDefault": {
+      "value": "Cmd+드래그: 미세 조정\nAlt+클릭: {default}(으)로 재설정\n더블 클릭: 텍스트 입력",
+      "description": "Knob tooltip footer variant carrying the parameter's default value"
+    },
+    "common.ok": {
+      "value": "확인",
+      "description": "Generic dismiss action"
+    },
+    "dialog.preset.path.title": {
+      "value": "프리셋 저장 경로",
+      "description": "Title for dialog showing the current preset save directory"
+    },
+    "common.cancel": {
+      "value": "취소",
+      "description": "Generic cancel action"
+    },
+    "common.save": {
+      "value": "저장",
+      "description": "Generic save action"
+    },
+    "dialog.savepreset.title": {
+      "value": "프리셋 저장",
+      "description": "Title for dialog that saves the current preset"
+    },
+    "dialog.savepreset.subtitle": {
+      "value": "현재 상태를 사용자 프리셋으로 저장합니다.",
+      "description": "Subtitle explaining that the current state will be saved as a user preset"
+    },
+    "field.name": {
+      "value": "이름",
+      "description": "Label for a name text field"
+    },
+    "field.category": {
+      "value": "카테고리",
+      "description": "Label for a category text field"
+    },
+    "action.update": {
+      "value": "업데이트",
+      "description": "Action label for updating an existing item"
+    },
+    "action.rename": {
+      "value": "이름 변경",
+      "description": "Action label for renaming an existing item"
+    },
+    "action.delete": {
+      "value": "삭제",
+      "description": "Action label for deleting an existing item"
+    },
+    "common.close": {
+      "value": "닫기",
+      "description": "Generic close action"
+    },
+    "dialog.managepresets.menuitem": {
+      "value": "사용자 프리셋 관리...",
+      "description": "Settings menu item that opens the user preset management dialog"
+    },
+    "dialog.managepresets.title.main": {
+      "value": "사용자 프리셋 관리",
+      "description": "Title for the user preset management dialog main mode"
+    },
+    "dialog.managepresets.title.delete": {
+      "value": "프리셋을 삭제할까요?",
+      "description": "Title for delete confirmation mode in the user preset management dialog"
+    },
+    "dialog.managepresets.title.rename": {
+      "value": "프리셋 이름 변경",
+      "description": "Title for rename mode in the user preset management dialog"
+    },
+    "dialog.managepresets.title.update": {
+      "value": "프리셋을 업데이트할까요?",
+      "description": "Title for update confirmation mode in the user preset management dialog"
+    },
+    "dialog.managepresets.prompt.delete": {
+      "value": "'{presetName}'을(를) 삭제할까요?\n이 작업은 되돌릴 수 없습니다.",
+      "description": "Delete confirmation prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "dialog.managepresets.prompt.rename": {
+      "value": "'{presetName}'의 새 이름을 입력하세요:",
+      "description": "Rename prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "dialog.managepresets.prompt.update": {
+      "value": "'{presetName}'을(를) 현재 설정으로 덮어쓸까요?",
+      "description": "Update confirmation prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "preset.none": {
+      "value": "-- 프리셋 없음 --",
+      "description": "Displayed in the preset header when no preset is selected"
+    },
+    "action.undo": {
+      "value": "실행 취소",
+      "description": "Generic undo action tooltip"
+    },
+    "action.undo.named": {
+      "value": "{action} 실행 취소",
+      "description": "Undo tooltip with the next undo action name. {action} is a literal action label."
+    },
+    "action.undo.empty": {
+      "value": "실행 취소할 항목 없음",
+      "description": "Disabled undo tooltip"
+    },
+    "action.redo": {
+      "value": "다시 실행",
+      "description": "Generic redo action tooltip"
+    },
+    "action.redo.named": {
+      "value": "{action} 다시 실행",
+      "description": "Redo tooltip with the next redo action name. {action} is a literal action label."
+    },
+    "action.redo.empty": {
+      "value": "다시 실행할 항목 없음",
+      "description": "Disabled redo tooltip"
+    },
+    "about.menu.manual": {
+      "value": "{productName} 매뉴얼 열기",
+      "description": "Settings menu item that opens the product manual. {productName} is the product name."
+    },
+    "about.menu.about": {
+      "value": "{productName} 정보",
+      "description": "Settings menu item that opens the product about overlay. {productName} is the product name."
+    },
+    "about.license.licensed": {
+      "value": "라이선스 인증됨",
+      "description": "About overlay license status for an activated product"
+    },
+    "about.license.trial": {
+      "value": "체험판",
+      "description": "About overlay license status for a trial product"
+    },
+    "preset.browser.search.placeholder": {
+      "value": "프리셋 검색...",
+      "description": "Placeholder text for the shared preset browser search field"
+    },
+    "preset.browser.filter.all": {
+      "value": "전체",
+      "description": "Preset browser filter showing all presets"
+    },
+    "preset.browser.filter.favorites": {
+      "value": "즐겨찾기",
+      "description": "Preset browser filter showing favorite presets"
+    },
+    "preset.browser.filter.cleanstarters": {
+      "value": "클린 스타터",
+      "description": "Preset browser filter showing clean starter presets"
+    },
+    "preset.browser.badge.startup": {
+      "value": "시작",
+      "description": "Preset browser badge for the preset used at startup"
+    },
+    "preset.browser.badge.user": {
+      "value": "사용자",
+      "description": "Preset browser badge for user-created presets"
+    },
+    "preset.browser.metadata.cleanstarter": {
+      "value": "클린 스타터",
+      "description": "Preset browser metadata label for a clean starter preset"
+    },
+    "preset.intensity.subtle": {
+      "value": "섬세",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.balanced": {
+      "value": "균형",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.assertive": {
+      "value": "강함",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.extreme": {
+      "value": "극단",
+      "description": "Preset metadata intensity label"
+    }
+  }
+}

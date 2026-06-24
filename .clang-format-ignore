@@ -1,0 +1,13 @@
+# Paths clang-format must never touch in the public tree. Honored by clang-format
+# (LLVM 18+) on every invocation, including explicitly-listed files.
+#
+# Globs are fnmatch-style: `*` does NOT cross `/`; use `/**` to match nested files
+# (`vendor/*` does NOT protect `vendor/pffft/pffft.h`; `vendor/**` does).
+
+# Third-party vendored code - preserve upstream diffability; we don't restyle code
+# we don't own.
+modules/bw_fft_adapters/vendor/**
+
+# Generated code (regenerated at build/extract from the token products) - owned by
+# the generator; formatting it would be overwritten on the next regen.
+modules/bw_ui/include/bw_ui/generated/**

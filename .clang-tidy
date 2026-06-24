@@ -1,0 +1,21 @@
+# bellweather-audio-core - clang-tidy (sharpened, contributor-facing)
+#
+# High-signal bug classes only. This is deliberately narrow
+# (bugprone + concurrency) so contributors get actionable findings instead of a
+# broad style backlog.
+# Run it diff-scoped (clang-tidy-diff.py) against your change, not whole-tree.
+#
+# Formatting is governed separately by .clang-format (see CONTRIBUTING).
+# clang-tidy here is advisory - it is not a required CI gate, because
+# a correct run needs compile_commands.json (a full build); the contributor lane
+# enforces formatting only.
+
+Checks: >
+  bugprone-*,
+  concurrency-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '(modules|plugins)/.*\.(h|hpp)$'
+FormatStyle: file

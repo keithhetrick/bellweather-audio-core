@@ -1,0 +1,103 @@
+{
+  "provenance": {
+    "source_spec": "EBU Tech 3341 v2.0 \u00a74.1",
+    "generated_by": "tools/audiotest/synth_tech3341.py",
+    "generation": "deterministic fixtures generated from tools/audiotest/synth_tech3341.py; this source tree includes the WAVs so conformance tests need no Python or numpy",
+    "deterministic": true
+  },
+  "format": {
+    "sample_rate_hz": 48000,
+    "channels": 2,
+    "channel_layout": "mono-content stereo (L=R)",
+    "sample_format": "float32",
+    "container": "RIFF / WAVE_FORMAT_IEEE_FLOAT (code 3)"
+  },
+  "fixtures": [
+    {
+      "filename": "case_1.wav",
+      "spec_case": "Tech 3341 case 1",
+      "description": "1 kHz stereo sine, 20 s, calibrated to -23.0 LUFS integrated (K-weighting gain divided out so the fixture's TRUE loudness is -23.0)",
+      "duration_seconds": 20.0,
+      "expected_integrated_lufs": -23.0,
+      "tolerance_lu": 0.1,
+      "diff_floor_class": "spec_band_0p1lu",
+      "sha256": "655afcf9e7392e6bddba576384f076aa56e164f98e3ac9c5009d3fd1e0b87a68"
+    },
+    {
+      "filename": "case_2.wav",
+      "spec_case": "Tech 3341 case 2",
+      "description": "1 kHz stereo sine, 60 s, calibrated to -33.0 LUFS integrated (K-weighting gain divided out)",
+      "duration_seconds": 60.0,
+      "expected_integrated_lufs": -33.0,
+      "tolerance_lu": 0.1,
+      "diff_floor_class": "spec_band_0p1lu",
+      "sha256": "37ecca30ee577aca2643c426af8b399e08d4ecc56403d4785436c38f57769b9b"
+    },
+    {
+      "filename": "case_3.wav",
+      "spec_case": "Tech 3341 case 3",
+      "description": "EBU case 3: 10 s @-36 / 60 s @-23 / 10 s @-36 LUFS \u2014 the -36 blocks pass the -70 abs gate but fail the relative gate; expected integrated -23.0 LUFS",
+      "duration_seconds": 80.0,
+      "expected_integrated_lufs": -23.0,
+      "tolerance_lu": 0.1,
+      "diff_floor_class": "spec_band_0p1lu",
+      "sha256": "ff888583c4766b59f690fe3f8b1f63a3c7a4b58cd597e86e27f8b93be77e48e5"
+    },
+    {
+      "filename": "case_4.wav",
+      "spec_case": "Tech 3341 case 4",
+      "description": "EBU case 4: 10 s @-72 / 10 s @-36 / 60 s @-23 / 10 s @-36 LUFS \u2014 the -72 block is dropped by the -70 ABSOLUTE gate, the -36 blocks fail the relative gate; expected integrated -23.0 LUFS",
+      "duration_seconds": 90.0,
+      "expected_integrated_lufs": -23.0,
+      "tolerance_lu": 0.1,
+      "diff_floor_class": "spec_band_0p1lu",
+      "sha256": "a0c576425ff8b6419dc510de59a813117cba8ba539fe2fa1ff3cd813daa74e35"
+    },
+    {
+      "filename": "case_20.wav",
+      "spec_case": "Tech 3341 case 20",
+      "description": "Embedded inter-sample peak stress case at decimation offset 0; independent true-peak oracle must read +0.0 dBTP within 0.1 dB before publication",
+      "duration_seconds": 1.0,
+      "expected_true_peak_dbtp": 0.0,
+      "tolerance_db": 0.1,
+      "diff_floor_class": "spec_band_0p1db",
+      "sha256": "1dbe64ff9ef93998badf9d3f504cea66a6e96ea26d61f4ffea4775179b9d7b8d"
+    },
+    {
+      "filename": "case_21.wav",
+      "spec_case": "Tech 3341 case 21",
+      "description": "Embedded inter-sample peak stress case at decimation offset 1; independent true-peak oracle must read +0.0 dBTP within 0.1 dB before publication",
+      "duration_seconds": 1.0,
+      "expected_true_peak_dbtp": 0.0,
+      "tolerance_db": 0.1,
+      "diff_floor_class": "spec_band_0p1db",
+      "sha256": "90252e2d0f18598e7da694dbd11f1d8aed34cb3f918afa786fba83e6a9b2393a"
+    },
+    {
+      "filename": "case_22.wav",
+      "spec_case": "Tech 3341 case 22",
+      "description": "Embedded inter-sample peak stress case at decimation offset 2; independent true-peak oracle must read +0.0 dBTP within 0.1 dB before publication",
+      "duration_seconds": 1.0,
+      "expected_true_peak_dbtp": 0.0,
+      "tolerance_db": 0.1,
+      "diff_floor_class": "spec_band_0p1db",
+      "sha256": "f600ca7d607aa978ae4b9fea7c7952abd4fe27f60ca85cd53f1bf6218b4fec51"
+    },
+    {
+      "filename": "case_23.wav",
+      "spec_case": "Tech 3341 case 23",
+      "description": "Embedded inter-sample peak stress case at decimation offset 3; independent true-peak oracle must read +0.0 dBTP within 0.1 dB before publication",
+      "duration_seconds": 1.0,
+      "expected_true_peak_dbtp": 0.0,
+      "tolerance_db": 0.1,
+      "diff_floor_class": "spec_band_0p1db",
+      "sha256": "a13b0654f250271dd9608575f943907cc711fcacfa75d7031917c7deb94ba67d"
+    }
+  ],
+  "diff_floor_class_definitions": {
+    "analytic_exact": "closed-form ground truth; tolerance <= 1e-6 LU",
+    "spec_band_0p1lu": "EBU Tech 3341 published acceptance band (0.1 LU)",
+    "spec_band_0p1db": "EBU Tech 3341 published true-peak acceptance band (0.1 dB)",
+    "cross_platform_fp_drift": "ARM64 vs x86_64 FP accumulation drift (~0.001 LU expected)"
+  }
+}

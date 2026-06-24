@@ -1,0 +1,185 @@
+{
+  "$schema": "../bellweather.tokens.schema.json",
+  "meta": {
+    "product": "barometer",
+    "version": "1.0.0",
+    "platform": "cpp",
+    "source": "plugins/production/BwsBarometer/Source/ (2 files, 69 hex refs, 28 unique colors)"
+  },
+  "colors": {
+    "bg": {
+      "base": "#1A1A1A",
+      "readout": "#252525",
+      "sliderTrack": "#2A2A2A",
+      "phaseInactive": "#3A3A3A"
+    },
+    "text": {
+      "title": "#FFFEF0",
+      "readout": "#FFFEF0",
+      "branding": "#888888",
+      "meterLabel": "#AAAAAA",
+      "inOutLabel": "#999999",
+      "tickLabel": "#777777",
+      "phaseBorder": "#555555",
+      "outlineBorder": "#444444"
+    },
+    "accent": {
+      "brass": "#D4AF37",
+      "brassActive": "#D4A84B",
+      "linkBlue": "#4A90D9"
+    },
+    "meter": {
+      "green": "#00AA00",
+      "yellow": "#FFAA00",
+      "red": "#FF3333",
+      "clip": "#FF0000"
+    },
+    "slider": {
+      "thumbBright": "#E5C47A",
+      "thumbDark": "#A87F3F",
+      "thumbRing": "#7A6545",
+      "trackShadow": "rgba(0, 0, 0, 0.25)"
+    },
+    "indicator": {
+      "soloYellow": "#FFCC00",
+      "phaseActive": "#D4A84B",
+      "phaseText": "#888888",
+      "dcFilterActive": "#4A90D9",
+      "lufsClipIndicator": "#E05050"
+    }
+  },
+  "meterGradient": [
+    {
+      "position": 0.0,
+      "color": "#00AA00"
+    },
+    {
+      "position": 0.5,
+      "color": "#FFAA00"
+    },
+    {
+      "position": 0.91,
+      "color": "#FFAA00"
+    },
+    {
+      "position": 1.0,
+      "color": "#FF3333"
+    }
+  ],
+  "spacing": {
+    "unit": 24,
+    "topMargin": 24,
+    "titleHeight": 20,
+    "titleToPresetGap": 15,
+    "presetToDialGap": 24,
+    "dialToControlsGap": 24,
+    "controlsToBrandGap": 15,
+    "bottomMargin": 15,
+    "phaseButtonGap": 8,
+    "controlsGap": 24,
+    "labelToControlGap": 8,
+    "meterDialGap": 14
+  },
+  "radii": {
+    "sm": 1.5,
+    "md": 3,
+    "lg": 4
+  },
+  "typography": {
+    "families": {
+      "default": "system"
+    },
+    "sizes": {
+      "tiny": 8,
+      "small": 9,
+      "body": 10,
+      "display": 12,
+      "title": 16
+    }
+  },
+  "layout": {
+    "pluginWidth": 408,
+    "heroDialSize": 200,
+    "phaseButtonSize": 24,
+    "phaseGroupWidth": 120,
+    "balanceSliderWidth": 120,
+    "balanceSliderHeight": 24,
+    "controlContainerWidth": 120,
+    "controlsGroupWidth": 264,
+    "meterBarWidth": 8,
+    "meterGap": 3,
+    "meterWidth": 19,
+    "meterHeight": 160,
+    "presetDropdownWidth": 140,
+    "presetDropdownHeight": 22,
+    "abButtonWidth": 52,
+    "abButtonHeight": 22,
+    "dcFilterButtonWidth": 36,
+    "dcFilterButtonHeight": 22,
+    "settingsButtonSize": 20,
+    "tabButtonWidth": 54,
+    "tabButtonHeight": 18,
+    "tabButtonGap": 4,
+    "brandHeight": 12,
+    "labelHeight": 14,
+    "settingsButtonRightMargin": 14,
+    "settingsButtonTopMargin": 14,
+    "presetDropdownTopGap": 6,
+    "abButtonAboveMeterGap": 8,
+    "valueLabelHeight": 14,
+    "valueToSliderGap": 8,
+    "sliderLabelSpace": 14,
+    "lufsReadoutHeight": 58,
+    "correlationMeterHeight": 20,
+    "controlsRowHeight": 24,
+    "minScale": 0.75,
+    "maxScale": 1.5
+  },
+  "meter": {
+    "dbMin": -60.0,
+    "dbMax": 6.0,
+    "cornerRadiusLg": 3.0,
+    "cornerRadiusMd": 2.0,
+    "cornerRadiusSm": 1.5,
+    "strokeWidthThin": 1.0,
+    "strokeWidthMed": 1.5,
+    "tickStrokeWidth": 1.0,
+    "soloDotSm": 2.0,
+    "soloDotMd": 4.0,
+    "soloDotLg": 8.0
+  },
+  "opacity": {
+    "meterBarBg": 0.3,
+    "meterHover": 0.8,
+    "meterNormal": 0.5,
+    "meterTextPrimary": 0.95,
+    "meterTextSecondary": 0.85,
+    "sliderHighlight": 0.25,
+    "sliderShadow": 0.15,
+    "sliderRing": 0.3,
+    "sliderReadout": 0.9,
+    "meterHoverGlow": 0.3,
+    "separatorLine": 0.3,
+    "readoutDim": 0.55,
+    "statusBadgeFill": 0.2,
+    "sparklineStroke": 0.4,
+    "signalLockDotEmpty": 0.6
+  },
+  "animation": {
+    "fadeInDurationMs": 150,
+    "fadeOutDurationMs": 300,
+    "fadeInMultiplier": 5.0,
+    "fadeOutMultiplier": 3.0,
+    "timerIntervalMs": 16,
+    "peakHoldTicks": 45,
+    "meterFallRateDb": 0.7,
+    "gainRampSec": 0.02,
+    "rmsWindowSec": 0.3
+  },
+  "paint": {
+    "sliderCornerRadius": 4.0,
+    "sliderStrokeWidth": 1.0,
+    "sliderRingBorder": 1.5,
+    "sliderRingStroke": 0.5
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 22, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "library",
+      "displayName": "Release libraries + conformance",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-library",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_TESTING": "ON",
+        "BWS_BUILD_BAROMETER_PLUGIN": "OFF"
+      }
+    },
+    {
+      "name": "default",
+      "displayName": "RelWithDebInfo (VST3 + AU)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "BUILD_TESTING": "OFF",
+        "BWS_BUILD_BAROMETER_PLUGIN": "ON",
+        "BWS_JUCE_FETCH": "ON"
+      }
+    },
+    {
+      "name": "universal",
+      "displayName": "RelWithDebInfo universal (x86_64 + arm64, macOS)",
+      "inherits": "default",
+      "cacheVariables": {
+        "BWS_OSX_ARCHITECTURES": "x86_64;arm64"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "library",
+      "configurePreset": "library"
+    },
+    { "name": "default", "configurePreset": "default" },
+    { "name": "universal", "configurePreset": "universal" }
+  ]
+}

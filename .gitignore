@@ -1,0 +1,31 @@
+# Build output
+/build/
+/build-*/
+cmake-build-*/
+*_artefacts/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# Fetched dependencies
+/_deps/
+
+# OS / editor
+.DS_Store
+.AppleDouble
+._*
+__MACOSX/
+*.swp
+*~
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Generated font subsets (regenerated at build)
+font_subsets/

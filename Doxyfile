@@ -1,0 +1,32 @@
+# Doxygen configuration for Bellweather Audio Core (public API docs).
+# Generate: doxygen Doxyfile  ->  docs/api/html/index.html
+# Only non-default settings are listed; Doxygen supplies the rest.
+
+PROJECT_NAME           = "Bellweather Audio Core"
+PROJECT_BRIEF          = "Framework-neutral C++20 audio DSP library"
+OUTPUT_DIRECTORY       = docs/api
+USE_MDFILE_AS_MAINPAGE = README.md
+
+# Inputs: the public README + the docs/ guides (so cross-links resolve) + every
+# exported module's public headers.
+INPUT                  = README.md CONTRIBUTING.md TESTING.md LICENSING.md THIRD_PARTY_NOTICES.md SECURITY.md docs modules
+FILE_PATTERNS          = *.h *.hpp *.md
+RECURSIVE              = YES
+EXCLUDE_PATTERNS       = */tests/* */test/* */detail/*
+
+# Document the full public surface even where a brief is absent, and treat the
+# in-house banner comments (/** ... */, ///, and leading // banners) as docs.
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = YES
+MARKDOWN_SUPPORT       = YES
+AUTOLINK_SUPPORT       = YES
+
+# Quiet, dependency-free, HTML-only (no LaTeX, no graphviz required).
+GENERATE_LATEX         = NO
+GENERATE_HTML          = YES
+HAVE_DOT               = NO
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
+SORT_BRIEF_DOCS        = YES

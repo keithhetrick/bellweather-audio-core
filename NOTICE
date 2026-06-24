@@ -1,0 +1,8 @@
+Bellweather Audio Core - an open-source C++ audio library from Bellweather Studios.
+Copyright (c) 2026 Bellweather Studios.
+
+Licensed under the Apache License, Version 2.0
+(SPDX-License-Identifier: Apache-2.0). See LICENSE for the full text.
+
+This software bundles or links third-party components, each under its own
+license, listed in THIRD_PARTY_NOTICES.md.

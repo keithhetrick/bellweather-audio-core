@@ -1,0 +1,182 @@
+# =============================================================================
+# Bellweather Studios - Clang-Format Configuration
+# =============================================================================
+#
+# Style: Allman (next-line) braces, 4-space indent, 120 column limit.
+#   - Allman: long DSP signatures (templates + attributes + noexcept) get a clean
+#     signature/body break, and it matches the audio/JUCE domain convention. Attach
+#     (the LLVM/Google mode) was considered and rejected because long DSP
+#     signatures read better with a clean signature/body break.
+#   - 4-space indent + 120 col are intentional (DSP density), non-default.
+#   - Short single-expression functions stay on one line.
+#
+# Usage:
+#   clang-format -i src/**/*.{h,cpp}
+#   clang-format --dry-run --Werror src/**/*.{h,cpp}   # CI check mode
+#
+# =============================================================================
+
+Language: Cpp
+Standard: c++20
+
+# --- Indentation ---
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+IndentCaseLabels: false
+IndentPPDirectives: None
+NamespaceIndentation: None
+AccessModifierOffset: -4
+IndentWrappedFunctionNames: false
+ContinuationIndentWidth: 4
+ConstructorInitializerIndentWidth: 4
+IndentExternBlock: NoIndent
+LambdaBodyIndentation: Signature
+
+# --- Column Width ---
+ColumnLimit: 120
+
+# --- Braces (Allman / next-line) ---
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: true
+
+# --- Short Forms (match DspMath/DspConstants single-line patterns) ---
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: Inline
+AllowShortLoopsOnASingleLine: false
+
+# --- Alignment ---
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: None
+AlignConsecutiveBitFields: Consecutive
+AlignConsecutiveDeclarations: None
+AlignConsecutiveMacros: Consecutive
+AlignEscapedNewlines: Left
+AlignOperands: Align
+AlignTrailingComments: true
+
+# --- Line Breaks ---
+AllowAllArgumentsOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBinaryOperators: None
+BreakBeforeConceptDeclarations: true
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
+BreakStringLiterals: true
+PackConstructorInitializers: BinPack
+
+# --- Spaces ---
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: true
+SpaceAroundPointerQualifiers: Default
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: false
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: Never
+SpacesInCStyleCastParentheses: false
+SpacesInConditionalStatement: false
+SpacesInContainerLiterals: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# --- Includes ---
+# IncludeBlocks: Preserve + SortIncludes: Never - clang-format does NOT reorder or
+# sort includes (the codebase is not include-what-you-use clean, so reordering can
+# break translation units that rely on transitive includes). The
+# IncludeCategories below are inert under Preserve, retained as the intended grouping
+# for a future include-hygiene pass.
+IncludeBlocks: Preserve
+IncludeCategories:
+  # JUCE headers
+  - Regex: "^<juce_"
+    Priority: 1
+    SortPriority: 1
+  # Bellweather module headers (angle bracket)
+  - Regex: "^<bw_"
+    Priority: 2
+    SortPriority: 2
+  # Bellweather module headers (quoted)
+  - Regex: '^"bw_'
+    Priority: 2
+    SortPriority: 3
+  # BPTS headers
+  - Regex: '^[<"]bpts/'
+    Priority: 2
+    SortPriority: 4
+  # Local project headers (quoted)
+  - Regex: '^"'
+    Priority: 3
+    SortPriority: 5
+  # System/standard library headers
+  - Regex: "^<"
+    Priority: 4
+    SortPriority: 6
+SortIncludes: Never
+
+# --- Pointer/Reference Alignment ---
+DerivePointerAlignment: false
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# --- Penalties (prefer breaking args over column overflow) ---
+PenaltyBreakAssignment: 2
+PenaltyBreakBeforeFirstCallParameter: 19
+PenaltyBreakComment: 300
+PenaltyBreakFirstLessLess: 120
+PenaltyBreakOpenParenthesis: 0
+PenaltyBreakString: 1000
+PenaltyBreakTemplateDeclaration: 10
+PenaltyExcessCharacter: 1000000
+PenaltyIndentedWhitespace: 0
+PenaltyReturnTypeOnItsOwnLine: 1000
+
+# --- Miscellaneous ---
+CompactNamespaces: false
+Cpp11BracedListStyle: true
+DeriveLineEnding: true
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: LogicalBlock
+FixNamespaceComments: true
+InsertBraces: false
+InsertTrailingCommas: None
+MaxEmptyLinesToKeep: 2
+ReflowComments: true
+RemoveBracesLLVM: false
+SeparateDefinitionBlocks: Leave
+SortUsingDeclarations: true

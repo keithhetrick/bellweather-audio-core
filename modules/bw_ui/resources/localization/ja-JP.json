@@ -1,0 +1,186 @@
+{
+  "_meta": {
+    "schemaVersion": 1,
+    "locale": "ja-JP",
+    "owner": "bw_ui",
+    "kind": "shared"
+  },
+  "strings": {
+    "knob.tooltip.footer": {
+      "value": "Cmd+ドラッグ: 微調整\nAlt+クリック: リセット\nダブルクリック: テキスト入力",
+      "description": "Canonical key-command footer appended to every knob tooltip"
+    },
+    "knob.tooltip.footer.withDefault": {
+      "value": "Cmd+ドラッグ: 微調整\nAlt+クリック: {default} にリセット\nダブルクリック: テキスト入力",
+      "description": "Knob tooltip footer variant carrying the parameter's default value"
+    },
+    "common.ok": {
+      "value": "OK",
+      "description": "Generic dismiss action"
+    },
+    "dialog.preset.path.title": {
+      "value": "プリセット保存先",
+      "description": "Title for dialog showing the current preset save directory"
+    },
+    "common.cancel": {
+      "value": "キャンセル",
+      "description": "Generic cancel action"
+    },
+    "common.save": {
+      "value": "保存",
+      "description": "Generic save action"
+    },
+    "dialog.savepreset.title": {
+      "value": "プリセットを保存",
+      "description": "Title for dialog that saves the current preset"
+    },
+    "dialog.savepreset.subtitle": {
+      "value": "現在の状態をユーザープリセットとして保存します。",
+      "description": "Subtitle explaining that the current state will be saved as a user preset"
+    },
+    "field.name": {
+      "value": "名前",
+      "description": "Label for a name text field"
+    },
+    "field.category": {
+      "value": "カテゴリー",
+      "description": "Label for a category text field"
+    },
+    "action.update": {
+      "value": "更新",
+      "description": "Action label for updating an existing item"
+    },
+    "action.rename": {
+      "value": "名前変更",
+      "description": "Action label for renaming an existing item"
+    },
+    "action.delete": {
+      "value": "削除",
+      "description": "Action label for deleting an existing item"
+    },
+    "common.close": {
+      "value": "閉じる",
+      "description": "Generic close action"
+    },
+    "dialog.managepresets.menuitem": {
+      "value": "ユーザープリセットを管理...",
+      "description": "Settings menu item that opens the user preset management dialog"
+    },
+    "dialog.managepresets.title.main": {
+      "value": "ユーザープリセットを管理",
+      "description": "Title for the user preset management dialog main mode"
+    },
+    "dialog.managepresets.title.delete": {
+      "value": "プリセットを削除しますか？",
+      "description": "Title for delete confirmation mode in the user preset management dialog"
+    },
+    "dialog.managepresets.title.rename": {
+      "value": "プリセット名を変更",
+      "description": "Title for rename mode in the user preset management dialog"
+    },
+    "dialog.managepresets.title.update": {
+      "value": "プリセットを更新しますか？",
+      "description": "Title for update confirmation mode in the user preset management dialog"
+    },
+    "dialog.managepresets.prompt.delete": {
+      "value": "'{presetName}' を削除しますか？\nこの操作は元に戻せません。",
+      "description": "Delete confirmation prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "dialog.managepresets.prompt.rename": {
+      "value": "'{presetName}' の新しい名前を入力してください:",
+      "description": "Rename prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "dialog.managepresets.prompt.update": {
+      "value": "'{presetName}' を現在の設定で上書きしますか？",
+      "description": "Update confirmation prompt. {presetName} is the literal preset name and must be preserved."
+    },
+    "preset.none": {
+      "value": "-- プリセットなし --",
+      "description": "Displayed in the preset header when no preset is selected"
+    },
+    "action.undo": {
+      "value": "取り消す",
+      "description": "Generic undo action tooltip"
+    },
+    "action.undo.named": {
+      "value": "{action} を取り消す",
+      "description": "Undo tooltip with the next undo action name. {action} is a literal action label."
+    },
+    "action.undo.empty": {
+      "value": "取り消す操作はありません",
+      "description": "Disabled undo tooltip"
+    },
+    "action.redo": {
+      "value": "やり直す",
+      "description": "Generic redo action tooltip"
+    },
+    "action.redo.named": {
+      "value": "{action} をやり直す",
+      "description": "Redo tooltip with the next redo action name. {action} is a literal action label."
+    },
+    "action.redo.empty": {
+      "value": "やり直す操作はありません",
+      "description": "Disabled redo tooltip"
+    },
+    "about.menu.manual": {
+      "value": "{productName} マニュアルを開く",
+      "description": "Settings menu item that opens the product manual. {productName} is the product name."
+    },
+    "about.menu.about": {
+      "value": "{productName} について",
+      "description": "Settings menu item that opens the product about overlay. {productName} is the product name."
+    },
+    "about.license.licensed": {
+      "value": "ライセンス認証済み",
+      "description": "About overlay license status for an activated product"
+    },
+    "about.license.trial": {
+      "value": "試用版",
+      "description": "About overlay license status for a trial product"
+    },
+    "preset.browser.search.placeholder": {
+      "value": "プリセットを検索...",
+      "description": "Placeholder text for the shared preset browser search field"
+    },
+    "preset.browser.filter.all": {
+      "value": "すべて",
+      "description": "Preset browser filter showing all presets"
+    },
+    "preset.browser.filter.favorites": {
+      "value": "お気に入り",
+      "description": "Preset browser filter showing favorite presets"
+    },
+    "preset.browser.filter.cleanstarters": {
+      "value": "クリーン・スターター",
+      "description": "Preset browser filter showing clean starter presets"
+    },
+    "preset.browser.badge.startup": {
+      "value": "起動時",
+      "description": "Preset browser badge for the preset used at startup"
+    },
+    "preset.browser.badge.user": {
+      "value": "ユーザー",
+      "description": "Preset browser badge for user-created presets"
+    },
+    "preset.browser.metadata.cleanstarter": {
+      "value": "クリーン・スターター",
+      "description": "Preset browser metadata label for a clean starter preset"
+    },
+    "preset.intensity.subtle": {
+      "value": "繊細",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.balanced": {
+      "value": "バランス",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.assertive": {
+      "value": "主張",
+      "description": "Preset metadata intensity label"
+    },
+    "preset.intensity.extreme": {
+      "value": "極端",
+      "description": "Preset metadata intensity label"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "company": {
+    "name": "Bellweather Studios",
+    "bundlePrefix": "com.bellweatherstudios"
+  },
+  "plugins": [
+    {
+      "id": "BwsBarometer",
+      "displayName": "Barometer",
+      "slug": "bws-barometer",
+      "version": "1.3.0",
+      "bundleId": "com.bellweatherstudios.barometer",
+      "manufacturerCode": "Bwst",
+      "pluginCode": "Baro",
+      "formats": ["VST3", "AU"],
+      "auMainType": "kAudioUnitType_Effect",
+      "category": "Utility",
+      "channelLayoutPolicy": "matched_mono_stereo",
+      "vst3Categories": ["Fx", "Tools"],
+      "tier": "production",
+      "status": "released",
+      "directory": "plugins/production/BwsBarometer",
+      "isSynth": false,
+      "needsMidiInput": false,
+      "needsMidiOutput": false,
+      "isMidiEffect": false,
+      "editorWantsKeyboardFocus": false
+    }
+  ]
+}
