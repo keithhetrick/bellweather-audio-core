@@ -17,7 +17,7 @@ namespace bws::domain
 
 /**
  * Non-owning view over a multichannel audio buffer.
- * Equivalent role to JUCE AudioBuffer but owns nothing.
+ * Non-owning multichannel float audio view.
  * RT-safe: no allocation, no virtual dispatch, trivially constructible.
  *
  * Clang consumes the GSL lifetime annotation for static analysis. Other

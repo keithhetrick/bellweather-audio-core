@@ -16,16 +16,16 @@ namespace bws::domain
 // RtSmoothedParam - canonical sample-accurate parameter smoother for
 // real-time audio. Header-only and framework-neutral.
 //
-// Wraps with three lessons baked into the API:
+// Wraps BwsLinearSmoothedValue with three lessons baked into the API:
 //
-//   1. Sample-accurate linear ramp - same shape as juce::SmoothedValue<float,
-//      Linear>; per-block setTarget + skip; per-sample getNextValue.
+//   1. Sample-accurate linear ramp; per-block setTarget + skip; per-sample
+//      getNextValue.
 //   2. Bumpless transfer - initial value is REQUIRED at prepare(). Eliminates
 //      the seeded-flag class of bug by making the type uninstantiable in an
 //      indeterminate state. Term + pattern: 50-year control-systems
 //      convention; Orastron bw_slew_lim_reset_state takes initial as a
 //      required arg; RxJS BehaviorSubject mandates initial value at
-// construction. (b lesson, generalized.)
+//      construction. (b lesson, generalized.)
 //   3. Reset-persistence policy - caller declares intent at prepare-time
 //      via ResetPolicy. Actual persistence behavior emerges from caller
 //      discipline (caller chooses whether to call resetTo() for a given

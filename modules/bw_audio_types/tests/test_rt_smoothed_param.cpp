@@ -4,26 +4,26 @@
 // =============================================================================
 // test_rt_smoothed_param - C++ Unit tests
 //                          (bws::domain::RtSmoothedParam primitive)
-// a, 2026-05-14 (HOLD POINT structure backfilled in slice 15)
+//   a, 2026-05-14 (HOLD POINT structure backfilled in slice 15)
 // =============================================================================
 //
 // HOLD POINT 1 - CONTRACT
 // -----------------------------------------------------------------------------
 // Contract sources:
-// - ``
+//   - ``
 //     industry-survey-driven design rationale (4-agent /research-deep
 //     pass; bumpless-transfer convention from control systems;
 //     factored-API canon from JUCE post-deprecation; mandatory-
 //     initialValue from RxJS BehaviorSubject + reactive programming).
 //   - `modules/bw_audio_types/include/bw_audio_types/RtSmoothedParam.h`
 //     header docstring - the 3 patterns the type bundles + ResetPolicy
-// semantics + header-only constraint.
-// - a plan + slice 14b/c migration history (the type's
+//     semantics + header-only constraint.
+//   - a plan + slice 14b/c migration history (the type's
 //     bit-identical-by-construction wrapper migration).
 //
 // What the contract requires:
 //   - **Pattern 1 - sample-accurate linear ramp**: per-block API
-// (`setTarget` + `skip` + `currentValue`) wraps ``
+//     (`setTarget` + `skip` + `currentValue`) wraps `BwsLinearSmoothedValue`
 //     with the same shape; `setTarget` always ramps; `resetTo` always
 //     snaps. No bundled overload (factored per JUCE deprecation canon).
 //   - **Pattern 2 - bumpless transfer at prepare()**: `initialValue` is
@@ -46,7 +46,7 @@
 // HOLD POINT 2 - ASSERTIONS (regression-net for the primitive contract)
 // -----------------------------------------------------------------------------
 // POS #1 (Pattern 1 - convergence to target via setTarget+skip):
-// - Catches: removal of the underlying `::skip`
+//   - Catches: removal of the underlying `BwsLinearSmoothedValue::skip`
 //     forwarding; off-by-one in the ramp-length computation.
 //
 // POS #2 (Pattern 1 - setTarget to same value is a no-op):

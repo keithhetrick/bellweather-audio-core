@@ -14,7 +14,7 @@
 //   C. Calibration-independent structural invariants (M=S=I on steady tones; an
 //      exact -X dB amplitude change -> -X LU integrated change; block-spread -> LRA).
 //   D. Block-size invariance (incl. the 1-sample block).
-// E. Edge /: silence, all-below-gate, gate-boundary, mono, long
+//   E. Edge /: silence, all-below-gate, gate-boundary, mono, long
 //      duration, reset/epoch, post-silence finiteness (denormal tail).
 //   F. Grid quantization: an exact -X dB step reads as a -X LU step within the
 //      cell bound.

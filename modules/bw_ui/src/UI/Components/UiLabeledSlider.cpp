@@ -132,6 +132,12 @@ void UiLabeledSlider::setFormatter(std::function<juce::String(double)> formatter
     refreshReadout();
 }
 
+void UiLabeledSlider::setFormat(const kernel::FormatSpec& spec, double displayScale)
+{
+    setFormatter(
+        [spec, displayScale](double value) { return juce::String(kernel::formatValue(value * displayScale, spec)); });
+}
+
 void UiLabeledSlider::refreshReadout()
 {
     if (formatter)

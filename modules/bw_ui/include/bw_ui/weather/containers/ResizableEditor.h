@@ -42,10 +42,13 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <cstdint>
 #include <functional>
 #include <limits>
 #include <optional>
+#include <vector>
 #include "bw_ui/Components/ThemedPopupMenuLookAndFeel.h"
+#include "bw_ui/Components/UiDisplaySlotHooks.h"
 #include "bw_ui/foundation/UiTheme.h"
 #include "bw_ui/windowing/HostedWindowGeometry.h"
 
@@ -103,6 +106,9 @@ public:
 
     /** Get current scale factor */
     float getScaleFactor() const { return scaleFactor_; }
+
+    // Test-only: sets scale without onScaleChanged (fullscreen-path repro).
+    void applyScaleWithoutNotifyForTesting(float s) { scaleFactor_ = s; }
 
     /** Chrome scale: min(windowScale, cap). Default cap +inf ⇒ == windowScale. */
     float getChromeScaleFactor() const { return juce::jmin(scaleFactor_, chromeScaleCap_); }
@@ -216,6 +222,20 @@ protected:
      * Default implementation calls repaint().
      */
     virtual void onThemeChanged() { repaint(); }
+
+    enum class ScaleAxis : std::uint8_t
+    {
+        Content,
+        Chrome
+    };
+    struct ChildReg
+    {
+        ScaleAxis axis {ScaleAxis::Content};
+        bws::ui::UiDisplaySlotHooks hooks {};
+    };
+    std::vector<ChildReg> childFanout_;
+    void propagateScale();
+    void propagateTheme(const bws::ui::UiThemeResolved* t);
 
     /** Show or hide the fullscreen button. Hidden by default for plugins
      *  that manage fullscreen via their own settings menu. */

@@ -1,6 +1,6 @@
 # cmake/BwsModuleSupport.cmake
 # =============================================================================
-# C++20 named module support detection and wiring.
+# BwsModuleSupport - C++20 named module support detection and wiring.
 #
 # Sets BW_HAS_MODULES cache variable based on:
 #   1. CMake version >= 3.28 (FILE_SET CXX_MODULES support)
@@ -9,7 +9,7 @@
 #   4. Compiler module support (compile test)
 #
 # Usage:
-# include
+#   include(BwsModuleSupport)
 #   bws_enable_module_for_target(<target> <cppm_file>)
 #
 # Graceful degradation: if any requirement is unmet, BW_HAS_MODULES = OFF

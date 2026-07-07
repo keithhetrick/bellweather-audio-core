@@ -10,7 +10,7 @@
 // fallback path (default-constructed metrics) stays in lockstep with the
 // production path (defaultKnobs() / defaultDropdowns() / etc. in UiTheme.cpp
 // that populate from these same token namespaces). See
-// for the full flow.
+//  for the full flow.
 #include "bw_ui/generated/BwTokens.h"
 
 namespace bws::ui

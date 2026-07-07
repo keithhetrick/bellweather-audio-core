@@ -8,7 +8,7 @@
 //
 // CONTRACT
 // -----------------------------------------------------------------------------
-// Source: modules/bw_audio_types/include/bw_audio_types/.h
+// Source: modules/bw_audio_types/include/bw_audio_types/BwsBiquadFilter.h -
 // biquadMagnitude + makeFirstOrderHighPass.
 //
 // What the contract requires:

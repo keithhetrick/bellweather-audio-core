@@ -10,7 +10,7 @@ namespace bws::ui::kernel
 
 /// Per-knob fine-drag sensitivity. Default 400/1600 (4× ratio) is the
 /// canonical convention; ReadoutStrip uses `{300, 1200}` as a documented
-/// exception for its 34 px height.
+// / exception for its 34 px height.
 struct FineDragSensitivity
 {
     int baseSensitivity = 400;

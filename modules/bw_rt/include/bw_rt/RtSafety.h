@@ -25,12 +25,12 @@
 //   void processBlock(...) noexcept BWS_NONBLOCKING;
 //
 //   // 2. Single-statement suppression at a known-safe vendor callsite.
-//   [[clang::suppress(function-effects)]] juce::call();
+//   [[clang::suppress(function-effects)]] vendorCall();
 //
 //   // 3. Multi-statement block suppression for legitimately-blocking init.
 //   BWS_NONBLOCKING_UNSAFE(
-//       juce::dsp::Convolution conv;
-//       conv.process(ctx);
+//       BlockingInitializer initializer;
+//       initializer.run();
 //   )
 //
 // Both suppression forms locally silence -Wfunction-effects WITHOUT

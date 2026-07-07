@@ -143,18 +143,17 @@ private:
 // closed-form math. Tests compose these into a CrossStageInvariantSet.
 //
 // Each primitive's derivation is in its docstring; reviewers verify the
-// derivation matches the cited source, NOT that it makes the current
-// implementation quiet (bias-resistance discipline).
+// derivation matches the cited source, NOT that it makes the current code quiet
+// (bias-resistance discipline).
 // -----------------------------------------------------------------------------
 
 // Latency consistency: upstream-reported latency MUST equal downstream-
 // consumed latency at each block. Tolerance handles fractional-delay
 // rounding (sub-sample) where applicable.
 //
-// Derivation: from the JUCE Processor latency contract - "the host
-// must compensate by exactly the reported latency." Cross-stage equivalent:
-// the consumer of a latency-reporting stage must consume exactly what is
-// reported. Discrepancy = phase drift = audible artifact.
+// Derivation: from the host latency-compensation contract. Cross-stage
+// equivalent: the consumer of a latency-reporting stage must consume exactly
+// what is reported. Discrepancy = phase drift = audible artifact.
 inline InvariantFn makeLatencyConsistencyInvariant(double tolerance_samples = 0.5)
 {
     return [tolerance_samples](const CrossStageSnapshot& before, const CrossStageSnapshot& after) -> InvariantResult {

@@ -30,8 +30,7 @@ namespace bws::audio::detail
 #endif
 
 // Shared loudness-analytics constants (BS.1770 / EBU R128 gate thresholds and
-// the meter's display floor). These are spec values, not implementation
-// fingerprints.
+// the meter's display floor). These are spec values, not code fingerprints.
 inline constexpr float kMinLufs = -100.0f;
 inline constexpr float kAbsoluteThresholdLufs = -70.0f;
 inline constexpr float kRelativeThresholdLu = -10.0f;
@@ -371,7 +370,7 @@ private:
     uint64_t workerExpectedSequence_ {};
     int64_t workerSamplesProcessed_ {};
     bool workerValid_ {true};
-    std::atomic_flag serviceOwner_ = ATOMIC_FLAG_INIT;
+    std::atomic_flag serviceOwner_;
     std::atomic<uint64_t> rejectedConcurrentService_ {};
 
     // Seqlock-published snapshot.

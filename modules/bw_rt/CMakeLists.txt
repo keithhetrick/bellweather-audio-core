@@ -4,12 +4,11 @@ project(bw_rt LANGUAGES CXX)
 # =============================================================================
 # bw_rt - RT safety infrastructure.
 #
-# Zero JUCE. Zero external dependencies beyond stdlib.
+# Zero external dependencies beyond stdlib.
 # Audio thread detection, violation recording, lock-free ring buffer.
 #
-# JUCE plugin format adapter (, ValueTreeRetainer)
-# lives in bw_juce_adapters. Swap JUCE for another framework:
-# rewrite bw_juce_adapters only. This module survives unchanged.
+# Framework adapters live outside this module. Swap the adapter and this module
+# survives unchanged.
 # =============================================================================
 
 option(BWS_ENABLE_RT_GUARD "Enable RT guard overrides" ON)
@@ -58,7 +57,7 @@ target_include_directories(bw_rt
 )
 
 # Zero external dependencies. Intentional.
-# + JUCE live in bw_juce_adapters.
+# Framework adapters live outside this module.
 
 target_compile_features(bw_rt PUBLIC cxx_std_20)
 target_compile_definitions(bw_rt

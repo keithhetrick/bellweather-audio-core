@@ -106,7 +106,7 @@ void BwsFFT::performRealOnlyForwardTransform(float* data) const
     vDSP_DFT_Execute(impl_->realFwd, input.realp, input.imagp, input.realp, input.imagp);
 
     // vDSP zrop forward applies 2x scaling vs mathematical DFT convention.
-    // Compensate to match pffft / JUCE output.
+    // Compensate to match the canonical real-transform packing.
     const float half = 0.5f;
     vDSP_vsmul(input.realp, 1, &half, input.realp, 1, static_cast<vDSP_Length>(n / 2));
     vDSP_vsmul(input.imagp, 1, &half, input.imagp, 1, static_cast<vDSP_Length>(n / 2));

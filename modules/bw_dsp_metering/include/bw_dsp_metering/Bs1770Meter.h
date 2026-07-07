@@ -501,9 +501,8 @@ private:
 
     // Gating grids exist only for analytics modes (allocated in prepare(), off
     // the audio thread). LiveOnly meters leave them null and carry no gating
-    // storage at all - more memory-frugal than typical reference
-    // implementations, which allocate gating structures regardless of the
-    // requested loudness mode.
+    // storage at all - more memory-frugal than typical reference meters, which
+    // allocate gating structures regardless of the requested loudness mode.
     std::unique_ptr<EnergyGrid> integratedGrid_;
     std::unique_ptr<EnergyGrid> shortTermGrid_;
 };

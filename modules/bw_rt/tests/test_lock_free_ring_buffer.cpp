@@ -146,6 +146,30 @@ TEST_CASE("LockFreeRingBuffer readChannel out of bounds", "[ring_buffer]")
     }
 }
 
+TEST_CASE("LockFreeRingBuffer wraps at non-power-of-two capacity without data loss", "[ring_buffer]")
+{
+    LockFreeRingBuffer buf;
+    buf.prepare(1, 5);
+
+    std::vector<float> out(3, 0.0f);
+    for (int round = 0; round < 7; ++round)
+    {
+        const auto v = static_cast<float>(round * 3);
+        std::vector<float> in = {v, v + 1.0f, v + 2.0f};
+        const float* ch = in.data();
+        REQUIRE(buf.push(&ch, 1, 3));
+
+        buf.readChannel(0, out.data(), 3);
+        CHECK(out[0] == Catch::Approx(v));
+        CHECK(out[1] == Catch::Approx(v + 1.0f));
+        CHECK(out[2] == Catch::Approx(v + 2.0f));
+
+        buf.consumeSamples(3);
+        CHECK(buf.availableToReadSamples() == 0);
+        CHECK(buf.availableToWriteSamples() == buf.getCapacity());
+    }
+}
+
 TEST_CASE("LockFreeRingBuffer wraps across capacity without data loss", "[ring_buffer]")
 {
     LockFreeRingBuffer buf;

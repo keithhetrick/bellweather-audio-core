@@ -8,8 +8,8 @@ namespace bws::domain
 
 /// Preset state metadata returned by IPresetStatePersistence::getPresetMetadata().
 ///
-/// name and category reference storage in the IPresetStatePersistence implementation.
-/// Valid until the next getPresetMetadata() call or implementation destruction.
+/// name and category reference storage is owned by IPresetStatePersistence.
+/// Valid until the next getPresetMetadata() call or owner destruction.
 /// Consume immediately - do not store across calls.
 struct PresetMetadata
 {

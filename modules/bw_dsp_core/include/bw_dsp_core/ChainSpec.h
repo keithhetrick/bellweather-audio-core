@@ -171,7 +171,7 @@ struct Custom
 
 // CTAD: deduction handled by constructor (Custom(Elements...) -> Custom<Elements...>)
 
-// ─── Detail: Counting Helpers (implementation) ─────────────────────────
+// Detail: Counting Helpers
 
 namespace detail
 {

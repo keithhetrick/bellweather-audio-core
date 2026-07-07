@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.1
+
+Maintenance source release.
+
+- Restores shipped framework class names in comments that the public-comment
+  scrubber previously over-genericized (e.g. `BwsAudioProcessor`).
+- Extraction now normalizes the tree with the pinned `clang-format` as a hard
+  gate, so the published source always matches the public style.
+- Syncs accumulated shared-library source and test updates from upstream.
+- No public API or ABI change.
+
 ## 1.0.0
 
 Initial public source release of `bellweather-audio-core`.

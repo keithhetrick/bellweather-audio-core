@@ -637,11 +637,14 @@ bool WeatherPresetManager::deletePreset(const juce::String& name)
     {
         currentPreset_ = Preset();
         currentPresetFile_ = juce::File();
-        if (!presets_.empty())
-            loadPresetByIndex(0);
     }
 
+    // Rebuild row models before reloading so listeners reconcile against current rows.
     notifyPresetListChanged();
+
+    if (deletedCurrent && !presets_.empty())
+        loadPresetByIndex(0);
+
     return stateSaved;
 }
 

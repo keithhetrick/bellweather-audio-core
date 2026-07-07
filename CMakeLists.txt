@@ -12,7 +12,7 @@ if(APPLE AND DEFINED BWS_OSX_ARCHITECTURES AND NOT BWS_OSX_ARCHITECTURES STREQUA
         "macOS target architectures" FORCE)
 endif()
 
-project(bellweather-audio-core VERSION 1.0.0 LANGUAGES C CXX)
+project(bellweather-audio-core VERSION 1.0.1 LANGUAGES C CXX)
 
 if(APPLE)
     enable_language(OBJCXX)

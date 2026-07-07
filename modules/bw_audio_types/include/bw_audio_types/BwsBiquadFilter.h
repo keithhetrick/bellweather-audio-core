@@ -5,14 +5,14 @@
 /// @file
 /// @brief Transposed Direct Form II biquad filter - a numerically robust float-DSP topology.
 
-// Transposed Direct Form II biquad filter.
+// BwsBiquadFilter - Transposed Direct Form II biquad filter.
 //
 // Industry-standard topology for floating-point audio DSP.
 // Numerically superior to standard DF-II: intermediate sums involve
 // operands of similar magnitude, reducing float rounding error.
 //
 // References:
-//   - ARM CMSIS-DSP: Transposed DF-II reference implementation
+//   - ARM CMSIS-DSP: Transposed DF-II reference algorithm
 //   - EarLevel Engineering: "prime candidate for biquad-based equalizers"
 //   - Oppenheim & Schafer, "Discrete-Time Signal Processing" (1975)
 //

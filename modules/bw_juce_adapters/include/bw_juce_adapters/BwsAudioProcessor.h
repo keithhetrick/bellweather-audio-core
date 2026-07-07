@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //==============================================================================
-// h
+// BwsAudioProcessor.h
 //==============================================================================
 // PURPOSE: Foundation base class for ALL Bellweather Studios audio plugins
 //
 // WHY THIS EXISTS:
 // Instead of inheriting from juce::Processor directly, ALL Bellweather
-// plugins inherit from to get automatic RT-safety guarantees
+// plugins inherit from BwsAudioProcessor to get automatic RT-safety guarantees
 // and performance optimizations for free.
 //
 // WHAT IT PROVIDES:
@@ -25,7 +25,7 @@
 // 3. PERFORMANCE OPTIMIZATIONS
 //    - Cached channel counts (avoids virtual calls per-sample)
 //    - Cached sample rate/block size (reduces function call overhead)
-// - Measured 0.7% CPU reduction from optimizations
+//    - Measured 0.7% CPU reduction from optimizations
 //
 // 4. CONSISTENT ARCHITECTURE
 //    - All plugins follow same lifecycle (prepareToPlay → processBlock → release)
@@ -33,12 +33,12 @@
 //    - Plugin code focuses on DSP, not boilerplate
 //
 // HOW TO USE:
-// 1. Inherit from bws:: (NOT juce::Processor!)
+// 1. Inherit from bws::BwsAudioProcessor (NOT juce::Processor!)
 // 2. Override prepareToPlayImpl(), releaseResourcesImpl(), processBlockImpl()
 // 3. Framework calls your Impl methods with RT-safety already applied
 //
 // EXAMPLE:
-// class Plugin: public bws:: {
+//   class Plugin: public bws::BwsAudioProcessor {
 //     void prepareToPlayImpl(double sr, int blockSize) override { ... }
 //     void processBlockImpl(const bws::domain::ProcessContext& ctx) override { ... }
 //   };
@@ -71,10 +71,10 @@ namespace bws
 // BASE CLASS FOR ALL BELLWEATHER AUDIO PROCESSORS
 //==============================================================================
 /**
- * - Foundation for all Bellweather Studios plugins
+ * BwsAudioProcessor - Foundation for all Bellweather Studios plugins
  *
  * INHERITANCE CHAIN:
- * - Plugin → → juce::Processor → (JUCE internals)
+ * - Plugin → BwsAudioProcessor → juce::Processor → (JUCE internals)
  *
  * WHY INHERIT FROM THIS INSTEAD OF juce::Processor?
  * - Automatic RT-safety enforcement (catches allocations in audio thread)
@@ -126,7 +126,7 @@ public:
      * - Generators/Synths: No input bus (output only)
      *
      * EXAMPLE (Mono in, stereo out):
-     * (BusesProperties
+     *   BwsAudioProcessor(BusesProperties()
      *       .withInput("Input", AudioChannelSet::mono())
      *       .withOutput("Output", AudioChannelSet::stereo()))
      */
@@ -636,7 +636,7 @@ public:
     //==========================================================================
 
     /** RAII guard: prevents trial mode from blocking preset browsing.
-     * Usage:::ScopedPresetLoad guard(processor);*/
+     *  Usage: BwsAudioProcessor::ScopedPresetLoad guard(processor); */
     class ScopedPresetLoad
     {
     public:

@@ -78,7 +78,7 @@ concept BufferDSP = requires(T& t, double sampleRate, int blockSize, bws::domain
 // ---------------------------------------------------------------------------
 // Modules that report gain reduction for metering.
 //
-// Note: implementations may return gain reduction on a 0-1 scale or in dB.
+// Note: modules may return gain reduction on a 0-1 scale or in dB.
 // The concept verifies the method exists but cannot enforce units - that is
 // the caller's responsibility.
 

@@ -494,6 +494,36 @@ void UiKnob::KnobSlider::mouseUp(const juce::MouseEvent& e)
     if (locked || interactionSuppressed)
         return;
 
+    // Click (no drag) within tolerance of a mark snaps to it; drag stays continuous.
+    if (e.mouseWasClicked())
+    {
+        if (const auto* marksVar = getProperties().getVarPointer("bws_marks"))
+        {
+            if (const auto* arr = marksVar->getArray(); arr != nullptr && !arr->isEmpty())
+            {
+                const auto rp = getRotaryParameters();
+                const auto centre = getLocalBounds().toFloat().getCentre();
+                const float dx = e.position.x - centre.x;
+                const float dy = e.position.y - centre.y;
+                float clickAngle = std::atan2(dx, -dy); // matches the sin / -cos paint convention
+                while (clickAngle < rp.startAngleRadians)
+                    clickAngle += juce::MathConstants<float>::twoPi;
+                const double clickProp =
+                    kernel::proportionForAngle(clickAngle, rp.startAngleRadians, rp.endAngleRadians);
+
+                std::vector<double> markProps;
+                markProps.reserve(static_cast<size_t>(arr->size()));
+                for (const auto& markVal : *arr)
+                    markProps.push_back(valueToProportionOfLength(static_cast<double>(markVal)));
+
+                constexpr double kClickTolerance = 0.05; // proportion units
+                const int hit = UiKnob::nearestMarkWithin(markProps, clickProp, kClickTolerance);
+                if (hit >= 0)
+                    setValue(static_cast<double>((*arr)[hit]), juce::sendNotificationSync);
+            }
+        }
+    }
+
     juce::Slider::mouseUp(e);
 }
 
@@ -745,7 +775,7 @@ void UiKnob::KnobLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, 
         // arc's perceived end.
         const float capOvershootAngle = (arc * 0.5f) / juce::jmax(1.0f, trackRadius);
         const float detentAngle =
-            rotaryStartAngle + detentProp * (rotaryEndAngle - rotaryStartAngle) + capOvershootAngle;
+            kernel::angleForProportion(detentProp, rotaryStartAngle, rotaryEndAngle) + capOvershootAngle;
         const float tickInner = trackRadius - arc * 0.6f;
         const float tickOuter = trackRadius + arc * 0.6f;
         const float sinA = std::sin(detentAngle);
@@ -754,6 +784,29 @@ void UiKnob::KnobLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, 
                                 centre.y + cosA * tickOuter};
         g.setColour(theme->colors.outline0.withAlpha((visuallyLocked ? 0.4f : 0.85f) * baseAlpha));
         g.drawLine(tick, juce::jmax(1.0f, arc * 0.35f));
+    }
+
+    if (const auto* marksVar = sliderRef.getProperties().getVarPointer("bws_marks"))
+    {
+        if (const auto* arr = marksVar->getArray())
+        {
+            const float capOvershootAngle = (arc * 0.5f) / juce::jmax(1.0f, trackRadius);
+            const float tickInner = trackRadius - arc * 0.6f;
+            const float tickOuter = trackRadius + arc * 0.6f;
+            g.setColour(theme->colors.outline0.withAlpha((visuallyLocked ? 0.4f : 0.85f) * baseAlpha));
+            for (const auto& markVal : *arr)
+            {
+                const float prop =
+                    static_cast<float>(sliderRef.valueToProportionOfLength(static_cast<double>(markVal)));
+                const float markAngle =
+                    kernel::angleForProportion(prop, rotaryStartAngle, rotaryEndAngle) + capOvershootAngle;
+                const float sinM = std::sin(markAngle);
+                const float cosM = -std::cos(markAngle);
+                juce::Line<float> markTick {centre.x + sinM * tickInner, centre.y + cosM * tickInner,
+                                            centre.x + sinM * tickOuter, centre.y + cosM * tickOuter};
+                g.drawLine(markTick, juce::jmax(1.0f, arc * 0.3f));
+            }
+        }
     }
 }
 
@@ -874,6 +927,47 @@ double UiKnob::getCenterDetentPosition() const noexcept
     return static_cast<double>(slider.getProperties().getWithDefault("bws_center_detent_position", 0.5));
 }
 
+void UiKnob::setMarks(const std::vector<double>& values)
+{
+    juce::Array<juce::var> arr;
+    for (double v : values)
+        arr.add(v);
+    slider.getProperties().set("bws_marks", arr);
+    slider.repaint();
+}
+
+void UiKnob::clearMarks()
+{
+    slider.getProperties().remove("bws_marks");
+    slider.repaint();
+}
+
+std::vector<double> UiKnob::getMarks() const
+{
+    std::vector<double> out;
+    if (const auto* marksVar = slider.getProperties().getVarPointer("bws_marks"))
+        if (const auto* arr = marksVar->getArray())
+            for (const auto& v : *arr)
+                out.push_back(static_cast<double>(v));
+    return out;
+}
+
+int UiKnob::nearestMarkWithin(const std::vector<double>& markProportions, double clickProportion, double tolerance)
+{
+    int best = -1;
+    double bestDelta = tolerance;
+    for (int i = 0; i < static_cast<int>(markProportions.size()); ++i)
+    {
+        const double delta = std::abs(markProportions[static_cast<size_t>(i)] - clickProportion);
+        if (delta < bestDelta)
+        {
+            bestDelta = delta;
+            best = i;
+        }
+    }
+    return best;
+}
+
 void UiKnob::setScale(float newScale)
 {
     scale = newScale;
@@ -907,7 +1001,53 @@ void UiKnob::setTheme(const UiThemeResolved& newTheme)
 void UiKnob::setFormatter(std::function<juce::String(double)> formatterFn)
 {
     formatter = std::move(formatterFn);
+    refreshReadoutWidthReservation();
     refreshReadout();
+}
+
+void UiKnob::setFormat(const kernel::FormatSpec& spec, double displayScale)
+{
+    setFormatter(
+        [spec, displayScale](double value) { return juce::String(kernel::formatValue(value * displayScale, spec)); });
+}
+
+void UiKnob::refreshReadoutWidthReservation()
+{
+    if (!formatter)
+        return;
+
+    const double lo = slider.getMinimum();
+    const double hi = slider.getMaximum();
+    if (!(hi > lo))
+        return;
+
+    const juce::Font probe = adapters::makeFont(kernelTheme, kernel::TextRole::Readout, scale);
+    const auto measure = [&probe](const juce::String& s) {
+        juce::GlyphArrangement glyphs;
+        glyphs.addLineOfText(probe, s, 0.0f, 0.0f);
+        return glyphs.getBoundingBox(0, -1, true).getWidth();
+    };
+    readout.setWidthReservationText(widestFormatted(lo, hi, 48, formatter, measure));
+}
+
+juce::String UiKnob::widestFormatted(double lo, double hi, int samples, const std::function<juce::String(double)>& fmt,
+                                     const std::function<float(const juce::String&)>& measure)
+{
+    const int n = juce::jmax(1, samples);
+    juce::String widest;
+    float widestWidth = -1.0f;
+    for (int i = 0; i <= n; ++i)
+    {
+        const double v = lo + (hi - lo) * (static_cast<double>(i) / static_cast<double>(n));
+        const juce::String candidate = fmt(v);
+        const float w = measure(candidate);
+        if (w > widestWidth)
+        {
+            widestWidth = w;
+            widest = candidate;
+        }
+    }
+    return widest;
 }
 
 void UiKnob::setTooltip(const juce::String& text)
@@ -1131,7 +1271,13 @@ bool UiKnob::commitEditedText(const juce::String& candidate, UiReadout::EditComm
 
     const double snapped =
         snapToInterval(parsed->first, slider.getMinimum(), slider.getMaximum(), slider.getInterval());
-    slider.setValue(snapped, juce::sendNotificationSync);
+    {
+        // User commit: bracket the write so undo bindings and host
+        // attachments see one gesture (drag notifications), matching the
+        // drag and double-click paths.
+        juce::Slider::ScopedDragNotification drag(slider);
+        slider.setValue(snapped, juce::sendNotificationSync);
+    }
     refreshReadout();
     return true;
 }
@@ -1141,7 +1287,10 @@ void UiKnob::resetToDefaultValue()
     if (locked || readoutEditing)
         return;
 
-    slider.setValue(defaultValue, juce::sendNotificationSync);
+    {
+        juce::Slider::ScopedDragNotification drag(slider);
+        slider.setValue(defaultValue, juce::sendNotificationSync);
+    }
     refreshReadout();
 }
 

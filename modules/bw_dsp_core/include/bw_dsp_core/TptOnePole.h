@@ -21,8 +21,8 @@ namespace bws::audio
  * meaningful across any coefficient change - eliminating filter-transient
  * artifacts on coefficient modulation by construction.
  *
- * Industry parallel for shape comparison: juce::dsp::FirstOrderTPTFilter,
- * chowdsp::FirstOrderHPF/LPF. No source code copied; reimplemented from
+ * Industry parallel for shape comparison: first-order TPT filters and
+ * chowdsp::FirstOrderHPF/LPF. No source code copied; derived from the
  * Zavalishin / Cytomic mathematical formulation. Pattern C channel-handling
  * (dual API mono-default) matching in-tree LfAnchorFilter precedent.
  *
@@ -47,10 +47,9 @@ namespace bws::audio
  *   updates require external smoothing.
  *
  * Subnormal handling:
- *   Callers SHOULD enable FTZ/DAZ at the audio-callback boundary (e.g.,
- *   juce::ScopedNoDenormals). As belt-and-suspenders, this primitive ALSO
- *   performs a manual flush after each state update, costing ~1 cycle.
- *   Non-JUCE consumers thus do not need to do anything.
+ *   Callers SHOULD enable FTZ/DAZ at the audio-callback boundary. As
+ *   belt-and-suspenders, this primitive also performs a manual flush after
+ *   each state update, costing ~1 cycle.
  *
  * User-observable behavior:
  *   Bypass→reactivate does NOT clear integrator state. Steady-state DC is

@@ -13,11 +13,11 @@ namespace bws
  * Driven port: preset state persistence.
  *
  * Implemented by WeatherPresetManager (bw_ui).
- * Consumed by (bw_rt).
+ * Consumed by BwsAudioProcessor (bw_rt).
  *
- * Save: calls getPresetMetadata to retrieve preset name,
+ * Save: BwsAudioProcessor calls getPresetMetadata() to retrieve preset name,
  *       category, and modified flag, then writes them to its own XML.
- * Restore: serializes its XML to a blob, passes it here.
+ * Restore: BwsAudioProcessor serializes its XML to a blob, passes it here.
  *          Implementation parses the blob internally using JUCE - JUCE XML
  *          never crosses this seam.
  */

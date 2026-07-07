@@ -10,6 +10,7 @@
 #include "bw_ui/Components/UiLabel.h"
 #include "bw_ui/Components/UiReadout.h"
 #include "bw_ui/Components/ControlStackMetrics.h"
+#include "bw_ui/kernel/ReadoutValue.h"
 
 namespace bws::ui
 {
@@ -39,6 +40,10 @@ public:
     void setReadoutRole(UiReadoutRole newRole);
     void setUnit(ReadoutUnit newUnit);
     void setFormatter(std::function<juce::String(double)> formatterFn);
+
+    // Canonical value display via kernel::ReadoutValue. displayScale converts the stored
+    // value to the displayed quantity (e.g. 100.0 for a 0..1 parameter shown as a percentage).
+    void setFormat(const kernel::FormatSpec& spec, double displayScale = 1.0);
 
     juce::Rectangle<int> debugReadoutBounds() const { return readout.getBounds(); }
     juce::Rectangle<int> debugSliderBounds() const { return sliderComp.getBounds(); }

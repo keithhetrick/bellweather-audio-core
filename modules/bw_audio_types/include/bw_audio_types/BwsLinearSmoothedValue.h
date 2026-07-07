@@ -8,11 +8,11 @@ namespace bws::domain
 {
 
 /**
- * Linear parameter smoother - drop-in replacement for juce::SmoothedValue<float>.
+ * Linear parameter smoother for sample-counted ramps.
  * Ramps from current value to target over a fixed time window.
  * Real-time safe: no allocations, no locks.
  *
- * API matches juce::SmoothedValue linear mode:
+ * API shape:
  *   reset(sampleRate, rampLengthSeconds)
  *   setCurrentAndTargetValue(v)
  *   setTargetValue(v)
@@ -45,8 +45,7 @@ public:
     }
 
     /// Set target - ramp begins on next getNextValue() call.
-    /// If target hasn't changed, the existing ramp continues uninterrupted
-    /// (matches juce::SmoothedValue behavior).
+    /// If target has not changed, the existing ramp continues uninterrupted.
     void setTargetValue(float target) noexcept
     {
         if (!std::islessgreater(target, target_))

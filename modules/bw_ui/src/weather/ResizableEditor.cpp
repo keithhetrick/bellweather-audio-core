@@ -202,6 +202,30 @@ void ResizableEditor::paint(juce::Graphics& g)
     paintContent(g);
 }
 
+void ResizableEditor::propagateScale()
+{
+    const float content = getScaleFactor();
+    const float chrome = getChromeScaleFactor();
+    for (auto& r : childFanout_)
+    {
+        if (r.hooks.setScale)
+        {
+            r.hooks.setScale(r.axis == ScaleAxis::Content ? content : chrome);
+        }
+    }
+}
+
+void ResizableEditor::propagateTheme(const bws::ui::UiThemeResolved* t)
+{
+    for (auto& r : childFanout_)
+    {
+        if (r.hooks.setTheme)
+        {
+            r.hooks.setTheme(t);
+        }
+    }
+}
+
 void ResizableEditor::resized()
 {
 #if JUCE_WINDOWS

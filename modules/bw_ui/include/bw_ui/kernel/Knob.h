@@ -137,4 +137,15 @@ struct ResolvedKnobModel
     return {};
 }
 
+// Canonical rotary value↔angle mapping, shared by paint and click hit-testing.
+[[nodiscard]] constexpr float angleForProportion(float proportion, float startAngle, float endAngle) noexcept
+{
+    return startAngle + proportion * (endAngle - startAngle);
+}
+
+[[nodiscard]] constexpr float proportionForAngle(float angle, float startAngle, float endAngle) noexcept
+{
+    return (endAngle > startAngle) ? (angle - startAngle) / (endAngle - startAngle) : 0.0f;
+}
+
 } // namespace bws::ui::kernel

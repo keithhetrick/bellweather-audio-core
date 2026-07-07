@@ -314,8 +314,8 @@ public:
     float getIntegratedLufs() const { return lufsMeter_.getIntegratedLufs(); }
     float getLoudnessRange() const { return lufsMeter_.getLoudnessRange(); }
     // stability flag for the LRA hero readout.
-    //  PluginEditor consults this and renders "-" when false (first 60 s of
-    //  measurement; matches EBU Tech 3342 / FLUX MiRA / Pleasurize convention).
+    // PluginEditor consults this and renders "-" when false (first 60 s of
+    // measurement; matches EBU Tech 3342 / FLUX MiRA / Pleasurize convention).
     bool isLoudnessRangeStable() const { return lufsMeter_.isLoudnessRangeStable(); }
     void resetIntegratedLufs() { lufsMeter_.resetIntegrated(); }
 
@@ -396,7 +396,7 @@ public:
 
 protected:
     // =========================================================================
-    // state management hooks
+    // BwsAudioProcessor state management hooks
     // =========================================================================
     juce::AudioProcessorValueTreeState* getApvtsPtr() override { return &apvts_; }
     bws::IPresetStatePersistence* getPresetManagerPtr() override { return presetManager_.get(); }

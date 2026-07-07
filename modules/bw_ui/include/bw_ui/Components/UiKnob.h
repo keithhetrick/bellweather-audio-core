@@ -4,6 +4,8 @@
 #pragma once
 
 #include <functional>
+#include <optional>
+#include <vector>
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "bw_ui/adapters/UiThemeKernelAdapter.h"
 #include "bw_ui/Components/ComponentSize.h"
@@ -12,6 +14,7 @@
 #include "bw_ui/interaction/DoubleClickAction.h"
 #include "bw_ui/interaction/InteractionPolicy.h"
 #include "bw_ui/kernel/Knob.h"
+#include "bw_ui/kernel/ReadoutValue.h"
 #include "bw_ui/foundation/UiTheme.h"
 
 namespace bws::ui
@@ -47,6 +50,7 @@ public:
     void setRange(double newMin, double newMax, double newInterval = 0.0)
     {
         slider.setRange(newMin, newMax, newInterval);
+        refreshReadoutWidthReservation();
     }
     void setUnit(ReadoutUnit unit);
     void setDefaultValue(double value);
@@ -56,9 +60,28 @@ public:
     void setCenterDetent(bool enable, double centerProportion = 0.5);
     bool hasCenterDetent() const noexcept;
     double getCenterDetentPosition() const noexcept;
+
+    /// Visual mark ticks at the given values; click snaps to one, drag stays continuous.
+    void setMarks(const std::vector<double>& values);
+    void clearMarks();
+    std::vector<double> getMarks() const;
+
+    /// Index of the nearest mark (0..1 proportions) within `tolerance`, or -1.
+    static int nearestMarkWithin(const std::vector<double>& markProportions, double clickProportion, double tolerance);
+
+    /// Widest formatted value over [lo,hi] (samples+1 points), ranked by `measure`.
+    static juce::String widestFormatted(double lo, double hi, int samples,
+                                        const std::function<juce::String(double)>& fmt,
+                                        const std::function<float(const juce::String&)>& measure);
     void setScale(float newScale);
     void setTheme(const UiThemeResolved& newTheme);
     void setFormatter(std::function<juce::String(double)> formatterFn);
+
+    // Canonical value display: the spec drives format, parse and width reservation through
+    // kernel::ReadoutValue. displayScale converts the stored value to the displayed quantity
+    // (e.g. 100.0 for a normalized 0..1 parameter shown as a percentage).
+    void setFormat(const kernel::FormatSpec& spec, double displayScale = 1.0);
+
     void setTooltip(const juce::String& text);
     void setLocked(bool shouldLock);
     void cancelUserInteraction();
@@ -140,6 +163,8 @@ private:
     };
 
     void refreshReadout();
+    // Reserve the readout font size for the widest formatted value in range.
+    void refreshReadoutWidthReservation();
     void refreshInteractionState();
     void applySizeVariant(ComponentSize size);
     struct EditSessionContext

@@ -32,7 +32,7 @@ RtViolationBuffer& globalViolationBuffer() noexcept;
 void recordViolation(ViolationType type, const char* message) noexcept;
 void ensureOverridesLinked() noexcept;
 
-// containment observability - non-heap delete guard counters.
+//  containment observability - non-heap delete guard counters.
 // Query these to verify the isHeapPointer guard is not silently hiding
 // unrelated invalid-free defects.
 uint64_t skippedNonHeapDeleteTotal() noexcept;
@@ -55,7 +55,7 @@ public:
     bool try_lock();
 
 private:
-    std::atomic_flag flag = ATOMIC_FLAG_INIT;
+    std::atomic_flag flag;
 };
 
 } // namespace bws::rt

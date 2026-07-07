@@ -50,9 +50,17 @@ public:
     void setUnit(ReadoutUnit newUnit);
     void setEmphasis(Emphasis newEmphasis);
     Emphasis getEmphasis() const noexcept { return emphasis; }
+    /// Render value text in the theme accent instead of text0.
+    void setAccentText(bool shouldUseAccent);
+    bool isAccentText() const noexcept { return accentText; }
     void setText(const juce::String& newText);
     void setValue(float value);
     const juce::String& getText() const noexcept { return text; }
+
+    /// Size the font to fit `widest` and render every value at that size, so the
+    /// readout does not refit per value. Empty = fit-to-current-text.
+    void setWidthReservationText(const juce::String& widest);
+    const juce::String& getWidthReservationText() const noexcept { return widthReservationText_; }
     void setEditable(bool shouldAllowEdit);
     bool isEditable() const noexcept { return editable; }
     bool isEditing() const noexcept { return editing; }
@@ -113,6 +121,7 @@ private:
     UiThemeResolved theme;
     kernel::ThemeSnapshot kernelTheme;
     juce::String text;
+    juce::String widthReservationText_;
     float lastValue {0.0f};
     float scale {1.0f};
     ReadoutUnit unit {ReadoutUnit::Plain};
@@ -120,6 +129,7 @@ private:
     Emphasis emphasis {Emphasis::Normal};
     bool editable {false};
     bool editing {false};
+    bool accentText {false};
     bool resolvingEditSession {false};
     int editSessionId {0};
     HiddenTextEditor editor;

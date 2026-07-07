@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Bellweather Studios.
 // SPDX-License-Identifier: Apache-2.0
 // Contract source: modules/bw_rt/include/bw_rt/RtGuard.h
-// RT-guard containment observability regression tests.
+//  RT-guard containment observability regression tests.
 //
 // The ValueTreeRetainer tests that used to live here moved to
 // modules/bw_juce_adapters/tests/test_value_tree_retainer.cpp when

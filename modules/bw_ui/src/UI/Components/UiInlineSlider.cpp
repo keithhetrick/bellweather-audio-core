@@ -235,6 +235,12 @@ void UiInlineSlider::setFormatter(std::function<juce::String(double)> formatterF
     repaint();
 }
 
+void UiInlineSlider::setFormat(const kernel::FormatSpec& spec, double displayScale)
+{
+    setFormatter(
+        [spec, displayScale](double value) { return juce::String(kernel::formatValue(value * displayScale, spec)); });
+}
+
 void UiInlineSlider::setTheme(const UiThemeResolved& newTheme)
 {
     theme = newTheme;

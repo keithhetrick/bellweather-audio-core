@@ -43,7 +43,7 @@ public:
     /// Disable retention for test harnesses (single-binary, no cross-module
     /// emptyString issue). Call ONCE from main() before any processor creation.
     /// NOT thread-safe - message thread only.
-    ///
+    // /
     static void disableForTesting() noexcept { testingMode_ = true; }
     static bool isTestingMode() noexcept { return testingMode_; }
 

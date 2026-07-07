@@ -392,11 +392,11 @@ public:
     //==========================================================================
 
     /** Return current preset metadata for state persistence.
-     * Called by::getStateInformation.*/
+     *  Called by BwsAudioProcessor::getStateInformation(). */
     [[nodiscard]] bws::domain::BwResult<bws::domain::PresetMetadata> getPresetMetadata() const override;
 
     /** Restore preset metadata from serialized state blob.
-     * Called by::setStateInformation.*/
+     *  Called by BwsAudioProcessor::setStateInformation(). */
     [[nodiscard]] bws::domain::BwResult<void> restorePresetState(bws::domain::BwStateBlob blob) override;
 
     void beginPresetStateRestore() override;

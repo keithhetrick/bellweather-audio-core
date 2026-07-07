@@ -12,8 +12,7 @@ namespace bws::domain
 {
 
 /**
- * Owning multichannel float audio buffer.
- * Replaces juce::AudioBuffer<float> as internal storage in DSP modules.
+ * Owning multichannel float audio buffer for DSP modules.
  *
  * Allocation policy:
  *   - setSize() is the ONLY allocation point. Call from prepare(), never from process().

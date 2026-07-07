@@ -350,7 +350,7 @@ void BarometerEditor::paintLufsReadout(juce::Graphics& g, juce::Rectangle<int> b
     const float truePeak = processor_.getHeldTruePeakDb();
     const float lra = processor_.getLoudnessRange();
     // render LRA as "---" until stable (≥60 s + non-empty gated
-    //  distribution per EBU Tech 3342 stability convention).
+    // distribution per EBU Tech 3342 stability convention).
     const bool lraStable = processor_.isLoudnessRangeStable();
 
     // Format helpers

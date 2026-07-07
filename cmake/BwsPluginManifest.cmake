@@ -168,7 +168,7 @@ function(bws_manifest_populate plugin_id)
 endfunction()
 
 # =============================================================================
-# Shared JUCE module aggregator (consolidation target)
+#  Shared JUCE module aggregator (consolidation target)
 #
 # INTERFACE library that bundles the union of JUCE modules production plugins
 # need. Plugins link `bws::juce_shared` instead of listing juce::* modules
@@ -177,7 +177,7 @@ endfunction()
 # CAVEAT: This does NOT reduce compile time. JUCE modules are themselves
 # INTERFACE libraries (per juce_add_module design); their sources still
 # compile into every consumer's object directory. Real compile-dedup is
-# (OBJECT/STATIC aggregator owning JUCE sources directly).
+#  (OBJECT/STATIC aggregator owning JUCE sources directly).
 # =============================================================================
 if(NOT TARGET bws_juce_shared)
     add_library(bws_juce_shared INTERFACE)

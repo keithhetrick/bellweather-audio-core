@@ -521,10 +521,10 @@ private:
         // STEP 2: Decompose into polyphase components
         //
         // Phase p gets every 'factor'-th coefficient starting at p:
-        // coeffs[0], coeffs[4], coeffs[8],.
-        // coeffs[1], coeffs[5], coeffs[9],.
-        // coeffs[2], coeffs[6], coeffs[10],.
-        // coeffs[3], coeffs[7], coeffs[11],.
+        //   coeffs[0], coeffs[4], coeffs[8],.
+        //   coeffs[1], coeffs[5], coeffs[9],.
+        //   coeffs[2], coeffs[6], coeffs[10],.
+        //   coeffs[3], coeffs[7], coeffs[11],.
         //----------------------------------------------------------------------
         for (int phase = 0; phase < kOversampleFactor; ++phase)
         {
@@ -574,8 +574,7 @@ private:
 };
 
 // Default 4× instantiation is the canonical TruePeakMeter - existing
-// call sites (e.g. Barometer's Processor)
-// keep their signatures unchanged via this alias.
+// call sites keep their signatures unchanged via this alias.
 using TruePeakMeter = TruePeakMeterImpl<4>;
 using TruePeakMeter8x = TruePeakMeterImpl<8>;
 using TruePeakMeter16x = TruePeakMeterImpl<16>;

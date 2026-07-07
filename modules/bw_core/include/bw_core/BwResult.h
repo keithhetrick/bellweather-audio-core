@@ -14,6 +14,15 @@
 // Call sites are IDENTICAL on both machines.
 // Monadic chaining (.and_then, .or_else, .transform) available on C++23 only.
 //
+// ABI: BwResult<T> is standard-dependent, so a BwResult that crosses a static-
+// archive boundary between TUs built at different standards has two layouts -
+// a link error on MSVC, silent stack corruption on libc++ (which, like MSVC,
+// exposes <expected> only at C++23; only libstdc++ exposes it at C++20). Because
+// bw_ui is pinned to the C++20 OSS floor while plugin code is C++23, the repo
+// root CMakeLists forces BW_HAS_EXPECTED=0 globally: the fallback struct has one
+// standard-independent layout, so the boundary is always safe. See
+//  rule 4.
+//
 // Migration note (once C++23 std::expected is the minimum supported path):
 //   1. Delete this file entirely
 //   2. Replace all BwResult<T> with std::expected<T, std::string_view>

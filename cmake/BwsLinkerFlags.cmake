@@ -1,10 +1,10 @@
 # cmake/BwsLinkerFlags.cmake
 # =============================================================================
-# Release build linker optimization flags.
+# BwsLinkerFlags - Release build linker optimization flags.
 #
 # Separate from BwsVisibility.cmake by design:
-# = compiler flags (symbol visibility, -fvisibility=hidden)
-# = linker flags (dead stripping, LTO-related overrides, etc.)
+#   BwsVisibility  = compiler flags (symbol visibility, -fvisibility=hidden)
+#   BwsLinkerFlags = linker flags   (dead stripping, LTO-related overrides, etc.)
 #
 # Usage:
 #   bws_apply_plugin_linker_flags(<plugin_target>)

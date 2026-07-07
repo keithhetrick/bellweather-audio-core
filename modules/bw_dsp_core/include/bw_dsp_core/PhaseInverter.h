@@ -118,7 +118,7 @@ private:
 };
 
 //==============================================================================
-// Implementation
+// Inline definitions
 //==============================================================================
 
 inline void PhaseInverter::prepare(double /*sampleRate*/, int /*maxBlockSize*/)

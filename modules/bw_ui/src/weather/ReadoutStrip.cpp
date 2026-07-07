@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "bw_ui/weather/displays/ReadoutStrip.h"
+#include "bw_ui/adapters/JuceTextMeasurer.h"
 #include "bw_ui/adapters/UiThemeKernelAdapter.h"
 #include "bw_ui/generated/BwTokens.h"
 #include <bw_ui/interaction/InteractionLogging.h>
@@ -14,15 +15,9 @@
 namespace bws::weather
 {
 
-using bws::ui::adapters::GestureSession;
-
 namespace
 {
 constexpr float kLockedAlpha = 0.55f;
-
-constexpr bws::ui::kernel::InteractionPolicy kReadoutPolicy {
-    .sensitivity = {.baseSensitivity = 300, .fineSensitivity = 1200},
-};
 
 bool isReadoutEditable(const bws::ui::kernel::AvailabilityState availability)
 {
@@ -100,19 +95,30 @@ ReadoutStrip::~ReadoutStrip()
 // CONFIGURATION
 //==============================================================================
 
-void ReadoutStrip::addParameter(
-    const juce::String& paramId, const juce::String& displayName, const juce::String& suffix,
-    std::function<juce::String(float normalizedValue, juce::RangedAudioParameter&)> formatter)
+void ReadoutStrip::addParameter(const juce::String& paramId, const juce::String& displayName,
+                                bws::ui::kernel::FormatSpec spec, double displayScale)
 {
     ParameterDisplay display;
     display.paramId = paramId;
     display.displayName = displayName;
-    display.suffix = suffix;
+    display.spec = spec;
+    display.displayScale = displayScale;
     display.param = apvts_.getParameter(paramId);
     display.lastValue = display.param ? display.param->getValue() : 0.0f;
-    display.formatter = std::move(formatter);
 
-    parameters_.push_back(display);
+    if (display.param != nullptr)
+    {
+        display.adapter = std::make_unique<bws::ui::adapters::JuceParameterAdapter>(display.param);
+        bws::ui::interaction::ValueInteractionConfig config;
+        config.drag = {.baseSensitivity = 300, .fineSensitivity = 1200};
+        config.wheelNormal = 0.01f;
+        config.wheelFine = 0.002f;
+        config.displayScale = displayScale;
+        display.vi = std::make_unique<bws::ui::interaction::ValueInteraction>(
+            *display.adapter, bws::ui::interaction::InteractionPolicy {}, spec, config);
+    }
+
+    parameters_.push_back(std::move(display));
     recomputeMaxPairWidth();
     repaint();
 }
@@ -204,25 +210,83 @@ void ReadoutStrip::setItemTooltip(int index, const juce::String& tooltip)
         setTooltip(tooltip);
 }
 
+void ReadoutStrip::setItemDisplayOverride(int index, std::optional<float> realValue)
+{
+    if (index < 0 || index >= static_cast<int>(parameters_.size()))
+        return;
+    auto& display = parameters_[static_cast<size_t>(index)];
+    if (display.displayOverride == realValue)
+        return;
+    display.displayOverride = realValue;
+    repaint();
+}
+
+juce::String ReadoutStrip::formatItemValue(const ParameterDisplay& display) const
+{
+    if (display.displayOverride.has_value())
+        return juce::String(bws::ui::kernel::formatValue(
+            static_cast<double>(*display.displayOverride) * display.displayScale, display.spec));
+    if (display.param == nullptr)
+        return juce::String::fromUTF8("\xE2\x80\x94");
+    const double real = display.param->convertFrom0to1(display.param->getValue()) * display.displayScale;
+    return juce::String(bws::ui::kernel::formatValue(real, display.spec));
+}
+
+juce::String ReadoutStrip::getItemValueTextForTesting(int index) const
+{
+    if (index < 0 || index >= static_cast<int>(parameters_.size()))
+        return {};
+    return formatItemValue(parameters_[static_cast<size_t>(index)]);
+}
+
+float ReadoutStrip::dragSegmentForTesting(int index, int pixelsUp, bws::ui::kernel::ModSet mods)
+{
+    if (index < 0 || index >= static_cast<int>(parameters_.size()) || !parameters_[static_cast<size_t>(index)].vi)
+        return 0.0f;
+    auto& d = parameters_[static_cast<size_t>(index)];
+    d.vi->pointerDown(mods, false);
+    d.vi->pointerDrag(pixelsUp, mods);
+    d.vi->pointerUp();
+    return d.param->getValue();
+}
+
+float ReadoutStrip::wheelSegmentForTesting(int index, float deltaY, bws::ui::kernel::ModSet mods)
+{
+    if (index < 0 || index >= static_cast<int>(parameters_.size()) || !parameters_[static_cast<size_t>(index)].vi)
+        return 0.0f;
+    auto& d = parameters_[static_cast<size_t>(index)];
+    d.vi->wheel(deltaY, mods);
+    return d.param->getValue();
+}
+
+float ReadoutStrip::doubleClickSegmentForTesting(int index)
+{
+    if (index < 0 || index >= static_cast<int>(parameters_.size()) ||
+        parameters_[static_cast<size_t>(index)].param == nullptr)
+        return 0.0f;
+    auto& d = parameters_[static_cast<size_t>(index)];
+    bws::ui::adapters::JuceParameterAdapter adapter {d.param};
+    bws::ui::kernel::setValueWithGesture(adapter, d.param->getDefaultValue()); // default action: Reset
+    return d.param->getValue();
+}
+
 void ReadoutStrip::setItemCenterDetent(int index, bool enable, float position, float snapRadius)
 {
     if (index < 0 || index >= static_cast<int>(parameters_.size()))
         return;
     auto& item = parameters_[static_cast<size_t>(index)];
-    item.centerDetentEnabled = enable;
-    item.centerDetentPosition = juce::jlimit(0.0f, 1.0f, position);
-    item.centerDetentSnapRadius = juce::jmax(0.0f, snapRadius);
+    if (item.vi)
+        item.vi->setDetent({enable, juce::jlimit(0.0f, 1.0f, position), juce::jmax(0.0f, snapRadius)});
 }
 
 void ReadoutStrip::cancelInteraction()
 {
-    // Linearize-then-destroy: move optionals out before dtor fires so a
-    // re-entrant call from the underlying endGesture listener observes nullopt.
-    auto expiredSlide = std::move(slideGesture_);
-    expiredSlide.reset();
-    auto expiredWheel = std::move(wheelGesture_);
-    expiredWheel.reset();
-    lastWheelGestureMs_ = 0.0;
+    if (draggingParameterIndex_ >= 0 && draggingParameterIndex_ < static_cast<int>(parameters_.size()))
+    {
+        auto& d = parameters_[static_cast<size_t>(draggingParameterIndex_)];
+        if (d.vi)
+            d.vi->pointerUp(); // drops any open gesture (RAII end)
+    }
 
     draggingParameterIndex_ = -1;
     hoveredParameterIndex_ = -1;
@@ -246,18 +310,6 @@ void ReadoutStrip::timerCallback()
     {
         stopTimer();
         return;
-    }
-
-    if (wheelGesture_)
-    {
-        const double nowMs = juce::Time::getMillisecondCounterHiRes();
-        if ((nowMs - lastWheelGestureMs_) >= kWheelGestureTimeoutMs)
-        {
-            // Linearize-then-destroy: empty the optional before dtor fires
-            // so a re-entrant cancelInteraction sees nullopt.
-            auto expired = std::move(wheelGesture_);
-            expired.reset();
-        }
     }
 
     // Check if any parameter values have changed
@@ -332,20 +384,6 @@ void ReadoutStrip::paintParameterValues(juce::Graphics& g, juce::Rectangle<float
     if (parameters_.empty())
         return;
 
-    const auto formatDisplayValue = [](const ParameterDisplay& display) {
-        if (display.param == nullptr)
-            return juce::String("---") + display.suffix;
-
-        const float normalizedValue = display.param->getValue();
-        if (display.formatter)
-            return display.formatter(normalizedValue, *display.param);
-
-        if (display.suffix == "%")
-            return juce::String(juce::roundToInt(normalizedValue * 100.0f)) + display.suffix;
-
-        return juce::String(display.param->convertFrom0to1(normalizedValue), 1) + display.suffix;
-    };
-
     // Padding
     const auto& metrics = activeReadoutMetrics(kernelTheme_);
     float padding = metrics.paddingX * scale_;
@@ -399,7 +437,7 @@ void ReadoutStrip::paintParameterValues(juce::Graphics& g, juce::Rectangle<float
         }
 
         // Get formatted value
-        const juce::String valueText = formatDisplayValue(display);
+        const juce::String valueText = formatItemValue(display);
 
         // Draw label - brighter when hovered/dragging unless locked
         g.setColour((isHovered || isDragging)
@@ -410,13 +448,15 @@ void ReadoutStrip::paintParameterValues(juce::Graphics& g, juce::Rectangle<float
         juce::String labelText = display.displayName + ":";
 
         // Calculate text widths using the fitted strip font.
-        float labelWidth = measureTextWidth(g.getCurrentFont(), labelText);
+        const float labelWidth = measureTextWidth(stripFont, labelText);
 
         // Draw label
+        g.setFont(stripFont);
         g.drawText(labelText, segment.withWidth(labelWidth + 4.0f * scale_), juce::Justification::centredLeft);
 
-        // Draw value - golden accent when hovered/dragging unless locked
+        // Draw value.
         g.setColour((isHovered || isDragging) ? t.weatherColors.accent : t.weatherColors.textPrimary);
+        g.setFont(stripFont);
         auto valueArea = segment;
         valueArea.removeFromLeft(labelWidth + 2.0f * scale_);
         g.drawText(valueText, valueArea, juce::Justification::centredLeft);
@@ -440,29 +480,29 @@ void ReadoutStrip::recomputeMaxPairWidth()
     if (parameters_.empty())
         return;
 
-    const auto stripFont =
-        bws::ui::adapters::makeFont(kernelTheme_, bws::ui::kernel::TextRole::Readout, scale_ * textScaleMultiplier_);
+    const float roleScale = scale_ * textScaleMultiplier_;
+    const auto stripFont = bws::ui::adapters::makeFont(kernelTheme_, bws::ui::kernel::TextRole::Readout, roleScale);
+    const bws::ui::adapters::JuceTextMeasurer valueMeasurer(kernelTheme_);
+    const float gap = 4.0f * scale_;
 
     for (const auto& display : parameters_)
     {
-        const auto formatAt = [&](float normalized) -> juce::String {
-            if (display.param == nullptr)
-                return juce::String("---") + display.suffix;
-            if (display.formatter)
-                return display.formatter(normalized, *display.param);
-            if (display.suffix == "%")
-                return juce::String(juce::roundToInt(normalized * 100.0f)) + display.suffix;
-            return juce::String(display.param->convertFrom0to1(normalized), 1) + display.suffix;
-        };
-
         const juce::String labelText = display.displayName + ":";
         const float labelWidth = measureTextWidth(stripFont, labelText);
-        const float gap = 4.0f * scale_;
 
-        const float widthAtMin = labelWidth + gap + measureTextWidth(stripFont, formatAt(0.0f));
-        const float widthAtMax = labelWidth + gap + measureTextWidth(stripFont, formatAt(1.0f));
+        double minReal = 0.0;
+        double maxReal = 0.0;
+        if (display.param != nullptr)
+        {
+            const double a = display.param->convertFrom0to1(0.0f) * display.displayScale;
+            const double b = display.param->convertFrom0to1(1.0f) * display.displayScale;
+            minReal = juce::jmin(a, b);
+            maxReal = juce::jmax(a, b);
+        }
+        const float valueWidth = bws::ui::kernel::reservedValueWidth(display.spec, minReal, maxReal, valueMeasurer,
+                                                                     bws::ui::kernel::TextRole::Readout, roleScale);
 
-        cachedMaxPairWidth_ = juce::jmax(cachedMaxPairWidth_, widthAtMin, widthAtMax);
+        cachedMaxPairWidth_ = juce::jmax(cachedMaxPairWidth_, labelWidth + gap + valueWidth);
     }
 }
 
@@ -549,33 +589,6 @@ void ReadoutStrip::setHoveredParameter(int index)
     }
 }
 
-void ReadoutStrip::adjustParameter(int index, float delta, bool fineTune)
-{
-    if (index < 0 || index >= static_cast<int>(parameters_.size()))
-        return;
-
-    auto& display = parameters_[static_cast<size_t>(index)];
-    if (!display.param || !isReadoutEditable(display.availability))
-        return;
-
-    if (fineTune)
-        delta *= 0.25f;
-
-    float currentValue = display.param->getValue();
-    float newValue = juce::jlimit(0.0f, 1.0f, currentValue + delta);
-
-    // Caller contract: exactly one of slideGesture_ / wheelGesture_ is open.
-    jassert((slideGesture_ != nullptr) != (wheelGesture_ != nullptr));
-    if (slideGesture_)
-    {
-        slideGesture_->scope.setValueNormalized(newValue);
-    }
-    else if (wheelGesture_)
-    {
-        wheelGesture_->scope.setValueNormalized(newValue);
-    }
-}
-
 void ReadoutStrip::mouseDown(const juce::MouseEvent& e)
 {
     if (!interactiveEnabled_)
@@ -590,28 +603,16 @@ void ReadoutStrip::mouseDown(const juce::MouseEvent& e)
 
         if (e.mods.isAltDown() && display.param)
         {
-            // Alt-reset is only valid when no gesture is open (avoids
-            // bracket-inside-bracket on rapid Alt+drag sequences).
-            if (!slideGesture_ && !wheelGesture_)
-            {
-                bws::ui::adapters::JuceParameterAdapter adapter {display.param};
-                bws::ui::kernel::setValueWithGesture(adapter, display.param->getDefaultValue());
-                repaint();
-            }
+            bws::ui::adapters::JuceParameterAdapter adapter {display.param};
+            bws::ui::kernel::setValueWithGesture(adapter, display.param->getDefaultValue());
+            repaint();
             return;
         }
 
         draggingParameterIndex_ = index;
         dragStartY_ = e.y;
-
-        if (display.param)
-        {
-            dragStartValue_ = display.param->getValue();
-            if (!slideGesture_)
-            {
-                slideGesture_ = std::make_unique<GestureSession>(display.param);
-            }
-        }
+        if (display.vi)
+            display.vi->pointerDown(bws::ui::kernel::fromJuce(e.mods), false);
 
         repaint();
     }
@@ -622,28 +623,18 @@ void ReadoutStrip::mouseDrag(const juce::MouseEvent& e)
     if (draggingParameterIndex_ < 0 || !interactiveEnabled_)
         return;
 
-    const int sensitivity = bws::ui::kernel::sensitivityForDrag(bws::ui::kernel::fromJuce(e.mods), kReadoutPolicy);
-    float delta = static_cast<float>(dragStartY_ - e.y) / static_cast<float>(sensitivity);
-
     auto& display = parameters_[static_cast<size_t>(draggingParameterIndex_)];
-    if (display.param && isReadoutEditable(display.availability) && slideGesture_)
-    {
-        float newValue = juce::jlimit(0.0f, 1.0f, dragStartValue_ + delta);
-        if (display.centerDetentEnabled &&
-            std::abs(newValue - display.centerDetentPosition) <= display.centerDetentSnapRadius)
-        {
-            newValue = display.centerDetentPosition;
-        }
-        slideGesture_->scope.setValueNormalized(newValue);
-    }
+    if (display.vi && isReadoutEditable(display.availability))
+        display.vi->pointerDrag(dragStartY_ - e.y, bws::ui::kernel::fromJuce(e.mods));
 }
 
 void ReadoutStrip::mouseUp(const juce::MouseEvent& /*e*/)
 {
     if (draggingParameterIndex_ >= 0)
     {
-        auto expired = std::move(slideGesture_);
-        expired.reset();
+        auto& display = parameters_[static_cast<size_t>(draggingParameterIndex_)];
+        if (display.vi)
+            display.vi->pointerUp();
         draggingParameterIndex_ = -1;
         repaint();
     }
@@ -669,18 +660,9 @@ void ReadoutStrip::mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWh
     if (index >= 0)
     {
         auto& display = parameters_[static_cast<size_t>(index)];
-        if (!isReadoutEditable(display.availability) || display.param == nullptr)
+        if (!isReadoutEditable(display.availability) || !display.vi)
             return;
-        float sensitivity = bws::ui::kernel::isFineGesture(bws::ui::kernel::fromJuce(e.mods)) ? 0.002f : 0.01f;
-        float delta = wheel.deltaY * sensitivity;
-
-        if (!wheelGesture_ || wheelGesture_->juceParamId != display.param)
-        {
-            wheelGesture_.reset();
-            wheelGesture_ = std::make_unique<GestureSession>(display.param);
-        }
-        lastWheelGestureMs_ = juce::Time::getMillisecondCounterHiRes();
-        adjustParameter(index, delta, false);
+        display.vi->wheel(wheel.deltaY, bws::ui::kernel::fromJuce(e.mods));
     }
 }
 

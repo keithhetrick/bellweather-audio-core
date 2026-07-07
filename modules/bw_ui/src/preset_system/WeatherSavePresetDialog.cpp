@@ -293,7 +293,7 @@ void attachAndShowSavePresetDialog(WeatherSavePresetDialog* dialog, float scaleF
         // top-level NSWindow is outside Reaper's window-hierarchy key-binding
         // scope, so the TextEditor receives typed spaces normally. Trade-off:
         // no dark backdrop dimming the plugin behind the dialog. See
-        // for the full
+        //  for the full
         // landscape + why embedded overlay is preferred when the host doesn't
         // hijack.
         const int cardW = sf(kCardWidthPx, scaleFactor);

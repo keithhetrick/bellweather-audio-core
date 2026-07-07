@@ -16,10 +16,10 @@
 //   Deployment target: macOS 11.0 (CMakeLists.txt:6-7)
 //
 // Gate tiers:
-// compile-time only: no runtime dep, safe on all targets
-// header-only stdlib: __cpp_* macro gate only
-// dylib runtime dep: __cpp_* macro + deployment target gate
-// modules: CMake gate only (BW_HAS_MODULES set by CMake)
+//   compile-time only: no runtime dep, safe on all targets
+//   header-only stdlib: __cpp_* macro gate only
+//   dylib runtime dep: __cpp_* macro + deployment target gate
+//   modules: CMake gate only (BW_HAS_MODULES set by CMake)
 //
 // Rules:
 //   - Never add version number checks (__clang_major__, _MSC_VER etc.)
@@ -35,7 +35,7 @@
 // Compatibility note:
 //   BW_HAS_CONSTEVAL = 1 in C++20 mode on Apple Clang 21 (reports 202211
 //   even under -std=c++20). Older Apple Clang versions may report 0. The
-//   C++20 smoke test validates gate logic, not every historical compiler value.
+//   C++20 smoke test validates gate logic, not every older compiler value.
 //
 // MSVC note:
 //   /Zc:__cplusplus must be set for __cplusplus to report the real standard
@@ -88,8 +88,8 @@
 // `std::max` is not recognized and forces Force=true warnings.
 //
 // Do NOT use this macro to silence legitimate reductions that indicate a
-// real algorithmic problem. Reserved for cases where a pure numerical loop
-// is provably reorderable.
+// real algorithmic problem. Use it only when a pure numerical loop is
+// provably reorderable.
 // -----------------------------------------------------------------------------
 #if defined(__clang__)
 #define BWS_PRAGMA(x) _Pragma(#x)
@@ -199,9 +199,9 @@
 // Gate on __has_include to avoid false negative on old machine.
 // Header-only in libc++. Safe on macOS 11.0 deployment target.
 //
-// Note: std::span is already used unconditionally in bw_audio_types
-// (BwStateBlob.h). BW_HAS_SPAN is guaranteed 1 on all supported
-// configurations. This gate exists for completeness and external consumers.
+// Note: std::span is already used unconditionally by public audio value types.
+// BW_HAS_SPAN is guaranteed 1 on all supported configurations. This gate exists
+// for completeness and external consumers.
 // -----------------------------------------------------------------------------
 #if __has_include(<span>) && __cpp_lib_span >= 202002L
 #define BW_HAS_SPAN 1

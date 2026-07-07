@@ -127,6 +127,7 @@ juce_add_binary_data(bw_ui_LocalizationAssets
 # binary-data (PRIVATE - only the font/localization loaders consume the symbols).
 add_library(bw_ui_foundation STATIC
     src/kernel/Theme.cpp
+    src/kernel/ReadoutValue.cpp
     src/UI/Fonts.cpp
     src/UI/FontManifest.cpp
     src/UI/UiBootstrap.cpp
@@ -137,6 +138,7 @@ add_library(bw_ui_foundation STATIC
     src/UI/OptimizedMouseHandler.cpp
     src/UI/PaintGuard.cpp
     src/interaction/InteractionLogging.cpp
+    src/interaction/ValueInteraction.cpp
     src/interactions/PhysicsInteractions.cpp
     src/ambient/AmbientEffects.cpp
 )
@@ -214,6 +216,7 @@ endif()
 add_library(bw_ui_controls STATIC
     src/UI/Components/UiLabel.cpp
     src/UI/Components/UiReadout.cpp
+    src/UI/Components/InteractiveReadout.cpp
     src/UI/Components/UiKnob.cpp
     src/UI/Components/UiControlTile.cpp
     src/UI/Components/UiLabeledSlider.cpp
@@ -371,6 +374,34 @@ _bw_ui_weather_target(bw_ui_weather_displays_core
 
 
 
+# weather/detachable - the detachable-window subsystem. No shipped plugin
+# consumes it; it builds only when BWS_BUILD_DETACHABLE is ON.
+option(BWS_BUILD_DETACHABLE "Detachable-window subsystem" OFF)
+if(BWS_BUILD_DETACHABLE)
+add_library(bw_ui_weather_detachable STATIC
+    src/weather/detachable/DetachableApertureCallbacks.cpp
+    src/weather/detachable/DetachableButtonUtils.cpp
+    src/weather/detachable/DetachableCallbackUtils.cpp
+    src/weather/detachable/DetachableDockCallbacks.cpp
+    src/weather/detachable/DetachableDockController.cpp
+    src/weather/detachable/DetachableDropZoneFeedback.cpp
+    src/weather/detachable/DetachableDropZoneGeometry.cpp
+    src/weather/detachable/DetachablePanelAnimatedReattach.cpp
+    src/weather/detachable/DetachablePanelCloseReattach.cpp
+    src/weather/detachable/DetachablePanelDetach.cpp
+    src/weather/detachable/DetachablePanelDockReattach.cpp
+    src/weather/detachable/DetachablePanelReattach.cpp
+    src/weather/detachable/DetachablePanelWindowManager.cpp
+    src/weather/detachable/DetachablePanelWorkflow.cpp
+    src/weather/detachable/DetachablePanelWorkflowFactory.cpp
+    src/weather/detachable/DetachableVisibilityUtils.cpp
+    src/weather/detachable/DetachableWindow.cpp
+    src/weather/detachable/DetachableWindowCallbacks.cpp
+)
+_bw_ui_weather_target(bw_ui_weather_detachable
+    bws::bw_ui_foundation bws::bw_ui_rendering bws::bw_ui_controls bws::bw_ui_tokens
+    bws::bw_ui_weather_displays_core)
+endif()
 # ── /Weather instrument layer ───────────────────────────────────────────────────
 
 # ── bw_ui_preset_system: preset browser, dialogs, library state (the apex) ───────
@@ -438,6 +469,9 @@ target_link_libraries(bw_ui
         bws::bw_ui_weather_displays_core
         bws::bw_ui_preset_system
 )
+if(BWS_BUILD_DETACHABLE)
+    target_link_libraries(bw_ui INTERFACE bws::bw_ui_weather_detachable)
+endif()
 
 # --- Linux: JUCE GUI deps (GTK/WebKit) must be visible to the consumer target ---
 # The failure you saw:

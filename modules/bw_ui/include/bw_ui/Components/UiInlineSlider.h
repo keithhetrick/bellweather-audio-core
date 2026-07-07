@@ -9,6 +9,7 @@
 #include "bw_ui/adapters/UiThemeKernelAdapter.h"
 #include "bw_ui/interaction/DoubleClickAction.h"
 #include "bw_ui/interaction/InteractionPolicy.h"
+#include "bw_ui/kernel/ReadoutValue.h"
 
 namespace bws::ui
 {
@@ -31,6 +32,11 @@ public:
     void setLabelText(const juce::String& text);
     void setLabelVisible(bool shouldShow);
     void setFormatter(std::function<juce::String(double)> formatterFn);
+
+    // Canonical value display via kernel::ReadoutValue. displayScale converts the stored
+    // value to the displayed quantity (e.g. 100.0 for a 0..1 parameter shown as a percentage).
+    void setFormat(const kernel::FormatSpec& spec, double displayScale = 1.0);
+
     void setTheme(const UiThemeResolved& newTheme);
     void setScale(float newScale);
     void setDefaultValue(double defaultValue);

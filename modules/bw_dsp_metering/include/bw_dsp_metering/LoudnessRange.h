@@ -7,7 +7,7 @@
  * @file LoudnessRange.h
  * @brief Loudness Range (LRA) statistic per EBU Tech 3342 §3.2
  *
- * Single canonical implementation of the LRA percentile-difference statistic.
+ * Single canonical calculator for the LRA percentile-difference statistic.
  * Consumed by:
  *   - bws::audio::LoudnessMeter::serviceLoudnessRange (production runtime)
  *   - bw_bpts_core LoudnessAnalysis::loudnessRange (test-framework batch analysis)

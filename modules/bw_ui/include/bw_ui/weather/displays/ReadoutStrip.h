@@ -24,15 +24,18 @@
  */
 
 #include "bw_ui/foundation/UiTheme.h"
-#include "bw_ui/adapters/GestureSession.h"
 #include "bw_ui/adapters/JuceParameterAdapter.h"
 #include "bw_ui/interaction/DoubleClickAction.h"
 #include "bw_ui/interaction/InteractionPolicy.h"
-#include "bw_ui/kernel/ParameterGestureScope.h"
+#include "bw_ui/interaction/ValueInteraction.h"
+#include "bw_ui/kernel/ModSet.h"
+#include "bw_ui/kernel/ReadoutValue.h"
 #include "bw_ui/kernel/State.h"
 #include "bw_ui/kernel/Theme.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
+
+#include <optional>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -77,11 +80,12 @@ public:
      * @brief Add a parameter to display in the strip
      * @param paramId Parameter ID in APVTS
      * @param displayName Display name (e.g., "GAIN")
-     * @param suffix Suffix for value (e.g., "%")
-     * @param formatter Optional formatter mapping (normalized value, parameter) to display text
+     * @param spec How to format the value (canonical kernel formatter)
+     * @param displayScale Multiplier from the param's real value to display units
+     *        (e.g. 100 for a 0..1 param shown as a percent)
      */
-    void addParameter(const juce::String& paramId, const juce::String& displayName, const juce::String& suffix = "",
-                      std::function<juce::String(float normalizedValue, juce::RangedAudioParameter&)> formatter = {});
+    void addParameter(const juce::String& paramId, const juce::String& displayName, bws::ui::kernel::FormatSpec spec,
+                      double displayScale = 1.0);
 
     /**
      * @brief Clear all parameter displays
@@ -158,6 +162,22 @@ public:
     /** Set per-item tooltip text owned by caller/editor. */
     void setItemTooltip(int index, const juce::String& tooltip);
 
+    /** Override the displayed value of a segment with a caller-supplied real
+        (denormalised, pre-displayScale) value; pass std::nullopt to fall back to
+        the live APVTS value. Used when a parameter's effective value differs from
+        its raw value (e.g. an AUTO-driven cutoff). */
+    void setItemDisplayOverride(int index, std::optional<float> realValue);
+
+    /** ForTesting: the formatted text a segment currently renders. */
+    juce::String getItemValueTextForTesting(int index) const;
+
+    /** ForTesting: drive a segment's gesture by index (headless, no MouseEvent).
+        Each returns the resulting normalized parameter value. The characterization
+        golden pins these across the ValueInteraction migration. */
+    float dragSegmentForTesting(int index, int pixelsUp, bws::ui::kernel::ModSet mods);
+    float wheelSegmentForTesting(int index, float deltaY, bws::ui::kernel::ModSet mods);
+    float doubleClickSegmentForTesting(int index);
+
     /** Enable a magnetic snap during drag at a normalised position. */
     void setItemCenterDetent(int index, bool enable, float position = 0.5f, float snapRadius = 0.02f);
 
@@ -203,17 +223,25 @@ private:
     {
         juce::String paramId;
         juce::String displayName;
-        juce::String suffix;
+        bws::ui::kernel::FormatSpec spec;
+        double displayScale = 1.0;
         juce::RangedAudioParameter* param = nullptr;
         float lastValue = 0.0f;        // For change detection
         juce::Rectangle<float> bounds; // Cached hit-test bounds for interaction
         bws::ui::kernel::AvailabilityState availability = bws::ui::kernel::AvailabilityState::Enabled;
         juce::String tooltip;
-        std::function<juce::String(float normalizedValue, juce::RangedAudioParameter&)> formatter;
-        bool centerDetentEnabled = false;
-        float centerDetentPosition = 0.5f;
-        float centerDetentSnapRadius = 0.02f;
+        std::optional<float> displayOverride; // real units; when set, shown instead of the live param value
+
+        // Per-segment action model: JUCE pinned to the adapter; the gesture
+        // orchestration (drag/wheel) is the native, JUCE-free ValueInteraction.
+        // unique_ptr keeps the adapter address stable across vector reallocation,
+        // so the model's IValueParameter& stays valid.
+        std::unique_ptr<bws::ui::adapters::JuceParameterAdapter> adapter;
+        std::unique_ptr<bws::ui::interaction::ValueInteraction> vi;
     };
+
+    // Formatted value text for a segment (honours displayOverride when set).
+    juce::String formatItemValue(const ParameterDisplay& display) const;
 
     //==========================================================================
     // TIMER CALLBACK
@@ -250,14 +278,6 @@ private:
      */
     void setHoveredParameter(int index);
 
-    /**
-     * @brief Apply a delta change to a parameter
-     * @param index Parameter index
-     * @param delta Normalized delta (-1 to +1 range, will be scaled)
-     * @param fineTune True for fine adjustment (shift held)
-     */
-    void adjustParameter(int index, float delta, bool fineTune);
-
     //==========================================================================
     // MEMBER VARIABLES
     //==========================================================================
@@ -287,24 +307,10 @@ private:
     // Interactive state
     bool interactiveEnabled_ = true;
     int hoveredParameterIndex_ = -1;
-    int draggingParameterIndex_ = -1;
-    float dragStartValue_ = 0.0f;
-    int dragStartY_ = 0;
-
-    // unique_ptr indirection: GestureSession is non-movable (scope holds
-    // IParameter* to &this->adapter), so optional<GestureSession> can't be
-    // moved. unique_ptr is movable, enabling the linearize-then-destroy
-    // pattern needed for re-entry safety.
-    std::unique_ptr<bws::ui::adapters::GestureSession> slideGesture_;
-    std::unique_ptr<bws::ui::adapters::GestureSession> wheelGesture_;
-    double lastWheelGestureMs_ = 0.0; // message-thread only
+    int draggingParameterIndex_ = -1; // active drag segment; -1 = none
+    int dragStartY_ = 0;              // pointer anchor; model captures the value anchor
 
     bws::ui::interaction::InteractionPolicy policy_ {};
-
-    // Constants
-    static constexpr int kDragSensitivity = 150;     // Pixels for full range drag
-    static constexpr int kFineDragSensitivity = 600; // Pixels for fine drag (4x slower)
-    static constexpr double kWheelGestureTimeoutMs = 180.0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ReadoutStrip)
 };

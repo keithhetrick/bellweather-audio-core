@@ -59,18 +59,16 @@ inline void recordSkippedNonHeapDelete(void* ptr) noexcept
 }
 
 // Returns true if ptr was returned by malloc/new and is safe to free.
-// Prevents crashes when JUCE's StringHolderUtils::release() reaches
-// operator delete[] with a pointer to constexpr static data (emptyString)
-// due to cross-module isEmptyString() mismatches in the VST3 bundle.
+// Prevents crashes when a foreign owner reaches operator delete[] with a
+// pointer to static storage.
 inline bool isHeapPointer([[maybe_unused]] void* ptr) noexcept
 {
 #if defined(__APPLE__)
     return malloc_size(ptr) > 0;
 #else
     // No portable heap-validity probe exists off Apple, so the guard degrades
-    // to a plain free. The mismatch it protects against is an Apple-only VST3
-    // bundling artifact, so it cannot occur here; the skipped-delete counters
-    // are therefore always zero on non-Apple platforms.
+    // to a plain free. The skipped-delete counters are therefore always zero
+    // on non-Apple platforms.
     return true;
 #endif
 }

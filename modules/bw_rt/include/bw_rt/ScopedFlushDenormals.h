@@ -20,7 +20,7 @@ namespace bws::rt
 {
 
 /// RAII scope guard that flushes denormal floats to zero for the duration
-/// of the scope. Equivalent to juce::ScopedNoDenormals.
+/// of the scope.
 ///
 /// x86/x64: sets FZ (flush-to-zero, bit 15) and DAZ (denormals-are-zero, bit 6)
 ///          in MXCSR via _mm_getcsr / _mm_setcsr.
@@ -33,7 +33,6 @@ namespace bws::rt
 /// Other:   no-op (safe default). Windows ARM64 currently uses this path.
 ///
 /// RT-safe: no allocation, no locks, no unbounded work.
-/// Verified against: JUCE ScopedNoDenormals, iPlug2, nosubnormals-rs.
 struct ScopedFlushDenormals
 {
     ScopedFlushDenormals() noexcept

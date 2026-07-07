@@ -137,7 +137,7 @@ TEST_CASE("IPresetStatePersistence - metadata string_views are valid", "[core][c
 }
 
 // =============================================================================
-// Positive: nullptr path (::getPresetManagerPtr default)
+// Positive: nullptr path (BwsAudioProcessor::getPresetManagerPtr default)
 // =============================================================================
 
 TEST_CASE("IPresetStatePersistence - nullptr is the default contract", "[core][contract][preset]")

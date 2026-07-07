@@ -8,7 +8,7 @@ project(bw_juce_adapters LANGUAGES CXX)
 # and runtime modules stay below this adapter boundary.
 #
 # Contents:
-# juce::Processor base class for all plugins
+#   BwsAudioProcessor - juce::Processor base class for all plugins
 #   ValueTreeRetainer  - juce::ValueTree lifetime retainer
 #   JuceScheduler      - IScheduler port implementation
 #   PlatformAdapter    - system info (OS name, machine ID, SHA256)

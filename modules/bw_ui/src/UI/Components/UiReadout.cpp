@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include "bw_ui/Components/UiReadout.h"
+#include "bw_ui/adapters/JuceTextMeasurer.h"
 #include "bw_ui/generated/BwTokens.h"
 #include "bw_ui/Components/UiReadoutGeometry.h"
 #include "bw_ui/rendering/JuceRenderer.h"
@@ -22,12 +23,7 @@ float resolveCompanionReadoutEmphasis(const UiThemeResolved& theme,
 
 float measureTextWidth(const juce::Font& font, const juce::String& text) noexcept
 {
-    if (text.isEmpty())
-        return 0.0f;
-
-    juce::GlyphArrangement glyphs;
-    glyphs.addLineOfText(font, text, 0.0f, 0.0f);
-    return glyphs.getBoundingBox(0, text.length(), true).getWidth();
+    return adapters::glyphWidth(font, text);
 }
 
 void drawTextRun(juce::Graphics& g, const juce::Font& font, juce::Colour colour, const juce::String& text, float x,
@@ -129,11 +125,28 @@ void UiReadout::setEmphasis(Emphasis newEmphasis)
     repaint();
 }
 
+void UiReadout::setAccentText(bool shouldUseAccent)
+{
+    if (accentText == shouldUseAccent)
+        return;
+
+    accentText = shouldUseAccent;
+    repaint();
+}
+
 void UiReadout::setText(const juce::String& newText)
 {
     text = newText;
     if (!editing)
         editor.setText(newText, juce::dontSendNotification);
+    repaint();
+}
+
+void UiReadout::setWidthReservationText(const juce::String& widest)
+{
+    if (widthReservationText_ == widest)
+        return;
+    widthReservationText_ = widest;
     repaint();
 }
 
@@ -220,8 +233,9 @@ void UiReadout::paint(juce::Graphics& g)
     namespace opr = bws::tokens::shared::opacity::ui_readout;
     auto fill = theme.colors.bg2.withAlpha(opr::FILL_NORMAL);
     auto outline = theme.colors.outline0.withAlpha(bws::tokens::shared::opacity::outline::STANDARD);
-    auto textColour = theme.colors.text0.withAlpha(
-        compact ? juce::jlimit(0.0f, 1.0f, opr::TEXT_COMPACT_BASE * readoutEmphasis) : 1.0f);
+    const auto baseTextRgb = accentText ? theme.weatherColors.accent : theme.colors.text0;
+    auto textColour =
+        baseTextRgb.withAlpha(compact ? juce::jlimit(0.0f, 1.0f, opr::TEXT_COMPACT_BASE * readoutEmphasis) : 1.0f);
     auto underline = theme.colors.outline0.withAlpha(
         compact ? juce::jlimit(0.0f, 1.0f, opr::UNDERLINE_COMPACT_BASE * readoutEmphasis) : 0.0f);
 
@@ -230,7 +244,7 @@ void UiReadout::paint(juce::Graphics& g)
     case Emphasis::Hovered:
         fill = fill.brighter(0.02f).withAlpha(opr::FILL_HOVER);
         outline = theme.colors.accent0.withAlpha(opr::OUTLINE_HOVER);
-        textColour = theme.colors.text0;
+        textColour = accentText ? theme.weatherColors.accent : theme.colors.text0;
         underline = compact ? theme.weatherColors.surfaceHighlight.interpolatedWith(theme.colors.accent0, 0.35f)
                                   .withAlpha(juce::jlimit(0.0f, 1.0f, opr::UNDERLINE_HOVER_COEFF * readoutEmphasis))
                             : underline;
@@ -238,7 +252,7 @@ void UiReadout::paint(juce::Graphics& g)
     case Emphasis::Active:
         fill = theme.colors.bg2.brighter(0.04f).withAlpha(opr::FILL_ACTIVE);
         outline = theme.colors.accent0.withAlpha(opr::OUTLINE_ACTIVE);
-        textColour = theme.colors.text0;
+        textColour = accentText ? theme.weatherColors.accent : theme.colors.text0;
         underline = compact ? theme.weatherColors.surfaceHighlight.interpolatedWith(theme.colors.accent0, 0.22f)
                                   .withAlpha(juce::jlimit(0.0f, 1.0f, opr::UNDERLINE_ACTIVE_COEFF * readoutEmphasis))
                             : underline;
@@ -271,11 +285,24 @@ void UiReadout::paint(juce::Graphics& g)
     font.setHeight(juce::jmin(font.getHeight(), maxFontHeight));
     if (!editing)
     {
+        const int verticalPad = (int)(compact ? geo.compactVerticalPad : geo.standardVerticalPad);
+        const auto textBox = pillBounds.toNearestInt().reduced((int)metrics.paddingX, verticalPad);
+
+        // Reserved width: size the font to the widest value once, so values don't refit.
+        if (widthReservationText_.isNotEmpty())
+        {
+            const float availW = (float)textBox.getWidth();
+            const float reservedW = measureTextWidth(font, widthReservationText_);
+            if (availW > 0.0f && reservedW > availW)
+                font.setHeight(juce::jmax(1.0f, font.getHeight() * (availW / reservedW)));
+        }
+
         g.setColour(textColour);
         g.setFont(font);
-        const int verticalPad = (int)(compact ? geo.compactVerticalPad : geo.standardVerticalPad);
-        g.drawFittedText(text, pillBounds.toNearestInt().reduced((int)metrics.paddingX, verticalPad),
-                         juce::Justification::centred, 1);
+        if (widthReservationText_.isNotEmpty())
+            g.drawText(text, textBox, juce::Justification::centred, false);
+        else
+            g.drawFittedText(text, textBox, juce::Justification::centred, 1);
 
         if (compact)
         {

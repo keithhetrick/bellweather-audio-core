@@ -7,8 +7,8 @@ namespace bws::domain
 {
 
 /**
- * Host transport information. Neutral wrapper over JUCE AudioPlayHead PositionInfo.
- * The JUCE adapter fills this from AudioPlayHead. The engine reads it.
+ * Host transport information in a framework-neutral shape. Adapters fill this
+ * structure from the active host transport source. The engine reads it.
  */
 struct TransportState
 {
