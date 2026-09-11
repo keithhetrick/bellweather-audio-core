@@ -19,7 +19,7 @@
 //   F. Grid quantization: an exact -X dB step reads as a -X LU step within the
 //      cell bound.
 //
-// SPEC CITATIONS: ITU-R BS.1770-5; EBU Tech 3341/3342 v2.0.
+// SPEC CITATIONS: ITU-R BS.1770-5; EBU Tech 3341 v4.0; EBU Tech 3342 v2.0.
 
 #include <bw_dsp_metering/Bs1770Meter.h>
 
@@ -56,6 +56,26 @@ struct PlanarBufferView
 std::vector<float> sineChannel(double sampleRate, double seconds, double lufsTarget, double freqHz = 1000.0)
 {
     const double amp = std::pow(10.0, (lufsTarget + 0.691) / 20.0);
+    const auto n = static_cast<std::size_t>(seconds * sampleRate);
+    std::vector<float> out(n, 0.0f);
+    const double inc = 2.0 * kPi * freqHz / sampleRate;
+    double phase = 0.0;
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        out[i] = static_cast<float>(amp * std::sin(phase));
+        phase += inc;
+        if (phase > 2.0 * kPi)
+            phase -= 2.0 * kPi;
+    }
+    return out;
+}
+
+// One channel of a sine with the specified per-channel digital peak level.
+// EBU Tech 3341 Table 1 defines its synthetic signals in dBFS, not in target
+// LUFS, so conformance fixtures must not reuse the target-relative helper above.
+std::vector<float> sineDbfsChannel(double sampleRate, double seconds, double peakDbfs, double freqHz = 1000.0)
+{
+    const double amp = std::pow(10.0, peakDbfs / 20.0);
     const auto n = static_cast<std::size_t>(seconds * sampleRate);
     std::vector<float> out(n, 0.0f);
     const double inc = 2.0 * kPi * freqHz / sampleRate;
@@ -168,9 +188,90 @@ void measureMaxMS(const std::vector<std::vector<float>>& planar, double sampleRa
     }
 }
 
+// Process one segment through an already-prepared meter and return the maxima
+// observed inside that segment. Keeping the meter alive across calls exercises
+// the successive live-meter sequences in EBU Tech 3341 cases 11 and 14.
+template <typename Meter>
+std::array<double, 2> processSegmentMaxMS(Meter& meter, const std::vector<std::vector<float>>& planar, int blockSize)
+{
+    const int numCh = static_cast<int>(planar.size());
+    std::vector<std::vector<float>> buf(static_cast<std::size_t>(numCh),
+                                        std::vector<float>(static_cast<std::size_t>(blockSize)));
+    std::vector<const float*> ptrs(static_cast<std::size_t>(numCh));
+    PlanarBufferView view;
+    view.numChannels = numCh;
+    view.numSamples = blockSize;
+
+    double maxMomentary = -1000.0;
+    double maxShortTerm = -1000.0;
+    const std::size_t frames = planar[0].size();
+    std::size_t f = 0;
+    while (f + static_cast<std::size_t>(blockSize) <= frames)
+    {
+        for (int c = 0; c < numCh; ++c)
+        {
+            for (int i = 0; i < blockSize; ++i)
+                buf[static_cast<std::size_t>(c)][static_cast<std::size_t>(i)] =
+                    planar[static_cast<std::size_t>(c)][f + static_cast<std::size_t>(i)];
+            ptrs[static_cast<std::size_t>(c)] = buf[static_cast<std::size_t>(c)].data();
+        }
+        view.channelData = ptrs.data();
+        meter.process(view);
+        maxMomentary = std::max(maxMomentary, static_cast<double>(meter.getMomentaryLufs()));
+        maxShortTerm = std::max(maxShortTerm, static_cast<double>(meter.getShortTermLufs()));
+        f += static_cast<std::size_t>(blockSize);
+    }
+    return {maxMomentary, maxShortTerm};
+}
+
+std::vector<float> alternatingTone(double sampleRate, int repetitions, double firstSeconds, double firstDbfs,
+                                   double secondSeconds, double secondDbfs)
+{
+    std::vector<float> out;
+    out.reserve(static_cast<std::size_t>(repetitions * (firstSeconds + secondSeconds) * sampleRate));
+    for (int i = 0; i < repetitions; ++i)
+    {
+        const auto first = sineDbfsChannel(sampleRate, firstSeconds, firstDbfs);
+        const auto second = sineDbfsChannel(sampleRate, secondSeconds, secondDbfs);
+        out.insert(out.end(), first.begin(), first.end());
+        out.insert(out.end(), second.begin(), second.end());
+    }
+    return out;
+}
+
 std::vector<std::vector<float>> stereo(std::vector<float> ch)
 {
     return {ch, ch};
+}
+
+std::vector<float> negate(std::vector<float> x)
+{
+    for (auto& s : x)
+        s = -s;
+    return x;
+}
+
+// Asymmetric waveform: a COSINE 2nd harmonic breaks the odd symmetry. A pure sine
+// (or any sum of sines) is odd, w(-t) = -w(t), so its positive and negative
+// half-cycles carry EQUAL energy - which masks a sign-dependent meter defect
+// (negating merely swaps two equal quantities). The sin+cos mix makes the two
+// half-cycles carry different energy, so this signal genuinely exercises the
+// meter's polarity handling. Carrier below Nyquist so the 2nd harmonic survives.
+std::vector<float> asymmetricChannel(double sampleRate, double seconds, double lufsTarget)
+{
+    const double amp = std::pow(10.0, (lufsTarget + 0.691) / 20.0);
+    const auto n = static_cast<std::size_t>(seconds * sampleRate);
+    std::vector<float> out(n, 0.0f);
+    const double inc = 2.0 * kPi * 1000.0 / sampleRate;
+    double phase = 0.0;
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        out[i] = static_cast<float>(amp * (std::sin(phase) + 0.6 * std::cos(2.0 * phase)));
+        phase += inc;
+        if (phase > 2.0 * kPi)
+            phase -= 2.0 * kPi;
+    }
+    return out;
 }
 
 bool isFinite(double v)
@@ -281,6 +382,26 @@ TEST_CASE("Bs1770Meter integrated relative gating excludes far-below blocks", "[
     REQUIRE_THAT(gated, WithinAbs(loudOnly, 0.1)); // -36 blocks relative-gated out
 }
 
+TEST_CASE("Bs1770Meter integrated keeps all blocks passing both gates (Tech 3341 case 5)",
+          "[bs1770][gating][calibration]")
+{
+    // EBU Tech 3341 - 2023 Table 1 case 5: 20 s @ -26, 20.1 s @ -20, 20 s @ -26.
+    // Every block sits above both gates (-26 is within 10 LU of the gated
+    // mean), so integrated is the pure energy-weighted mean: -23.0, i.e. equal
+    // to a uniform -23 reference tone measured the same way (relative form
+    // cancels the sineChannel K-gain calibration, like the case-3 test above;
+    // the absolute -23.0 is pinned on the synthesized WAV in
+    // fixtures/tech3341/META.json). A meter that wrongly excludes the -26
+    // blocks reads at the -20 reference instead, 3 LU outside the band.
+    const auto reference =
+        measureMeter<bws::audio::Bs1770Meter>(stereo(sineChannel(48000.0, 60.1, -23.0)), 48000.0, 480).integrated;
+    const auto seq = stereo(concatCh(concatCh(sineChannel(48000.0, 20.0, -26.0), sineChannel(48000.0, 20.1, -20.0)),
+                                     sineChannel(48000.0, 20.0, -26.0)));
+    const auto integrated = measureMeter<bws::audio::Bs1770Meter>(seq, 48000.0, 480).integrated;
+    INFO("reference=" << reference << " integrated=" << integrated);
+    REQUIRE_THAT(integrated, WithinAbs(reference, 0.1));
+}
+
 TEST_CASE("Bs1770Meter LRA reflects the block-loudness spread", "[bs1770][lra][calibration]")
 {
     // Two-level program: spread 13 LU (-23 vs -36) and 6 LU (-20 vs -26),
@@ -316,6 +437,49 @@ TEST_CASE("Bs1770Meter LRA is sample-rate invariant", "[bs1770][lra][samplerate]
         DYNAMIC_SECTION("sr=" << sr)
         {
             REQUIRE_THAT(measureMeter<bws::audio::Bs1770Meter>(varied(sr), sr, 480).lra, WithinAbs(ref, 1.0));
+        }
+    }
+}
+
+// ITU-R BS.1771-1 PLG-3: the peak-programme-level meter SHALL read within 0.5 LU
+// under polarity reversal. K-weighting is a linear filter and the gating
+// integrates mean-square energy - both sign-independent - so M/S/I are invariant
+// to machine precision. Asserted at 1e-6 LU, five-plus orders inside the 0.5 LU
+// shall. Expected value: ITU-R BS.1771-1, Annex 1, Table 1, PLG-3 (Required) -
+// "the loudness display reading must not vary by more than 0.5 loudness units
+// when the signal polarity is reversed".
+//
+// The asymmetric case carries the teeth: a symmetric sine has equal positive and
+// negative half-cycle energy, so negating it merely swaps two equal quantities
+// and a sign-dependent meter defect would stay invisible (verified - a 5%
+// negative-sample weighting mutant shifts the sine reading by ~3e-6 LU but the
+// asymmetric reading by ~0.064 LU; recorded in the conformance-lane receipt).
+TEST_CASE("Bs1770Meter M/S/I are invariant under polarity reversal (BS.1771-1 PLG-3)",
+          "[bs1770][polarity][calibration]")
+{
+    struct Programme
+    {
+        const char* name;
+        std::vector<float> ch;
+    };
+    const std::vector<Programme> programmes {
+        {"sine -23", sineChannel(48000.0, 6.0, -23.0)},
+        {"sine -14", sineChannel(48000.0, 6.0, -14.0)},
+        {"asymmetric -20", asymmetricChannel(48000.0, 6.0, -20.0)},
+    };
+    for (const auto& p : programmes)
+    {
+        DYNAMIC_SECTION(p.name)
+        {
+            const auto pos = measureMeter<bws::audio::Bs1770Meter>(stereo(p.ch), 48000.0, 480);
+            const auto neg = measureMeter<bws::audio::Bs1770Meter>(stereo(negate(p.ch)), 48000.0, 480);
+            INFO("I " << pos.integrated << " vs " << neg.integrated << " | M " << pos.momentary << " vs "
+                      << neg.momentary << " | S " << pos.shortTerm << " vs " << neg.shortTerm);
+            REQUIRE_THAT(neg.integrated, WithinAbs(pos.integrated, 1e-6));
+            REQUIRE_THAT(neg.momentary, WithinAbs(pos.momentary, 1e-6));
+            REQUIRE_THAT(neg.shortTerm, WithinAbs(pos.shortTerm, 1e-6));
+            // The spec ceiling itself (documented): comfortably inside 0.5 LU.
+            REQUIRE(std::abs(neg.integrated - pos.integrated) <= 0.5);
         }
     }
 }
@@ -469,49 +633,107 @@ TEST_CASE("Bs1770Meter integrated quantization error stays within the cell bound
     REQUIRE(worstStepError <= 0.1);
 }
 
-// EBU Tech 3341 case 13 (Maximum Momentary): a 400 ms burst in silence must read
-// Max-M = the burst's steady level, regardless of where the burst falls relative
-// to the meter's internal grid. A 100 ms momentary cadence underreads a
-// grid-misaligned 400 ms burst by ~0.6 LU (measured); the 5 ms sub-step cadence
-// captures it within the EBU ±0.1 LU band. Anchored on the steady reference
-// (calibration-independent).
-TEST_CASE("Bs1770Meter Max-Momentary captures a 400 ms burst within 0.1 LU (EBU 3341 case 13)",
-          "[bs1770][momentary][transient][calibration]")
+TEST_CASE("Bs1770Meter Short-term follows the exact alternating mixture (EBU 3341 case 9)",
+          "[bs1770][shortterm][tech3341][calibration]")
 {
     const double sr = 48000.0;
-    const double steadyM =
-        measureMeter<bws::audio::Bs1770Meter>(stereo(sineChannel(sr, 2.0, -23.0)), sr, 480).momentary;
+    const auto valid =
+        measureMeter<bws::audio::Bs1770Meter>(stereo(alternatingTone(sr, 5, 1.34, -20.0, 1.66, -30.0)), sr, 64);
+    const auto altered =
+        measureMeter<bws::audio::Bs1770Meter>(stereo(alternatingTone(sr, 5, 1.34, -20.0, 1.66, -24.0)), sr, 64);
+    INFO("valid S=" << valid.shortTerm << " altered S=" << altered.shortTerm);
+    REQUIRE_THAT(valid.shortTerm, WithinAbs(-23.0, 0.1));
+    REQUIRE(std::abs(altered.shortTerm - (-23.0)) > 0.1);
+}
 
-    // Several burst placements, including offsets that are NOT multiples of the
-    // 5 ms sub-step (e.g. 0.3331 s), to exercise genuine sub-grid misalignment.
-    for (const double leadSilence : {0.3, 0.35, 0.3331, 0.4173})
+TEST_CASE("Bs1770Meter Max-Short-term covers every file-meter placement (EBU 3341 case 10)",
+          "[bs1770][shortterm][transient][tech3341][calibration]")
+{
+    const double sr = 48000.0;
+    for (int i = 0; i < 20; ++i)
     {
-        DYNAMIC_SECTION("lead silence " << leadSilence << " s")
+        DYNAMIC_SECTION("lead silence " << i * 0.15 << " s")
         {
-            const auto sig = stereo(concatCh(concatCh(silenceChannel(sr, leadSilence), sineChannel(sr, 0.4, -23.0)),
+            const auto sig = stereo(concatCh(concatCh(silenceChannel(sr, i * 0.15), sineDbfsChannel(sr, 3.0, -23.0)),
                                              silenceChannel(sr, 1.0)));
             double maxM = 0.0, maxS = 0.0;
             measureMaxMS<bws::audio::Bs1770Meter>(sig, sr, 64, maxM, maxS);
-            INFO("steadyM=" << steadyM << " maxM=" << maxM << " under=" << (steadyM - maxM));
-            REQUIRE_THAT(maxM, WithinAbs(steadyM, 0.1));
+            REQUIRE_THAT(maxS, WithinAbs(-23.0, 0.1));
         }
+    }
+
+    const auto wrongLevel = stereo(concatCh(sineDbfsChannel(sr, 3.0, -24.0), silenceChannel(sr, 1.0)));
+    double maxM = 0.0, maxS = 0.0;
+    measureMaxMS<bws::audio::Bs1770Meter>(wrongLevel, sr, 64, maxM, maxS);
+    REQUIRE(maxS < -23.1);
+}
+
+TEST_CASE("Bs1770Meter live Max-Short-term follows the full level span (EBU 3341 case 11)",
+          "[bs1770][shortterm][transient][tech3341][calibration]")
+{
+    const double sr = 48000.0;
+    bws::audio::Bs1770Meter meter;
+    meter.prepare(sr, 2);
+    for (int i = 0; i < 20; ++i)
+    {
+        const double expected = -38.0 + i;
+        const auto sig = stereo(concatCh(concatCh(silenceChannel(sr, i * 0.15), sineDbfsChannel(sr, 3.0, expected)),
+                                         silenceChannel(sr, 3.0 - i * 0.15)));
+        const auto maxima = processSegmentMaxMS(meter, sig, 64);
+        INFO("case=" << i << " expected S=" << expected << " maxS=" << maxima[1]);
+        REQUIRE_THAT(maxima[1], WithinAbs(expected, 0.1));
     }
 }
 
-// EBU Tech 3341 case 10 (Maximum Short-term): a >=3 s burst must read Max-S = the
-// steady short-term level (the 3 s window is wide enough that sub-step alignment
-// is a non-issue, but this confirms the short-term max-capture path).
-TEST_CASE("Bs1770Meter Max-Short-term captures a 3 s burst within 0.1 LU (EBU 3341 case 10)",
-          "[bs1770][shortterm][transient][calibration]")
+TEST_CASE("Bs1770Meter Momentary follows the exact alternating mixture (EBU 3341 case 12)",
+          "[bs1770][momentary][tech3341][calibration]")
 {
     const double sr = 48000.0;
-    const double steadyS =
-        measureMeter<bws::audio::Bs1770Meter>(stereo(sineChannel(sr, 4.0, -23.0)), sr, 480).shortTerm;
+    const auto valid =
+        measureMeter<bws::audio::Bs1770Meter>(stereo(alternatingTone(sr, 25, 0.18, -20.0, 0.22, -30.0)), sr, 64);
+    const auto altered =
+        measureMeter<bws::audio::Bs1770Meter>(stereo(alternatingTone(sr, 25, 0.18, -20.0, 0.22, -24.0)), sr, 64);
+    INFO("valid M=" << valid.momentary << " altered M=" << altered.momentary);
+    REQUIRE_THAT(valid.momentary, WithinAbs(-23.0, 0.1));
+    REQUIRE(std::abs(altered.momentary - (-23.0)) > 0.1);
+}
 
-    const auto sig =
-        stereo(concatCh(concatCh(silenceChannel(sr, 0.5), sineChannel(sr, 3.05, -23.0)), silenceChannel(sr, 1.0)));
+TEST_CASE("Bs1770Meter Max-Momentary covers every file-meter placement (EBU 3341 case 13)",
+          "[bs1770][momentary][transient][tech3341][calibration]")
+{
+    const double sr = 48000.0;
+
+    for (int i = 0; i < 20; ++i)
+    {
+        DYNAMIC_SECTION("lead silence " << i * 0.02 << " s")
+        {
+            const auto sig = stereo(concatCh(concatCh(silenceChannel(sr, i * 0.02), sineDbfsChannel(sr, 0.4, -23.0)),
+                                             silenceChannel(sr, 1.0)));
+            double maxM = 0.0, maxS = 0.0;
+            measureMaxMS<bws::audio::Bs1770Meter>(sig, sr, 64, maxM, maxS);
+            REQUIRE_THAT(maxM, WithinAbs(-23.0, 0.1));
+        }
+    }
+
+    const auto wrongLevel = stereo(concatCh(sineDbfsChannel(sr, 0.4, -24.0), silenceChannel(sr, 1.0)));
     double maxM = 0.0, maxS = 0.0;
-    measureMaxMS<bws::audio::Bs1770Meter>(sig, sr, 64, maxM, maxS);
-    INFO("steadyS=" << steadyS << " maxS=" << maxS);
-    REQUIRE_THAT(maxS, WithinAbs(steadyS, 0.1));
+    measureMaxMS<bws::audio::Bs1770Meter>(wrongLevel, sr, 64, maxM, maxS);
+    REQUIRE(maxM < -23.1);
+}
+
+TEST_CASE("Bs1770Meter live Max-Momentary follows the full level span (EBU 3341 case 14)",
+          "[bs1770][momentary][transient][tech3341][calibration]")
+{
+    const double sr = 48000.0;
+    bws::audio::Bs1770Meter meter;
+    meter.prepare(sr, 2);
+    for (int i = 0; i < 20; ++i)
+    {
+        const double expected = -38.0 + i;
+        const auto sig = stereo(concatCh(concatCh(silenceChannel(sr, i * 0.02), sineDbfsChannel(sr, 0.4, expected)),
+                                         silenceChannel(sr, 0.4 - i * 0.02)));
+        const auto maxima = processSegmentMaxMS(meter, sig, 64);
+        INFO("case=" << i << " expected M=" << expected << " maxM=" << maxima[0]);
+        REQUIRE_THAT(maxima[0], WithinAbs(expected, 0.1));
+    }
 }

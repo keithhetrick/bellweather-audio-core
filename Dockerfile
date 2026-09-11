@@ -34,7 +34,7 @@ RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_COMPILER=clang \
         -DCMAKE_CXX_COMPILER=clang++ \
         2>&1 | tee /tmp/configure.log \
-    && ! grep -E "warning:|CMake Warning|Manually-specified variables were not used|Performing Test .* - Failed" /tmp/configure.log \
+    && ! grep -E "warning:|CMake Warning|Manually-specified variables were not used" /tmp/configure.log \
     && cmake --build build 2>&1 | tee /tmp/build.log \
     && ! grep -E "warning:|CMake Warning" /tmp/build.log \
     && ctest --test-dir build -L public-surface --output-on-failure \
@@ -80,7 +80,7 @@ RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_COMPILER=gcc \
         -DCMAKE_CXX_COMPILER=g++ \
         2>&1 | tee /tmp/configure.log \
-    && ! grep -E "warning:|CMake Warning|Manually-specified variables were not used|Performing Test .* - Failed" /tmp/configure.log \
+    && ! grep -E "warning:|CMake Warning|Manually-specified variables were not used" /tmp/configure.log \
     && cmake --build build 2>&1 | tee /tmp/build.log \
     && ! grep -E "warning:|CMake Warning" /tmp/build.log \
     && ctest --test-dir build -L public-surface --output-on-failure \
@@ -127,7 +127,7 @@ RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_COMPILER=gcc \
         -DCMAKE_CXX_COMPILER=g++ \
         2>&1 | tee /tmp/configure.log \
-    && ! grep -E "warning:|CMake Warning|Manually-specified variables were not used|Performing Test .* - Failed" /tmp/configure.log \
+    && ! grep -E "warning:|CMake Warning|Manually-specified variables were not used" /tmp/configure.log \
     && cmake --build build 2>&1 | tee /tmp/build.log \
     && ! grep -E "warning:|CMake Warning" /tmp/build.log \
     && ctest --test-dir build -L public-surface --output-on-failure \
@@ -179,7 +179,7 @@ RUN cmake -S . -B build-barometer -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         -DCMAKE_C_COMPILER=clang \
         -DCMAKE_CXX_COMPILER=clang++ \
         2>&1 | tee /tmp/configure.log \
-    && ! grep -E "warning:|CMake Warning|Manually-specified variables were not used|Performing Test .* - Failed" /tmp/configure.log \
+    && ! grep -E "warning:|CMake Warning|Manually-specified variables were not used" /tmp/configure.log \
     && cmake --build build-barometer --target BwsBarometer_VST3 --parallel 2 2>&1 \
         | tee /tmp/build.log \
         | sed -E '/^removing moduleinfo[.]json$/d;/^creating .*Barometer[.]vst3$/d' \

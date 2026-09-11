@@ -5,7 +5,7 @@
 
 /**
  * @file WeatherPresetManager.h
- * @brief FabFilter-quality Preset Management System - Weather Design System
+ * @brief Flagship-quality Preset Management System - Weather Design System
  *
  * Bellweather Studios - Reusable Preset Infrastructure
  *
@@ -381,6 +381,15 @@ public:
     /** Deterministically flush pending dirty tracking work for tests/headless callers. */
     void flushPendingDirtyTrackingForTesting();
 
+    [[nodiscard]] bws::preset::StateApplyStatus getLastStateApplyStatus() const noexcept
+    {
+        return lastStateApplyStatus_;
+    }
+    [[nodiscard]] bws::preset::StateCaptureStatus getLastStateCaptureStatus() const noexcept
+    {
+        return lastStateCaptureStatus_;
+    }
+
     /** Refresh the preset list by rescanning directories. */
     void refreshPresetList();
 
@@ -447,12 +456,28 @@ protected:
      * Helper to apply a ValueTree state to the processor.
      * Override if you need custom state deserialization.
      */
-    virtual void applyProcessorState(const juce::ValueTree& state);
+    virtual bool applyProcessorState(const juce::ValueTree& state,
+                                     bws::preset::ColdStateIntent intent = bws::preset::ColdStateIntent::presetFile,
+                                     const Preset* trustedPreset = nullptr);
 
     /** Resolve bundled factory asset roots for runtime discovery. */
     virtual std::vector<juce::File> getBundledFactoryAssetRoots() const;
     virtual bool readLibraryStateDocument(juce::var& outDocument) const;
     virtual bool writeLibraryStateDocument(const juce::var& document) const;
+
+    /** Product startup policy. Most plugins retain the historical first/startup
+     *  preset load; Pressure opts out so its first observable state is decoder
+     *  defaults while the scanned catalog remains available. */
+    virtual bool shouldLoadStartupPreset() const { return true; }
+
+    /** Most products activate dirty observation at the end of initialize().
+     *  Pressure defers until its composition root has installed every listener. */
+    virtual bool shouldActivateStateBridgeDuringInitialize() const { return true; }
+    [[nodiscard]] bool activatePresetStateBridge();
+
+    /** Decoded preset-state allocation bound. Products with a strict state
+     *  envelope override this; the default preserves legacy fleet behavior. */
+    virtual std::size_t maximumDecodedPresetStateBytes() const { return std::numeric_limits<std::size_t>::max(); }
 
 private:
     enum class LoadReason
@@ -488,6 +513,8 @@ private:
     std::unique_ptr<bws::preset::IPresetRepository> presetRepository_;
     bws::preset::PresetStateSubscription presetStateSubscription_;
     std::vector<bws::preset::ScopedPresetStateSuppression> activeRestoreSuppressions_;
+    bws::preset::StateApplyStatus lastStateApplyStatus_ {bws::preset::StateApplyStatus::rejected};
+    mutable bws::preset::StateCaptureStatus lastStateCaptureStatus_ {bws::preset::StateCaptureStatus::failed};
 
     class ScopedDirtyTrackingSuppression;
     class ScopedCallbackSuppression;
@@ -510,7 +537,7 @@ private:
     bool loadPresetByDirection(bws::preset::PresetNavigationDirection direction);
     bool loadPresetByIndexInternal(int index, LoadReason reason);
     bws::preset::PresetStateBytes capturePresetStateBytes() const;
-    bool decodeBase64State(const juce::String& base64, juce::MemoryOutputStream& stream) const;
+    bool decodeBase64State(const juce::String& base64, juce::MemoryBlock& decoded) const;
     int findUniquePresetIndexByName(const juce::String& name) const;
     int findUniqueUserPresetIndexByName(const juce::String& name) const;
 

@@ -3,7 +3,8 @@
   "meta": {
     "product": "barometer",
     "version": "1.0.0",
-    "platform": "cpp",
+    "targets": ["cpp"],
+    "extends": [],
     "source": "plugins/production/BwsBarometer/Source/ (2 files, 69 hex refs, 28 unique colors)"
   },
   "colors": {
@@ -129,7 +130,8 @@
     "valueLabelHeight": 14,
     "valueToSliderGap": 8,
     "sliderLabelSpace": 14,
-    "lufsReadoutHeight": 58,
+    "routingBandHeight": 32,
+    "lufsReadoutHeight": 72,
     "correlationMeterHeight": 20,
     "controlsRowHeight": 24,
     "minScale": 0.75,

@@ -4,6 +4,7 @@
 // BarometerEditorSetup.cpp - constructor, layout, and theme-snapshot setup for BarometerEditor
 
 #include "BarometerEditor.h"
+#include "BarometerUiTextSpec.h"
 #include "ui/BarometerToyOverlay.h"
 #include <bw_ui/adapters/UiThemeKernelAdapter.h>
 #include <bw_ui/generated/BwTokens.h>
@@ -12,6 +13,7 @@
 #include <bw_ui/preset_system/WeatherSavePresetDialog.h>
 #include <bw_ui/foundation/UiTheme.h>
 #include <array>
+#include <cstdlib>
 #include <vector>
 
 namespace bws::barometer
@@ -38,6 +40,9 @@ BarometerEditor::BarometerEditor(BarometerProcessor& p)
 
 void BarometerEditor::setupControls()
 {
+    tooltipWindow_ = std::make_unique<bws::ui::TooltipHub>(
+        this, getTheme(), [](const juce::String& key) { return bws::barometer::ui_text::tooltipForKey(key); }, 200,
+        [this] { return tooltipsEnabled_; });
 
     // =========================================================================
     // Hero Gain Dial (260px) - UiArcKnob
@@ -418,6 +423,36 @@ void BarometerEditor::setupControls()
         processor_.getApvts(), BarometerProcessor::kWidthParamId, *widthSlider_);
 
     // =========================================================================
+    // Discoverable stereo routing controls (BWS-BAROMETER-ROUTING-1)
+    // =========================================================================
+    soloLeftToggle_ = std::make_unique<bws::ui::UiToggle>(getTheme(), bws::ui::UiToggle::Size::Dense);
+    swapLeftRightToggle_ = std::make_unique<bws::ui::UiToggle>(getTheme(), bws::ui::UiToggle::Size::Dense);
+    soloRightToggle_ = std::make_unique<bws::ui::UiToggle>(getTheme(), bws::ui::UiToggle::Size::Dense);
+    soloLeftToggle_->setLabel("Solo L");
+    swapLeftRightToggle_->setLabel("Swap L/R");
+    soloRightToggle_->setLabel("Solo R");
+    addAndMakeVisible(*soloLeftToggle_);
+    addAndMakeVisible(*swapLeftRightToggle_);
+    addAndMakeVisible(*soloRightToggle_);
+    channelRoutingBinding_ = std::make_unique<ChannelRoutingBinding>(
+        processor_.getApvts(), *soloLeftToggle_, *swapLeftRightToggle_, *soloRightToggle_, tooltipWindow_.get());
+    channelRoutingBinding_->setStereoAvailable(processor_.getTotalNumOutputChannels() >= 2);
+    measurementResetButton_ = std::make_unique<bws::weather::ActionPill>("Reset");
+    measurementResetButton_->setTheme(getTheme());
+    measurementResetButton_->setScaleFactor(getScaleFactor());
+    measurementResetButton_->setTitle("Reset measurement");
+    measurementResetButton_->setDescription(
+        "Clear integrated loudness, retained loudness maxima, true-peak hold, and the visible history trace.");
+    measurementResetButton_->onClick = [this] {
+        processor_.requestMeasurementReset();
+        sparklineHistory_.fill(-100.0f);
+        sparklineWritePos_ = 0;
+        repaint(lufsReadoutBounds_);
+    };
+    addAndMakeVisible(*measurementResetButton_);
+    tooltipWindow_->registerControl(*measurementResetButton_, "measurementReset");
+
+    // =========================================================================
     // Balance/Width Tab Group
     // =========================================================================
     balanceWidthTabs_ = std::make_unique<bws::weather::WeatherTabGroup>();
@@ -479,7 +514,8 @@ void BarometerEditor::setupPreferencesAndOverlay()
     // Preferences & Post-Init
     // =========================================================================
 
-    // Load tooltip preference and create tooltip window if enabled
+    // Load tooltip preference. The hub stays alive; its resolver suppresses
+    // copy while disabled so registered attachment pointers remain valid.
     loadTooltipPreference();
 
     // Create value display popup (hover value display)
@@ -528,6 +564,17 @@ void BarometerEditor::layoutComponents()
         abToggle_->setScaleFactor(getScaleFactor());
         abToggle_->setTheme(getTheme());
     }
+    if (soloLeftToggle_)
+    {
+        soloLeftToggle_->setTheme(getTheme());
+        swapLeftRightToggle_->setTheme(getTheme());
+        soloRightToggle_->setTheme(getTheme());
+        soloLeftToggle_->setScale(getScaleFactor());
+        swapLeftRightToggle_->setScale(getScaleFactor());
+        soloRightToggle_->setScale(getScaleFactor());
+    }
+    if (measurementResetButton_)
+        measurementResetButton_->setScaleFactor(getScaleFactor());
 
     const int width = getWidth();
 
@@ -653,9 +700,28 @@ void BarometerEditor::layoutComponents()
     widthSlider_->setBounds(balanceContainerX, controlsY, scaled(kBalanceSliderWidth), scaled(kBalanceSliderHeight));
 
     // =========================================================================
-    // LUFS Readout Strip: Below slider labels, above correlation meter
+    // Visible stereo routing band: below slider labels.
     // =========================================================================
-    const int lufsReadoutY = controlsY + scaled(kControlsRowHeight) + scaled(kSliderLabelSpace);
+    const int routingY = controlsY + scaled(kControlsRowHeight) + scaled(kSliderLabelSpace);
+    const int routingH = scaled(kRoutingBandHeight);
+    const int routingInset = scaled(24);
+    routingBandBounds_ = {routingInset, routingY, getWidth() - routingInset * 2, routingH};
+    const int routingGap = scaled(8);
+    const int routingControlW = (routingBandBounds_.getWidth() - routingGap * 3) / 4;
+    const int routingControlH = scaled(24);
+    const int routingControlY = routingBandBounds_.getCentreY() - routingControlH / 2;
+    soloLeftToggle_->setBounds(routingBandBounds_.getX(), routingControlY, routingControlW, routingControlH);
+    swapLeftRightToggle_->setBounds(routingBandBounds_.getX() + routingControlW + routingGap, routingControlY,
+                                    routingControlW, routingControlH);
+    soloRightToggle_->setBounds(routingBandBounds_.getX() + (routingControlW + routingGap) * 2, routingControlY,
+                                routingControlW, routingControlH);
+    measurementResetButton_->setBounds(routingBandBounds_.getX() + (routingControlW + routingGap) * 3, routingControlY,
+                                       routingControlW, routingControlH);
+
+    // =========================================================================
+    // LUFS Readout Strip: Below routing, above correlation meter
+    // =========================================================================
+    const int lufsReadoutY = routingY + routingH;
     const int lufsReadoutH = scaled(kLufsReadoutHeight);
     const int lufsReadoutInset = scaled(24); // Horizontal inset from edges
     lufsReadoutBounds_ =

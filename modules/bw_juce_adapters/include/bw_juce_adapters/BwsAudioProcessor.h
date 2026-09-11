@@ -350,7 +350,7 @@ public:
      * CALLED BY: Framework from processBlock() (see above)
      * CALLED ON: AUDIO THREAD (REAL-TIME CRITICAL - NO ALLOCATIONS!)
      *
-     *The base class builds ProcessContext (buffer + transport + params)
+     * The base class builds ProcessContext (buffer + transport + params)
      * and calls this method. The compiler rejects the old (AudioBuffer, MidiBuffer)
      * signature - the seam is enforced by the type system.
      *
@@ -629,10 +629,12 @@ public:
     //==========================================================================
     // PRESET LOAD FLAG (trial mode support)
     //==========================================================================
-    // Set by WeatherPresetManager (via ScopedPresetLoad RAII guard) around
-    // setStateInformation() calls during preset loading.  When true,
-    // the trial mode check in setStateInformation() is skipped so that
-    // factory presets can be browsed in trial mode.
+    // Set via the ScopedPresetLoad RAII guard around in-session
+    // setStateInformation() calls: JucePresetStateBridge scopes it by
+    // ColdStateIntent (every non-hostSession apply), PressurePresetManager
+    // wraps loadPresetByIndex, and CeilingEditor wraps its A/B slot
+    // restores. When true, the trial mode check in setStateInformation()
+    // is skipped so in-session operations work in trial mode.
     //==========================================================================
 
     /** RAII guard: prevents trial mode from blocking preset browsing.

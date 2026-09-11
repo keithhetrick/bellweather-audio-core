@@ -8,7 +8,7 @@
       "id": "BwsBarometer",
       "displayName": "Barometer",
       "slug": "bws-barometer",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "bundleId": "com.bellweatherstudios.barometer",
       "manufacturerCode": "Bwst",
       "pluginCode": "Baro",
@@ -24,7 +24,7 @@
       "needsMidiInput": false,
       "needsMidiOutput": false,
       "isMidiEffect": false,
-      "editorWantsKeyboardFocus": false
+      "editorWantsKeyboardFocus": true
     }
   ]
 }

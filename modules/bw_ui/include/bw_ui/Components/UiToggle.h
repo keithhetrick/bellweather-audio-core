@@ -44,6 +44,7 @@ public:
     bool keyPressed(const juce::KeyPress& key) override;
     void focusGained(FocusChangeType) override;
     void focusLost(FocusChangeType) override;
+    std::unique_ptr<juce::AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     struct PaintSpec

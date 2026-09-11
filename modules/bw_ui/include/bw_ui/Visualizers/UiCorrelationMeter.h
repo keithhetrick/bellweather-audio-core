@@ -8,7 +8,7 @@
  * @brief Pro-level stereo phase correlation meter for audio plugin UIs
  *
  * DESIGN GOALS:
- * - Professional visualization inspired by iZotope Insight, Nugen VisLM, Waves PAZ
+ * - Professional visualization inspired by the flagship loudness/metering suites
  * - Shows stereo phase correlation from -1 (out of phase) to +1 (mono/in phase)
  * - Multiple display modes: Bar, Needle, Histogram
  * - Thread-safe audio→UI communication

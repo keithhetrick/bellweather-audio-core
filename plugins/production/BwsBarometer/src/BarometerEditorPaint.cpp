@@ -50,11 +50,6 @@ void BarometerEditor::paintInputMeter(juce::Graphics& g, juce::Rectangle<int> bo
     const auto kernelTheme = makeEditorKernelTheme(getTheme());
     const float leftPeakDb = processor_.getInputLeftPeakDb();
     const float rightPeakDb = processor_.getInputRightPeakDb();
-    const bool soloLActive =
-        processor_.getApvts().getRawParameterValue(BarometerProcessor::kSoloLParamId)->load() > 0.5f;
-    const bool swapActive =
-        processor_.getApvts().getRawParameterValue(BarometerProcessor::kSwapLRParamId)->load() > 0.5f;
-
     constexpr float minDb = -60.0f;
     constexpr float maxDb = 6.0f;
     constexpr float rangeDb = maxDb - minDb;
@@ -92,10 +87,9 @@ void BarometerEditor::paintInputMeter(juce::Graphics& g, juce::Rectangle<int> bo
         r.fillRoundedRect(e.getX(), e.getY(), e.getWidth(), e.getHeight(), 2.0f);
     }
 
-    if (inputMeterHovered_ || soloLActive || swapActive)
+    if (inputMeterHovered_)
     {
-        r.setColour(bp::withAlpha(tok::accent::BRASS,
-                                  inputMeterHovered_ ? tok::opacity::METER_HOVER : tok::opacity::METER_NORMAL));
+        r.setColour(bp::withAlpha(tok::accent::BRASS, tok::opacity::METER_HOVER));
         auto b = fb(bounds).reduced(0.5f);
         r.drawRoundedRect(b.getX(), b.getY(), b.getWidth(), b.getHeight(), 3.0f, 1.5f);
     }
@@ -137,32 +131,6 @@ void BarometerEditor::paintInputMeter(juce::Graphics& g, juce::Rectangle<int> bo
                static_cast<float>(leftBarBounds.getWidth()), scaledF(8.0f), bws::ui::rendering::Justification::Centre);
     r.drawText("R", static_cast<float>(rightBarBounds.getX()), static_cast<float>(bounds.getBottom() + scaled(1)),
                static_cast<float>(rightBarBounds.getWidth()), scaledF(8.0f), bws::ui::rendering::Justification::Centre);
-
-    // Solo / swap indicator dots
-    const bool soloRActive =
-        processor_.getApvts().getRawParameterValue(BarometerProcessor::kSoloRParamId)->load() > 0.5f;
-    const float dotSize = scaledF(4.0f);
-    const float dotInset = scaledF(2.0f);
-    if (soloLActive && soloLClickedOnInput_)
-    {
-        r.setColour(tok::indicator::SOLO_YELLOW);
-        r.fillEllipse(static_cast<float>(leftBarBounds.getCentreX()) - dotInset,
-                      static_cast<float>(bounds.getY() + scaled(2)), dotSize, dotSize);
-    }
-    if (soloRActive && soloRClickedOnInput_)
-    {
-        r.setColour(tok::indicator::SOLO_YELLOW);
-        r.fillEllipse(static_cast<float>(rightBarBounds.getCentreX()) - dotInset,
-                      static_cast<float>(bounds.getY() + scaled(2)), dotSize, dotSize);
-    }
-    if (swapActive)
-    {
-        const bool anySoloOnInput = (soloLActive && soloLClickedOnInput_) || (soloRActive && soloRClickedOnInput_);
-        const float dotY = anySoloOnInput ? static_cast<float>(bounds.getY() + scaled(8))
-                                          : static_cast<float>(bounds.getY() + scaled(2));
-        r.setColour(tok::accent::BRASS);
-        r.fillEllipse(static_cast<float>(bounds.getRight() - scaled(6)), dotY, dotSize, dotSize);
-    }
 
     // dB scale ticks on the left side
     g.setFont(bws::ui::adapters::makeFont(kernelTheme, bws::ui::kernel::TextRole::Annotation, getScaleFactor()));
@@ -292,13 +260,13 @@ void BarometerEditor::paintOutputMeter(juce::Graphics& g, juce::Rectangle<int> b
         processor_.getApvts().getRawParameterValue(BarometerProcessor::kSoloLParamId)->load() > 0.5f;
     const float dotSize = scaledF(4.0f);
     const float dotInset = scaledF(2.0f);
-    if (soloLActive && !soloLClickedOnInput_)
+    if (soloLActive)
     {
         r.setColour(tok::indicator::SOLO_YELLOW);
         r.fillEllipse(static_cast<float>(leftBarBounds.getCentreX()) - dotInset,
                       static_cast<float>(bounds.getY() + scaled(2)), dotSize, dotSize);
     }
-    if (soloRActive && !soloRClickedOnInput_)
+    if (soloRActive)
     {
         r.setColour(tok::indicator::SOLO_YELLOW);
         r.fillEllipse(static_cast<float>(rightBarBounds.getCentreX()) - dotInset,
@@ -306,7 +274,7 @@ void BarometerEditor::paintOutputMeter(juce::Graphics& g, juce::Rectangle<int> b
     }
     if (swapActive)
     {
-        const bool anySoloOnOutput = (soloLActive && !soloLClickedOnInput_) || (soloRActive && !soloRClickedOnInput_);
+        const bool anySoloOnOutput = soloLActive || soloRActive;
         const float dotY = anySoloOnOutput ? static_cast<float>(bounds.getY() + scaled(8))
                                            : static_cast<float>(bounds.getY() + scaled(2));
         r.setColour(tok::accent::BRASS);
@@ -344,8 +312,9 @@ void BarometerEditor::paintLufsReadout(juce::Graphics& g, juce::Rectangle<int> b
     const auto kernelTheme = makeEditorKernelTheme(getTheme());
     // Two-tier layout: Hero row (I + TP) on top, secondary row (M, S, LRA) below
 
-    const float momentary = processor_.getMomentaryLufs();
-    const float shortTerm = processor_.getShortTermLufs();
+    const auto live = processor_.getLiveLoudnessSnapshot();
+    const float momentary = live.momentaryLufs;
+    const float shortTerm = live.shortTermLufs;
     const float integrated = processor_.getIntegratedLufs();
     const float truePeak = processor_.getHeldTruePeakDb();
     const float lra = processor_.getLoudnessRange();
@@ -571,9 +540,20 @@ void BarometerEditor::paintLufsReadout(juce::Graphics& g, juce::Rectangle<int> b
     r.drawText(lraStr.toRawUTF8(), static_cast<float>(heroStartX + (secColW * 2)), static_cast<float>(secY),
                static_cast<float>(secColW), static_cast<float>(secH), bws::ui::rendering::Justification::Centre);
 
+    // Retained observations use only complete standards-defined windows.
+    const int maxY = secY + secH + scaled(2);
+    const auto maxMomentary = live.momentaryMaximumValid ? formatLufs(live.momentaryMaximumLufs) : juce::String("---");
+    const auto maxShortTerm = live.shortTermMaximumValid ? formatLufs(live.shortTermMaximumLufs) : juce::String("---");
+    const auto maxMStr = "Max M: " + maxMomentary;
+    const auto maxSStr = "Max S: " + maxShortTerm;
+    r.drawText(maxMStr.toRawUTF8(), static_cast<float>(heroStartX), static_cast<float>(maxY),
+               static_cast<float>(totalHeroW / 2), static_cast<float>(secH), bws::ui::rendering::Justification::Centre);
+    r.drawText(maxSStr.toRawUTF8(), static_cast<float>(heroStartX + totalHeroW / 2), static_cast<float>(maxY),
+               static_cast<float>(totalHeroW / 2), static_cast<float>(secH), bws::ui::rendering::Justification::Centre);
+
     // Sparkline - visual trend below numeric readouts
     const auto boundsF = bounds.toFloat();
-    const float sparklineTop = static_cast<float>(secY + secH) + scaledF(2.0F);
+    const float sparklineTop = static_cast<float>(maxY + secH) + scaledF(2.0F);
     const float sparklineH = scaledF(16.0F);
     const float sparklineLabelW = scaledF(10.0F);
 

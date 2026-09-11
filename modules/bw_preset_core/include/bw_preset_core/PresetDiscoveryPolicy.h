@@ -24,6 +24,9 @@ struct PresetDiscoveryCandidate
     if (!key.empty())
         return key;
 
+    if (!metadata.identity.isValid())
+        return {};
+
     return metadata.identity.legacyKey();
 }
 

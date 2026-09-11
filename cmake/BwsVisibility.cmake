@@ -12,8 +12,8 @@ function(bws_apply_hidden_visibility target)
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
         target_compile_options(${target} PRIVATE
-            -fvisibility=hidden
-            -fvisibility-inlines-hidden
+            $<$<COMPILE_LANGUAGE:C,CXX,OBJC,OBJCXX>:-fvisibility=hidden>
+            $<$<COMPILE_LANGUAGE:CXX,OBJCXX>:-fvisibility-inlines-hidden>
         )
     endif()
 endfunction()

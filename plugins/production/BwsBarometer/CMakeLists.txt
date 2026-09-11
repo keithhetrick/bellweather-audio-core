@@ -17,6 +17,10 @@ target_sources(BwsBarometer PRIVATE
     src/BarometerEditorInteraction.cpp
     src/BarometerEditorSetup.cpp
     src/BarometerEditor.h
+    src/ChannelRoutingBinding.cpp
+    src/ChannelRoutingBinding.h
+    src/ChannelRoutingInteraction.h
+    src/BarometerUiTextSpec.h
     src/BarometerWeatherPresetManager.cpp
     src/BarometerWeatherPresetManager.h
     # Signal Lock demo interface

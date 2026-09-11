@@ -79,8 +79,12 @@ bool BarometerProcessor::hasOptionalHooks() const noexcept
 void BarometerProcessor::startLoudnessAnalyticsWorker()
 {
     stopLoudnessAnalyticsWorker();
-    loudnessAnalyticsWorker_ = std::jthread([this](std::stop_token stopToken) {
-        while (!stopToken.stop_requested())
+    if (deterministicAnalyticsForTesting_)
+        return;
+
+    stopLoudnessAnalyticsWorker_.store(false, std::memory_order_release);
+    loudnessAnalyticsWorker_ = std::thread([this] {
+        while (!stopLoudnessAnalyticsWorker_.load(std::memory_order_acquire))
         {
             lufsMeter_.serviceAnalytics();
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -90,11 +94,27 @@ void BarometerProcessor::startLoudnessAnalyticsWorker()
     });
 }
 
+bool BarometerProcessor::serviceDeterministicAnalyticsForTesting() noexcept
+{
+    if (!deterministicAnalyticsForTesting_ || loudnessAnalyticsWorker_.joinable())
+        return false;
+
+    const bool serviced = lufsMeter_.serviceAnalytics();
+    if (serviced)
+        ++deterministicAnalyticsServiceCount_;
+    return serviced;
+}
+
+std::size_t BarometerProcessor::pendingAnalyticsRecordsForTesting() const noexcept
+{
+    return lufsMeter_.getPendingAnalyticsRecords();
+}
+
 void BarometerProcessor::stopLoudnessAnalyticsWorker() noexcept
 {
     if (loudnessAnalyticsWorker_.joinable())
     {
-        loudnessAnalyticsWorker_.request_stop();
+        stopLoudnessAnalyticsWorker_.store(true, std::memory_order_release);
         loudnessAnalyticsWorker_.join();
     }
 }
@@ -222,6 +242,11 @@ bws::domain::ParamSnapshot BarometerProcessor::buildParamSnapshot() const noexce
 void BarometerProcessor::prepareToPlayImpl(double sampleRate, int samplesPerBlock)
 {
     stopLoudnessAnalyticsWorker();
+    if (deterministicAnalyticsForTesting_)
+    {
+        ++deterministicAnalyticsEpoch_;
+        deterministicAnalyticsServiceCount_ = 0;
+    }
     paramPtrs_.bind(apvts_); // cache param pointers once
 
     juce::dsp::ProcessSpec spec;
@@ -444,6 +469,11 @@ void BarometerProcessor::processBlockImpl(const bws::domain::ProcessContext& ctx
         const float corr = (denom > 1e-10) ? static_cast<float>(corrLR / denom) : 1.0f;
         stereoCorrelation_.store(juce::jlimit(-1.0f, 1.0f, corr), std::memory_order_relaxed);
     }
+
+    // The message thread only requests measurement reset. The producer owns
+    // the non-atomic true-peak hold countdown and therefore consumes it here.
+    if (measurementResetPending_.exchange(false, std::memory_order_acq_rel))
+        truePeakMeter_.resetHeldPeaks();
 
     // LUFS and True Peak metering (post all processing, measures final output)
     lufsMeter_.process(buffer);

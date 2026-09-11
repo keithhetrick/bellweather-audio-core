@@ -217,7 +217,7 @@ void MouseWheelToggle::mouseWheelMove(const juce::MouseEvent&, const juce::Mouse
 }
 
 // =============================================================================
-// HeroBrassToggle Implementation - FabFilter-quality circular brass button
+// HeroBrassToggle Implementation - flagship-quality circular brass button
 // =============================================================================
 
 HeroBrassToggle::HeroBrassToggle(const juce::String& text)

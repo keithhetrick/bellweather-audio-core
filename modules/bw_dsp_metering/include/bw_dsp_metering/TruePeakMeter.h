@@ -84,7 +84,7 @@ namespace audio
  * - Called from: the plugin's processBlock (end of chain)
  * - UI access via: the processor's getTruePeakDb() / getTruePeakHeldDb()
  */
-template <int OversampleFactor_ = 4>
+template <int OversampleFactor = 4>
 class TruePeakMeterImpl
 {
 public:
@@ -96,13 +96,13 @@ public:
     // available for premium-tier ISP detection where the higher polyphase
     // resolution closes the residual gap to the +3.0103 dB analytic asymptote
     // on signals (e.g. fs/4 maximally-displaced-phase sine).
-    static_assert(OversampleFactor_ == 4 || OversampleFactor_ == 8 || OversampleFactor_ == 16,
+    static_assert(OversampleFactor == 4 || OversampleFactor == 8 || OversampleFactor == 16,
                   "TruePeakMeterImpl supports oversample factors 4, 8, or 16");
 
     // Maximum supported channels (stereo)
     static constexpr int kMaxChannels = 2;
 
-    static constexpr int kOversampleFactor = OversampleFactor_;
+    static constexpr int kOversampleFactor = OversampleFactor;
 
     // Filter design. At 4× the lowpass kernel is 49 taps; at 8× and 16×
     // the kernel scales as

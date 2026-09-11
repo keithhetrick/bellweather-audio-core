@@ -146,6 +146,7 @@ TEST_CASE("LockFreeRingBuffer readChannel out of bounds", "[ring_buffer]")
     }
 }
 
+// NOLINTNEXTLINE(bugprone-throwing-static-initialization): Catch2 registers TEST_CASEs via static objects.
 TEST_CASE("LockFreeRingBuffer wraps at non-power-of-two capacity without data loss", "[ring_buffer]")
 {
     LockFreeRingBuffer buf;

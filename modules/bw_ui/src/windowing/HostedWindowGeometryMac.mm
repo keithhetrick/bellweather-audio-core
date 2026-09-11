@@ -23,6 +23,7 @@ struct HostedWindowGeometry
     juce::Rectangle<int> nativeWindowFrame;
     juce::Rectangle<int> contentLayoutFrame;
     juce::Rectangle<int> visibleFrame;
+    std::uint64_t nativeWindowStyleMask {};
     int superviewDepth { 0 };
     bool borderless { false };
 };
@@ -69,6 +70,7 @@ std::optional<HostedWindowGeometry> measureHostedWindowGeometry(const juce::Comp
     geometry.nativeViewInWindow = toJuceRect([view convertRect:[view bounds] toView:nil]);
     geometry.nativeWindowFrame = toJuceRect([window frame]);
     geometry.contentLayoutFrame = toJuceRect([window contentLayoutRect]);
+    geometry.nativeWindowStyleMask = static_cast<std::uint64_t>([window styleMask]);
 
     NSScreen* screen = [window screen];
     if (screen == nil)
@@ -96,6 +98,7 @@ std::optional<HostedWindowSessionState> captureHostedWindowSessionState(const ju
     HostedWindowSessionState state;
     state.nativeWindowFrame = geometry->nativeWindowFrame;
     state.nativeViewInWindow = geometry->nativeViewInWindow;
+    state.nativeWindowStyleMask = geometry->nativeWindowStyleMask;
     state.borderless = geometry->borderless;
 
     return state;
@@ -127,19 +130,31 @@ bool applyHostedFullscreenExitRestore(const juce::Component& component,
     // afterward. Preserving the current post-fullscreen frame size lets clamp
     // "win" and produces the bottom-locked restore bug we observed in-host.
     const juce::Rectangle<int> targetFrame = state.nativeWindowFrame;
+    const auto targetStyleMask = static_cast<NSWindowStyleMask>(state.nativeWindowStyleMask);
+
+    bool changed = false;
+    if ([window styleMask] != targetStyleMask)
+    {
+        [window setStyleMask:targetStyleMask];
+        changed = true;
+    }
 
     const auto currentFrame = toJuceRect([window frame]);
-    if (targetFrame == currentFrame)
-        return false;
+    if (targetFrame != currentFrame)
+    {
+        [window setFrame:NSMakeRect(targetFrame.getX(),
+                                    targetFrame.getY(),
+                                    targetFrame.getWidth(),
+                                    targetFrame.getHeight())
+                 display:YES];
+        changed = true;
+    }
 
-    [window setFrame:NSMakeRect(targetFrame.getX(),
-                                targetFrame.getY(),
-                                targetFrame.getWidth(),
-                                targetFrame.getHeight())
-             display:YES];
-
-    clampHostedWindowToVisibleFrame(component);
-    return true;
+    if (changed)
+    {
+        clampHostedWindowToVisibleFrame(component);
+    }
+    return changed;
 }
 
 bool fitHostedWindowToVisibleFrame(const juce::Component& component)

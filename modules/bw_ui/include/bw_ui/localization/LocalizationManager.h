@@ -29,6 +29,9 @@ public:
 
     bool addCatalogFromJson(const char* data, size_t dataSize);
     bool addCatalogFromJson(const juce::String& jsonText);
+    // Deleted: implicit String(const char*) decodes extended bytes as Latin-1 and
+    // corrupts UTF-8 catalogs. Use the (data, size) overload or String::fromUTF8.
+    bool addCatalogFromJson(const char* jsonText) = delete;
 
     void setLanguage(juce::String languageCode);
     const juce::String& currentLanguage() const noexcept { return currentLanguage_; }

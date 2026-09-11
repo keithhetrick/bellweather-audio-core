@@ -3,7 +3,8 @@
   "meta": {
     "product": "shared",
     "version": "1.0.0",
-    "platform": "cpp",
+    "targets": ["cpp"],
+    "extends": [],
     "source": "WeatherConstants.h (Brass namespace) + BellweatherColors.h \u2014 cross-product shared tokens"
   },
   "colors": {
@@ -274,7 +275,7 @@
       "cornerRadius": 7.0,
       "outlineThickness": 1.1,
       "popupFontScale": 0.94,
-      "minPopupWidth": 128.0,
+      "minPopupWidth": 120.0,
       "rowHeightFactor": 1.8,
       "tickGlyphFactor": 0.22,
       "minTickGlyphRadius": 1.5,
@@ -290,8 +291,8 @@
       "cornerRadius": 4.0,
       "outlineThickness": 0.6,
       "popupFontScale": 1.0,
-      "minPopupWidth": 128.0,
-      "rowHeightFactor": 1.8,
+      "minPopupWidth": 96.0,
+      "rowHeightFactor": 1.5,
       "tickGlyphFactor": 0.22,
       "minTickGlyphRadius": 1.5,
       "separatorInsetX": 8.0,

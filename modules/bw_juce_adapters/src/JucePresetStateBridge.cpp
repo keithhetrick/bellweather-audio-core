@@ -3,14 +3,21 @@
 
 #include "bw_juce_adapters/JucePresetStateBridge.h"
 
+#include "bw_juce_adapters/BwsAudioProcessor.h"
+
+#include <bw_rt/AudioThreadScope.h>
+
 #include <unordered_set>
+#include <optional>
 
 namespace bws::adapters
 {
 
-JucePresetStateBridge::JucePresetStateBridge(juce::AudioProcessor& processor, juce::AudioProcessorValueTreeState& apvts)
+JucePresetStateBridge::JucePresetStateBridge(juce::AudioProcessor& processor, juce::AudioProcessorValueTreeState& apvts,
+                                             bws::preset::IColdStateTransaction* transaction)
     : processor_(processor)
     , apvts_(apvts)
+    , transaction_(transaction)
     , callbackState_(std::make_shared<CallbackState>())
     , dirtyTracker_(std::make_shared<bws::preset::AtomicPresetDirtyTracker>())
 {
@@ -19,38 +26,40 @@ JucePresetStateBridge::JucePresetStateBridge(juce::AudioProcessor& processor, ju
     {
         auto* hosted = dynamic_cast<juce::HostedAudioProcessorParameter*>(parameter);
         if (hosted == nullptr)
+        {
+            mappingValid_ = false;
             continue;
+        }
 
         const auto parameterId = hosted->getParameterID();
         if (parameterId.isEmpty())
         {
             jassertfalse;
+            mappingValid_ = false;
             continue;
         }
 
         if (!registeredIds.insert(parameterId.toStdString()).second)
         {
             jassertfalse;
+            mappingValid_ = false;
             continue;
         }
 
         if (apvts_.getParameter(parameterId) == nullptr)
         {
             jassertfalse;
+            mappingValid_ = false;
             continue;
         }
 
-        apvts_.addParameterListener(parameterId, this);
         parameterIds_.add(parameterId);
     }
-
-    startTimerHz(30);
 }
 
 JucePresetStateBridge::~JucePresetStateBridge()
 {
-    stopTimer();
-    detachParameterListeners();
+    deactivate();
     if (callbackState_ != nullptr)
     {
         const std::scoped_lock lock(callbackState_->mutex);
@@ -58,18 +67,101 @@ JucePresetStateBridge::~JucePresetStateBridge()
     }
 }
 
+bool JucePresetStateBridge::activate()
+{
+    if (active_.load(std::memory_order_acquire))
+        return true;
+    if (!mappingValid_ || parameterIds_.isEmpty())
+        return false;
+
+    dirtyTracker_->reset(false);
+    for (const auto& parameterId : parameterIds_)
+        apvts_.addParameterListener(parameterId, this);
+    active_.store(true, std::memory_order_release);
+    startTimerHz(30);
+    return true;
+}
+
+void JucePresetStateBridge::deactivate() noexcept
+{
+    if (!active_.exchange(false, std::memory_order_acq_rel))
+        return;
+    stopTimer();
+    detachParameterListeners();
+    dirtyTracker_->reset(false);
+}
+
 bws::preset::PresetStateBytes JucePresetStateBridge::captureState() const
 {
+    auto result = captureStateResult();
+    return result.verified() || result.status == bws::preset::StateCaptureStatus::capturedUnverified
+               ? std::move(result.bytes)
+               : bws::preset::PresetStateBytes {};
+}
+
+bws::preset::StateCaptureResult JucePresetStateBridge::captureStateResult() const
+{
+    if (bws::rt::AudioThreadScope::isAudioThread())
+        return {bws::preset::StateCaptureStatus::wrongThread, {}};
+    if (transaction_ != nullptr)
+        return transaction_->captureColdState();
     juce::MemoryBlock stateData;
     processor_.getStateInformation(stateData);
-    return bws::preset::PresetStateBytes(stateData.getData(), stateData.getSize());
+    if (stateData.isEmpty())
+        return {bws::preset::StateCaptureStatus::failed, {}};
+    return {bws::preset::StateCaptureStatus::capturedUnverified,
+            bws::preset::PresetStateBytes(stateData.getData(), stateData.getSize())};
+}
+
+bws::preset::StateCaptureResult JucePresetStateBridge::embedPresetMetadataResult(
+    bws::domain::BwStateBlob state, bws::preset::PresetMetadataContext metadata) const
+{
+    if (bws::rt::AudioThreadScope::isAudioThread())
+        return {bws::preset::StateCaptureStatus::wrongThread, {}};
+    if (transaction_ == nullptr)
+        return {bws::preset::StateCaptureStatus::unsupported, {}};
+    return transaction_->captureColdStateWithPresetMetadata(state, metadata);
 }
 
 bool JucePresetStateBridge::applyState(bws::domain::BwStateBlob state)
 {
+    if (bws::rt::AudioThreadScope::isAudioThread())
+        return false;
+    return applyStateWithIntent(state, bws::preset::ColdStateIntent::presetFile);
+}
+
+bool JucePresetStateBridge::applyStateWithIntent(bws::domain::BwStateBlob state, bws::preset::ColdStateIntent intent)
+{
+    if (bws::rt::AudioThreadScope::isAudioThread())
+        return false;
+    return applyStateWithContext(state, intent, {});
+}
+
+bool JucePresetStateBridge::applyStateWithContext(bws::domain::BwStateBlob state, bws::preset::ColdStateIntent intent,
+                                                  bws::preset::ColdStateIdentityContext context)
+{
+    const auto result = applyStateResultWithContext(state, intent, context);
+    return result.verifiedCommit() || result.status == bws::preset::StateApplyStatus::appliedUnverified;
+}
+
+bws::preset::StateApplyResult JucePresetStateBridge::applyStateResultWithContext(
+    bws::domain::BwStateBlob state, bws::preset::ColdStateIntent intent, bws::preset::ColdStateIdentityContext context)
+{
+    if (bws::rt::AudioThreadScope::isAudioThread())
+        return {bws::preset::StateApplyStatus::wrongThread};
     auto suppression = suppressDirtyNotifications();
+    if (transaction_ != nullptr)
+        return transaction_->applyColdStateWithContext(state, intent, context);
+    // In-session intents (preset load/preview) are exempt from the base class's
+    // trial-mode restore reset; only hostSession restores carry that policy.
+    std::optional<bws::BwsAudioProcessor::ScopedPresetLoad> presetLoadGuard;
+    if (intent != bws::preset::ColdStateIntent::hostSession)
+    {
+        if (auto* bwsProcessor = dynamic_cast<bws::BwsAudioProcessor*>(&processor_))
+            presetLoadGuard.emplace(*bwsProcessor);
+    }
     processor_.setStateInformation(state.data.data(), static_cast<int>(state.data.size()));
-    return true;
+    return {bws::preset::StateApplyStatus::appliedUnverified};
 }
 
 bws::preset::PresetStateSubscription JucePresetStateBridge::subscribeToDirtyChanges(std::function<void()> callback)
@@ -122,21 +214,26 @@ void JucePresetStateBridge::detachParameterListeners()
 {
     for (const auto& parameterId : parameterIds_)
         apvts_.removeParameterListener(parameterId, this);
-    parameterIds_.clear();
 }
 
 void JucePresetStateBridge::parameterChanged(const juce::String&, float)
 {
+    if (!active_.load(std::memory_order_acquire))
+        return;
     dirtyTracker_->markDirtyFromRealtime();
 }
 
 void JucePresetStateBridge::timerCallback()
 {
+    if (!active_.load(std::memory_order_acquire))
+        return;
     flushPendingDirtyChange();
 }
 
 void JucePresetStateBridge::flushPendingDirtyChange()
 {
+    if (!active_.load(std::memory_order_acquire))
+        return;
     if (!dirtyTracker_->consumePendingDirtyChange())
         return;
 

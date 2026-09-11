@@ -6,6 +6,35 @@
 
 namespace bws::ui
 {
+namespace
+{
+class UiToggleAccessibilityHandler final : public juce::AccessibilityHandler
+{
+public:
+    explicit UiToggleAccessibilityHandler(UiToggle& toggleIn)
+        : juce::AccessibilityHandler(toggleIn, juce::AccessibilityRole::toggleButton, makeActions(toggleIn))
+        , toggle(toggleIn)
+    {}
+
+    juce::AccessibleState getCurrentState() const override
+    {
+        auto current = juce::AccessibilityHandler::getCurrentState().withCheckable();
+        return toggle.getValue() ? current.withChecked() : current;
+    }
+
+private:
+    static juce::AccessibilityActions makeActions(UiToggle& toggle)
+    {
+        return juce::AccessibilityActions()
+            .addAction(juce::AccessibilityActionType::press,
+                       [&toggle] { toggle.keyPressed(juce::KeyPress(juce::KeyPress::returnKey)); })
+            .addAction(juce::AccessibilityActionType::toggle,
+                       [&toggle] { toggle.keyPressed(juce::KeyPress(juce::KeyPress::returnKey)); });
+    }
+
+    UiToggle& toggle;
+};
+} // namespace
 
 UiToggle::UiToggle(const UiThemeResolved& themeIn, Size sizeIn)
     : theme(themeIn)
@@ -295,6 +324,11 @@ void UiToggle::commitToggleChange(bool newValue, bool fromUserInteraction)
 
     if (fromUserInteraction && onChange)
         onChange(value);
+}
+
+std::unique_ptr<juce::AccessibilityHandler> UiToggle::createAccessibilityHandler()
+{
+    return std::make_unique<UiToggleAccessibilityHandler>(*this);
 }
 
 } // namespace bws::ui

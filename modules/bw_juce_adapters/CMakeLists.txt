@@ -83,6 +83,25 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 # --- /Linux deps ---
 
+# JUCE-tied bpts capture infrastructure. Header-only INTERFACE consumed by
+# test builds AND by bw_bpts (the Observatory release-gate app captures GUI
+# snapshots at runtime), so it is defined unconditionally; plugins unaffected.
+add_library(bw_juce_adapters_bpts INTERFACE)
+    add_library(bws::bw_juce_adapters_bpts ALIAS bw_juce_adapters_bpts)
+
+    target_include_directories(bw_juce_adapters_bpts
+        INTERFACE
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bpts_include>
+    )
+
+    target_link_libraries(bw_juce_adapters_bpts
+        INTERFACE
+            bws::bw_juce_adapters
+            bws::bw_bpts_core
+            juce::juce_gui_basics
+            juce::juce_graphics
+            juce::juce_cryptography
+    )
 
 target_compile_features(bw_juce_adapters PUBLIC cxx_std_20)
 

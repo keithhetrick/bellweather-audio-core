@@ -10,7 +10,7 @@
  *
  * Bellweather Studios - Weather Instrument Design System
  *
- * Provides FabFilter-style direct manipulation for graph/curve displays:
+ * Provides flagship-style direct manipulation for graph/curve displays:
  *   - Click to create elements
  *   - Drag to adjust elements
  *   - Multi-select (Ctrl/Cmd+Click)
@@ -56,7 +56,7 @@ namespace weather
  * @brief Base class for interactive Weather displays.
  *
  * Provides common interaction patterns for graph and curve displays
- * with FabFilter-quality UX while maintaining the Weather aesthetic.
+ * with flagship-quality UX while maintaining the Weather aesthetic.
  */
 class InteractiveDisplay : public juce::Component
 {

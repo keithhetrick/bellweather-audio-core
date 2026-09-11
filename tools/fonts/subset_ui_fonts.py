@@ -32,26 +32,28 @@
 # "juce_add_binary_data(bw_ui_FontAssets ...)" block.
 
 import argparse
+import importlib.util
 import sys
 from pathlib import Path
 
-
-UNICODE_RANGES = ",".join([
-    "U+0020-007E",  # Basic Latin (ASCII printable)
-    "U+00A0-00FF",  # Latin-1 Supplement
-    "U+0100-017F",  # Latin Extended-A
-    "U+0180-024F",  # Latin Extended-B
-    "U+1E00-1EFF",  # Latin Extended Additional (qps-ploc pseudo-loc uses these)
-    "U+2000-206F",  # General Punctuation (em-dash, curly quotes, etc.)
-    "U+2070-209F",  # Superscripts and Subscripts
-    "U+20A0-20CF",  # Currency Symbols
-    "U+2100-214F",  # Letterlike Symbols (™, ℗, ℅, dB-adjacent)
-    "U+2150-218F",  # Number Forms
-    "U+2200-22FF",  # Mathematical Operators (±, ×, ÷, ≤, ≥, ≠, ∞)
-    "U+25A0-25FF",  # Geometric Shapes (▶, ●, ◀)
-    "U+2600-26FF",  # Miscellaneous Symbols (☀, ☁, ♭, ♯, ⚠)
-    "U+2700-27BF",  # Dingbats (✓, ✗, ✶)
-])
+UNICODE_RANGES = ",".join(
+    [
+        "U+0020-007E",  # Basic Latin (ASCII printable)
+        "U+00A0-00FF",  # Latin-1 Supplement
+        "U+0100-017F",  # Latin Extended-A
+        "U+0180-024F",  # Latin Extended-B
+        "U+1E00-1EFF",  # Latin Extended Additional (qps-ploc pseudo-loc uses these)
+        "U+2000-206F",  # General Punctuation (em-dash, curly quotes, etc.)
+        "U+2070-209F",  # Superscripts and Subscripts
+        "U+20A0-20CF",  # Currency Symbols
+        "U+2100-214F",  # Letterlike Symbols (™, ℗, ℅, dB-adjacent)
+        "U+2150-218F",  # Number Forms
+        "U+2200-22FF",  # Mathematical Operators (±, x, ÷, ≤, ≥, ≠, ∞)
+        "U+25A0-25FF",  # Geometric Shapes (▶, ●, ◀)
+        "U+2600-26FF",  # Miscellaneous Symbols (☀, ☁, ♭, ♯, ⚠)
+        "U+2700-27BF",  # Dingbats (✓, ✗, ✶)
+    ]
+)
 
 KEPT_LAYOUT_FEATURES = ["kern", "ccmp", "locl", "mark", "mkmk", "tnum", "calt"]
 
@@ -63,14 +65,14 @@ HINTING_TABLES = ["cvt ", "fpgm", "prep", "gasp", "hdmx", "LTSH", "VDMX"]
 
 SOURCE_TO_OUTPUT = {
     "JetBrainsMono/JetBrainsMonoNL-Regular.ttf": "JetBrainsMonoNL-Regular.ttf",
-    "JetBrainsMono/JetBrainsMonoNL-Medium.ttf":  "JetBrainsMonoNL-Medium.ttf",
-    "Inter/Inter-Regular.ttf":                   "Inter-Regular.ttf",
-    "Inter/Inter-SemiBold.ttf":                  "Inter-SemiBold.ttf",
+    "JetBrainsMono/JetBrainsMonoNL-Medium.ttf": "JetBrainsMonoNL-Medium.ttf",
+    "Inter/Inter-Regular.ttf": "Inter-Regular.ttf",
+    "Inter/Inter-SemiBold.ttf": "Inter-SemiBold.ttf",
 }
 
 
 def subset_one(src: Path, dst: Path, level: str) -> tuple[int, int]:
-    from fontTools.subset import Subsetter, Options, load_font, save_font
+    from fontTools.subset import Options, Subsetter, load_font, save_font
 
     options = Options()
     options.layout_features = KEPT_LAYOUT_FEATURES
@@ -115,19 +117,30 @@ def parse_unicode_ranges(spec: str) -> list[int]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Subset Bellweather UI fonts for in-binary embedding.")
-    parser.add_argument("--source-dir", required=True, type=Path,
-                        help="bw_ui stylekit fonts root (contains Inter/ and JetBrainsMono/)")
-    parser.add_argument("--output-dir", required=True, type=Path,
-                        help="Where to write subset TTFs (typically build-tree)")
-    parser.add_argument("--level", choices=["mid", "tight"], default="mid",
-                        help="mid (default): keep hinting. tight: drop hinting tables "
-                             "for ~170 KB extra savings per plugin.")
+        description="Subset Bellweather UI fonts for in-binary embedding."
+    )
+    parser.add_argument(
+        "--source-dir",
+        required=True,
+        type=Path,
+        help="bw_ui stylekit fonts root (contains Inter/ and JetBrainsMono/)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        required=True,
+        type=Path,
+        help="Where to write subset TTFs (typically build-tree)",
+    )
+    parser.add_argument(
+        "--level",
+        choices=["mid", "tight"],
+        default="mid",
+        help="mid (default): keep hinting. tight: drop hinting tables "
+        "for ~170 KB extra savings per plugin.",
+    )
     args = parser.parse_args()
 
-    try:
-        import fontTools  # noqa: F401
-    except ImportError:
+    if importlib.util.find_spec("fontTools") is None:
         sys.stderr.write(
             "ERROR: fontTools is not installed. Install with:\n"
             "    python3 -m pip install fonttools\n"
@@ -152,8 +165,7 @@ def main() -> int:
         print(f"  {out_name:40s}  {in_b:7d} -> {out_b:7d}  ({pct:5.1f}%)")
 
     saved = total_in - total_out
-    print(f"  TOTAL: {total_in} -> {total_out}  (saved {saved} bytes, "
-          f"{saved / 1024:.1f} KB)")
+    print(f"  TOTAL: {total_in} -> {total_out}  (saved {saved} bytes, {saved / 1024:.1f} KB)")
     return 0
 
 

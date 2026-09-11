@@ -39,7 +39,7 @@ namespace bws::ui
  * - Brass/gold accent color (configurable)
  * - Optional tick mark at 0 dB
  * - Smooth mouse interaction with fine-adjustment mode (Shift)
- * - Cmd/Ctrl+drag for secondary parameter (e.g., Output Trim) - FabFilter-style
+ * - Cmd/Ctrl+drag for secondary parameter (e.g., Output Trim) - flagship-style
  * - Double-click to reset to default value
  */
 class UiArcKnob : public juce::Slider

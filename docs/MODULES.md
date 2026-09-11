@@ -129,7 +129,7 @@ signing/notarization artifacts, and unreleased plugin code.
 ### `bw_ui`
 
 - Purpose: token-driven JUCE UI closure used by Barometer: controls, panels, preset manager/dialogs, rendering, localization, weather-layout components, and generated design tokens.
-- Public headers: selected headers under `include/bw_ui/Components`, `Presets`, `Visualizers`, `adapters`, `ambient`, `foundation`, `generated`, `interaction`, `interactions`, `internal`, `kernel`, `localization`, `preset_system`, `rendering`, `tokens`, `weather`, and `windowing`.
+- Public headers: selected headers under `include/bw_ui/Components`, `Editor`, `Presets`, `Visualizers`, `adapters`, `ambient`, `foundation`, `generated`, `interaction`, `interactions`, `internal`, `kernel`, `localization`, `preset_system`, `rendering`, `tokens`, `weather`, and `windowing`. The `Editor` surface includes `ControlAttachments.h`, which the shipped Barometer source consumes directly.
 - Depends on: `bws::bw_juce_adapters`, `bws::bw_preset_core`, `bws::bw_toy_shell`, shipped token JSON, shipped font/localization assets, and JUCE GUI modules.
 - JUCE: yes.
 - Independently linkable: yes when `BWS_BUILD_BAROMETER_PLUGIN=ON`, `bws::bw_ui` and its shipped sub-library targets.

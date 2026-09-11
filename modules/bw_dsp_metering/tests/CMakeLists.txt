@@ -13,7 +13,9 @@ add_executable(bw_dsp_metering_tests
     bs1770_meter_test.cpp
     bs1770_conformance_test.cpp
     true_peak_meter_test.cpp
+
     meter_ballistics_test.cpp
+
 )
 
 target_include_directories(bw_dsp_metering_tests PRIVATE
@@ -60,4 +62,10 @@ add_test(NAME bw_dsp_metering_analytics
     COMMAND bw_dsp_metering_tests "[bs1770][analytics]" --reporter console --success)
 set_tests_properties(bw_dsp_metering_analytics PROPERTIES
     LABELS "bpts_calibration"
+    FAIL_REGULAR_EXPRESSION "No test cases matched")
+
+add_test(NAME bw_dsp_metering_live_maxima
+    COMMAND bw_dsp_metering_tests "[maxima]" --reporter console --success)
+set_tests_properties(bw_dsp_metering_live_maxima PROPERTIES
+    LABELS "bpts_gate"
     FAIL_REGULAR_EXPRESSION "No test cases matched")

@@ -263,8 +263,11 @@ public:
                                   "std::atomic<float>"},
         bws::dsp::AtomicCrossing {"correlation-value", bws::dsp::Thread::Audio >> bws::dsp::Thread::UI,
                                   bws::dsp::Ordering::Relaxed, "Stereo phase correlation (inline computation)",
-                                  "std::atomic<float>"}};
-    static_assert(kThreadCrossings.size() == 5, "kThreadCrossings count doesn't match actual atomic declarations");
+                                  "std::atomic<float>"},
+        bws::dsp::AtomicCrossing {"measurement-reset", bws::dsp::Thread::Message >> bws::dsp::Thread::Audio,
+                                  bws::dsp::Ordering::AcquireRelease,
+                                  "Reset request with immediate UI-side invalid projection", "std::atomic<bool>"}};
+    static_assert(kThreadCrossings.size() == 6, "kThreadCrossings count doesn't match actual atomic declarations");
 
     // =========================================================================
     // A/B Compare
@@ -311,6 +314,10 @@ public:
     // =========================================================================
     float getMomentaryLufs() const { return lufsMeter_.getMomentaryLufs(); }
     float getShortTermLufs() const { return lufsMeter_.getShortTermLufs(); }
+    bws::audio::LoudnessMeter::LiveLoudnessSnapshot getLiveLoudnessSnapshot() const
+    {
+        return lufsMeter_.getLiveLoudnessSnapshot();
+    }
     float getIntegratedLufs() const { return lufsMeter_.getIntegratedLufs(); }
     float getLoudnessRange() const { return lufsMeter_.getLoudnessRange(); }
     // stability flag for the LRA hero readout.
@@ -318,15 +325,36 @@ public:
     // measurement; matches EBU Tech 3342 / FLUX MiRA / Pleasurize convention).
     bool isLoudnessRangeStable() const { return lufsMeter_.isLoudnessRangeStable(); }
     void resetIntegratedLufs() { lufsMeter_.resetIntegrated(); }
+    void requestMeasurementReset() noexcept
+    {
+        lufsMeter_.resetIntegrated();
+        lufsMeter_.requestLiveMaximaReset();
+        measurementResetPending_.store(true, std::memory_order_release);
+    }
+    bool isMeasurementResetPending() const noexcept { return measurementResetPending_.load(std::memory_order_acquire); }
 
     // =========================================================================
     // True Peak (4x oversampled, post-processing)
     // =========================================================================
     float getTruePeakDb() const { return truePeakMeter_.getTruePeakDb(); }
-    float getHeldTruePeakDb() const { return truePeakMeter_.getHeldPeakDb(); }
+    float getHeldTruePeakDb() const { return isMeasurementResetPending() ? -100.0f : truePeakMeter_.getHeldPeakDb(); }
     float getTruePeakDbLeft() const { return truePeakMeter_.getTruePeakDb(0); }
     float getTruePeakDbRight() const { return truePeakMeter_.getTruePeakDb(1); }
     void resetTruePeakHold() { truePeakMeter_.resetHeldPeaks(); }
+
+    // Deterministic visual-evidence seam. Must be selected before prepareToPlay().
+    // It changes only analytics ownership: audio rendering still follows the
+    // production processBlock path, while the caller services the production
+    // analytics consumer synchronously instead of using the polling thread.
+    void setDeterministicAnalyticsForTesting(bool enabled) noexcept { deterministicAnalyticsForTesting_ = enabled; }
+    bool serviceDeterministicAnalyticsForTesting() noexcept;
+    [[nodiscard]] std::size_t pendingAnalyticsRecordsForTesting() const noexcept;
+    [[nodiscard]] bool analyticsWorkerRunningForTesting() const noexcept { return loudnessAnalyticsWorker_.joinable(); }
+    [[nodiscard]] uint64_t analyticsEpochForTesting() const noexcept { return deterministicAnalyticsEpoch_; }
+    [[nodiscard]] uint64_t analyticsServiceCountForTesting() const noexcept
+    {
+        return deterministicAnalyticsServiceCount_;
+    }
 
     // =========================================================================
     // Presets - delegated to WeatherPresetManager
@@ -494,7 +522,12 @@ private:
     // =========================================================================
     bws::audio::LoudnessMeter lufsMeter_ {bws::audio::LoudnessMeter::AnalyticsMode::ExternalService};
     bws::audio::TruePeakMeter truePeakMeter_;
-    std::jthread loudnessAnalyticsWorker_;
+    std::thread loudnessAnalyticsWorker_;
+    std::atomic<bool> stopLoudnessAnalyticsWorker_ {false};
+    std::atomic<bool> measurementResetPending_ {false};
+    bool deterministicAnalyticsForTesting_ {};
+    uint64_t deterministicAnalyticsEpoch_ {};
+    uint64_t deterministicAnalyticsServiceCount_ {};
 
     void startLoudnessAnalyticsWorker();
     void stopLoudnessAnalyticsWorker() noexcept;

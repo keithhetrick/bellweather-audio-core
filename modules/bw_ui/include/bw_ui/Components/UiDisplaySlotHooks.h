@@ -36,14 +36,19 @@ namespace bws::ui
 /// field defaults to empty; UiDisplayHost honors only those that are set.
 struct UiDisplaySlotHooks
 {
+    /// Called by `propagateScale()` on DPI / editor-scale changes.
+    ///
+    /// Declared before `setTheme` so that the common call-site ordering
+    /// (`.setScale` before `.setTheme`) matches member-declaration order:
+    /// C++20 requires designated initializers in declaration order, and MSVC
+    /// makes a mismatch a hard error (C7560), not a warning like AppleClang.
+    std::function<void(float)> setScale;
+
     /// Called by the host's `propagateTheme()` fan-out. Slot components that
     /// own theme-dependent state should refresh from the supplied pointer.
     /// Pointer is owned externally by the editor; lifetime must outlive the
     /// host's last propagation call.
     std::function<void(const UiThemeResolved*)> setTheme;
-
-    /// Called by `propagateScale()` on DPI / editor-scale changes.
-    std::function<void(float)> setScale;
 
     /// Called by `propagateInteraction()` when the host enters / leaves an
     /// interactive state (e.g., modal-open suppression).

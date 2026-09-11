@@ -11,7 +11,6 @@ import pathlib
 import re
 import sys
 
-
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "MANIFEST.md"
 MODULES_DOC = ROOT / "docs" / "MODULES.md"
@@ -94,11 +93,7 @@ def _module_doc_gaps() -> list[str]:
 
     text = MODULES_DOC.read_text(encoding="utf-8")
     documented = set(re.findall(r"^### `([^`]+)`", text, flags=re.MULTILINE))
-    modules = {
-        path.name
-        for path in (ROOT / "modules").glob("bw_*")
-        if path.is_dir()
-    }
+    modules = {path.name for path in (ROOT / "modules").glob("bw_*") if path.is_dir()}
     return sorted(modules - documented)
 
 
@@ -111,7 +106,8 @@ def main() -> int:
     uncovered = [path for path in paths if not _covered(path, patterns)]
     if uncovered:
         failures.append(
-            "Uncovered paths:\n  " + "\n  ".join(uncovered[:200])
+            "Uncovered paths:\n  "
+            + "\n  ".join(uncovered[:200])
             + ("\n  ..." if len(uncovered) > 200 else "")
         )
 

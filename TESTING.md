@@ -16,18 +16,25 @@ or marketplace packaging.
 The suite lives in `modules/bw_dsp_metering/tests/`. Each file maps to a published
 specification you can check it against:
 
-| Test file                     | Specification                                                    | What it checks                                                                                                                             |
-| ----------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `bs1770_conformance_test.cpp` | ITU-R BS.1770-5 · EBU Tech 3341 (incl. cases 10, 13) · Tech 3342 | Integrated loudness, momentary/short-term convergence, absolute + relative gating, loudness range, and the 44.1-192 kHz sample-rate matrix |
-| `bs1770_meter_test.cpp`       | BS.1770-5 · EBU Tech 3341 / 3342                                 | Published-target calibration cases, the off-thread analytics lifecycle, and the allocation-free audio path                                 |
-| `true_peak_meter_test.cpp`    | BS.1770-5 §3.5 · EBU Tech 3341 case 20 · Nielsen/Lund bound      | Inter-sample true-peak with 4× oversampling, against the analytic bound                                                                    |
-| `meter_ballistics_test.cpp`   | EBU Tech 3341 (M/S integration windows)                          | Momentary (400 ms) and short-term (3 s) time-window behaviour                                                                              |
+| Test file                     | Specification                                                        | What it checks                                                                                                                                                                  |
+| ----------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bs1770_conformance_test.cpp` | ITU-R BS.1770-5; EBU Tech 3341 cases 9-14; Tech 3342                 | Integrated loudness, the full published momentary/short-term response and maximum matrix, absolute and relative gating, loudness range, and the 44.1-192 kHz sample-rate matrix |
+| `bs1770_meter_test.cpp`       | BS.1770-5 · EBU Tech 3341 / 3342                                     | Published-target calibration cases, the off-thread analytics lifecycle, and the allocation-free audio path                                                                      |
+| `true_peak_meter_test.cpp`    | BS.1770-5 section 3.5; EBU Tech 3341 cases 15-23; Nielsen/Lund bound | Inter-sample true-peak with 4x oversampling, against the published acceptance bands and analytic bound                                                                          |
+| `meter_ballistics_test.cpp`   | EBU Tech 3341 (M/S integration windows)                              | Momentary (400 ms) and short-term (3 s) time-window behaviour                                                                                                                   |
 
-The EBU Tech 3341 reference signals are committed under
+Bellweather-authored equivalents of selected EBU Tech 3341 signals are committed under
 `modules/bw_dsp_metering/tests/fixtures/tech3341/` as float WAVs, with
 `META.json` recording each signal's spec case, expected value, and SHA-256. The
 synthesiser that produced them (`tools/audiotest/synth_tech3341.py`) ships too,
-so the fixtures can be regenerated and re-checked from the spec formulas.
+so the fixtures can be regenerated and re-checked from published factual
+parameters. These are not official EBU audio files. Cases 9-14 are synthesized
+in memory by the C++ conformance tests and do not add stored WAVs.
+
+This is a library measurement proof, not standards-body certification or a
+claim that the Barometer product implements every EBU Mode display requirement.
+In particular, a live EBU Mode product must expose retained Maximum Momentary
+and Maximum Short-term values and reset them with the Integrated measurement.
 
 ## Standards and metrics
 
@@ -103,9 +110,9 @@ ctest --test-dir build-library -L framework-boundary --output-on-failure   # JUC
 100% tests passed, 0 tests failed out of <platform count>
 ```
 
-The exact count can move as coverage grows. The current launch suite reports 162
-tests on macOS/Linux and 161 on Windows ARM64, where the Apple-only containment
-probe is not registered. The public-surface lane reports one passing smoke test
+The exact count can move as coverage grows. The current suite reports 164 tests
+on macOS and Linux. Windows registration differs by platform and must be
+remeasured for each release. The public-surface lane reports one passing smoke test
 per Stable/reusable module in `docs/MODULES.md`, and the framework-boundary lane
 prints:
 

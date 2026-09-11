@@ -3,7 +3,8 @@
   "meta": {
     "product": "rendering",
     "version": "1.0.0",
-    "platform": "cpp",
+    "targets": ["cpp"],
+    "extends": [],
     "source": "ShadowTokens.h elevation/inner/glow/coloredGlow banks - mixed-field (int offset + float blur + ARGB colour) render tokens"
   },
   "shadows": {

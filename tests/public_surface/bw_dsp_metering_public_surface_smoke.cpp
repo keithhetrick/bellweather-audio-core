@@ -13,6 +13,9 @@
 int main()
 {
     bws::audio::Bs1770Meter meter;
+    const auto live = meter.getLiveLoudnessSnapshot();
+    meter.requestLiveMaximaReset();
+    (void)live;
     meter.prepare(48000.0, 2);
 
     const float eased = bws::audio::MeterBallistics::easeToward(0.0f, 1.0f, 100.0f, 0.01f);

@@ -10,7 +10,7 @@
  *
  * Bellweather Studios - Weather Instrument Design System
  *
- * Extends UiArcKnob with FabFilter-style features:
+ * Extends UiArcKnob with flagship-style features:
  *   - Smart text parsing:
  *     - "1k" -> 1000 Hz
  *     - "10k" -> 10000 Hz
@@ -46,7 +46,7 @@ namespace weather
 {
 
 /**
- * @brief Enhanced knob with smart text parsing and FabFilter-style features.
+ * @brief Enhanced knob with smart text parsing and flagship-style features.
  *
  * Provides intelligent input parsing for frequency, gain, and percentage values,
  * along with professional-grade keyboard shortcuts and mouse interaction.
@@ -133,7 +133,7 @@ public:
     void paint(juce::Graphics& g) override;
 
     // =========================================================================
-    // FabFilter-Style Interactions
+    // Flagship-Style Interactions
     // =========================================================================
 
     /** Show right-click context menu with reset, enter value, MIDI learn options */

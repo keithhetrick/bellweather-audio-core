@@ -27,7 +27,21 @@ WeatherLampButton::WeatherLampButton(const juce::String& label)
     : labelText_(label)
 {
     setClickingTogglesState(true);
+    setWantsKeyboardFocus(true);
     setMouseCursor(juce::MouseCursor::PointingHandCursor);
+}
+
+bool WeatherLampButton::keyPressed(const juce::KeyPress& key)
+{
+    if (!isEnabled())
+        return false;
+
+    if (key == juce::KeyPress::spaceKey || key == juce::KeyPress::returnKey)
+    {
+        triggerClick();
+        return true;
+    }
+    return false;
 }
 
 void WeatherLampButton::setLabel(const juce::String& text)

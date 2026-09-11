@@ -67,7 +67,7 @@ inline int labeledSliderStackHeight(float scale, const UiThemeResolved& theme, U
            knobReadoutBlockHeight(spacingRole, scale, theme, readoutRole);
 }
 
-inline int knobVariantDiameter(ComponentSize size)
+inline constexpr int knobVariantDiameter(ComponentSize size)
 {
     switch (size)
     {

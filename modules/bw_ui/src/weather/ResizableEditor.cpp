@@ -334,7 +334,7 @@ bool ResizableEditor::keyPressed(const juce::KeyPress& key, juce::Component* /*o
 
 void ResizableEditor::enterFullScreen()
 {
-    if (isFullScreen_)
+    if (isFullScreen_ || getPeer() == nullptr)
         return;
 
     // Save current state
@@ -344,17 +344,19 @@ void ResizableEditor::enterFullScreen()
 
     isFullScreen_ = true;
 
+    // Capture the host-owned native frame before JUCE mutates it for kiosk
+    // mode. HostedWindowGeometry then fits that frame to the visible display;
+    // the captured pre-entry frame remains the exact exit target.
+    hostedWindowSessionState_ = bws::ui::windowing::enterHostedFullscreenSession(*this);
+
     // Enter kiosk mode - this will resize the component to fill the screen,
     // triggering resized() which derives the scale from actual window bounds.
     // We intentionally do NOT precompute scaleFactor_ here; resized() handles
     // it so the scale always matches reality even if kiosk mode fails.
     juce::Desktop::getInstance().setKioskModeComponent(this);
 
-    // Hosted plugin windows carry native frame chrome that JUCE's editor-view
-    // bounds do not account for. Fit the native host window to the visible
-    // frame first; fall back to view-sized bounds only when no hosted window
-    // geometry is available.
-    hostedWindowSessionState_ = bws::ui::windowing::enterHostedFullscreenSession(*this);
+    // Fall back to view-sized bounds only when no hosted window geometry is
+    // available.
     if (!hostedWindowSessionState_.has_value())
     {
         const auto fullscreenBounds = availableDisplayAreaFor(*this);
@@ -465,43 +467,50 @@ void ResizableEditor::showResizeMenu()
     if (resizeMenuLookAndFeel_)
         menu.setLookAndFeel(resizeMenuLookAndFeel_.get());
 
+    // Hosts may destroy and recreate an editor while the popup result is
+    // delivered asynchronously. Never let the callback outlive this editor.
+    juce::Component::SafePointer<ResizableEditor> safeThis(this);
+
     // Show menu
     menu.showMenuAsync(bws::ui::popup_menu::makePopupMenuOptionsForComponent(
                            *resizeCorner_, this, theme_, scaleFactor_, bws::ui::UiDropdownRole::UtilityMenu, 0, this),
-                       [this](int result) {
+                       [safeThis](int result) {
+                           if (safeThis == nullptr)
+                               return;
+
                            switch (result)
                            {
                            case 3:
-                               setSizePreset(SizePreset::Medium);
+                               safeThis->setSizePreset(SizePreset::Medium);
                                break;
                            case 4:
-                               setSizePreset(SizePreset::Large);
+                               safeThis->setSizePreset(SizePreset::Large);
                                break;
                            case 5:
-                               setSizePreset(SizePreset::ExtraLarge);
+                               safeThis->setSizePreset(SizePreset::ExtraLarge);
                                break;
 
                            case 11:
-                               setScaleFactor(0.75f);
+                               safeThis->setScaleFactor(0.75f);
                                break;
                            case 12:
-                               setScaleFactor(1.0f);
+                               safeThis->setScaleFactor(1.0f);
                                break;
                            case 13:
-                               setScaleFactor(1.25f);
+                               safeThis->setScaleFactor(1.25f);
                                break;
                            case 14:
-                               setScaleFactor(1.5f);
+                               safeThis->setScaleFactor(1.5f);
                                break;
                            case 15:
-                               setScaleFactor(1.75f);
+                               safeThis->setScaleFactor(1.75f);
                                break;
                            case 16:
-                               setScaleFactor(2.0f);
+                               safeThis->setScaleFactor(2.0f);
                                break;
 
                            case 20:
-                               toggleFullScreen();
+                               safeThis->toggleFullScreen();
                                break;
 
                            default:

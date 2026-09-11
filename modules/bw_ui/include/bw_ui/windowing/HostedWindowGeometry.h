@@ -4,6 +4,7 @@
 #pragma once
 
 #include <juce_gui_basics/juce_gui_basics.h>
+#include <cstdint>
 #include <optional>
 
 namespace bws::ui::windowing
@@ -16,6 +17,7 @@ struct HostedWindowSessionState
 {
     juce::Rectangle<int> nativeWindowFrame;
     juce::Rectangle<int> nativeViewInWindow;
+    std::uint64_t nativeWindowStyleMask {};
     bool borderless {false};
 };
 

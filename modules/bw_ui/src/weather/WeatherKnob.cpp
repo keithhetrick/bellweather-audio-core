@@ -306,7 +306,7 @@ void WeatherKnob::mouseDown(const juce::MouseEvent& e)
         return;
     }
 
-    // Cmd/Ctrl+click: Reset to default value (FabFilter-style quick reset)
+    // Cmd/Ctrl+click: Reset to default value (flagship-style quick reset)
     if (e.mods.isCommandDown() && !e.mods.isAltDown())
     {
         // Reset to default value

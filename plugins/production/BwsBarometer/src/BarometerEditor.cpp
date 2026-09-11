@@ -23,6 +23,7 @@ BarometerEditor::~BarometerEditor()
     processor_.getPresetManager().removeListener(this);
 
     valueDisplayPopup_.reset();
+    channelRoutingBinding_.reset();
     tooltipWindow_.reset();
     gainAttachment_.reset();
     balanceAttachment_.reset();
@@ -41,6 +42,10 @@ BarometerEditor::~BarometerEditor()
     monoButton_.reset();
     abToggle_.reset();
     dcFilterButton_.reset();
+    soloLeftToggle_.reset();
+    swapLeftRightToggle_.reset();
+    soloRightToggle_.reset();
+    measurementResetButton_.reset();
     presetCombo_.reset();
     balanceWidthTabs_.reset();
     settingsButton_.reset();
@@ -54,11 +59,23 @@ void BarometerEditor::onThemeChanged()
         balanceWidthTabs_->setTheme(t);
     if (aboutOverlay_)
         aboutOverlay_->setTheme(t);
+    if (tooltipWindow_)
+        tooltipWindow_->setTheme(t);
+    if (soloLeftToggle_)
+    {
+        soloLeftToggle_->setTheme(t);
+        swapLeftRightToggle_->setTheme(t);
+        soloRightToggle_->setTheme(t);
+    }
+    if (measurementResetButton_)
+        measurementResetButton_->setTheme(t);
     repaint();
 }
 
 void BarometerEditor::onUiTick(double dtSeconds)
 {
+    if (channelRoutingBinding_)
+        channelRoutingBinding_->setStereoAvailable(processor_.getTotalNumOutputChannels() >= 2);
     // Output meter (right of dial)
     if (!meterBounds_.isEmpty())
     {
@@ -95,6 +112,50 @@ void BarometerEditor::onUiTick(double dtSeconds)
     {
         repaint(lufsReadoutBounds_);
     }
+}
+
+void BarometerEditor::prepareForVisualEvidenceForTesting()
+{
+    uiClock_.unsubscribe(&uiTicker_);
+    uiClock_.unsubscribe(&fadeTicker_);
+    resized();
+}
+
+void BarometerEditor::setStereoViewForVisualEvidenceForTesting(int view)
+{
+    setBalanceWidthMode(view == 1 ? 1 : 0);
+    resized();
+}
+
+void BarometerEditor::advanceVisualEvidenceUiForTesting(double dtSeconds)
+{
+    onUiTick(dtSeconds);
+}
+
+BarometerEditor::VisualEvidenceState BarometerEditor::visualEvidenceStateForTesting() const
+{
+    VisualEvidenceState state;
+    state.stereoView = balanceWidthMode_;
+    state.balanceVisible = balanceSlider_ != nullptr && balanceSlider_->isVisible();
+    state.widthVisible = widthSlider_ != nullptr && widthSlider_->isVisible();
+    state.inputPeakDb = processor_.getInputPeakDb();
+    state.outputPeakDb = processor_.getOutputPeakDb();
+    state.inputRmsDb = std::max(processor_.getInputLeftRmsDb(), processor_.getInputRightRmsDb());
+    state.outputRmsDb = std::max(processor_.getOutputLeftRmsDb(), processor_.getOutputRightRmsDb());
+    state.momentaryLufs = processor_.getMomentaryLufs();
+    state.shortTermLufs = processor_.getShortTermLufs();
+    state.integratedLufs = processor_.getIntegratedLufs();
+    state.loudnessRange = processor_.getLoudnessRange();
+    state.loudnessRangeStable = processor_.isLoudnessRangeStable();
+    state.truePeakDb = processor_.getTruePeakDb();
+    state.correlation = processor_.getStereoCorrelation();
+    state.sparklineWritePosition = sparklineWritePos_;
+    state.width = getWidth();
+    state.height = getHeight();
+    state.updateInvocations = updateCheckInvocationCount_;
+    state.fullscreenModalVisible =
+        isToyOverlayActiveForTest() || juce::ModalComponentManager::getInstance()->getNumModalComponents() > 0;
+    return state;
 }
 
 void BarometerEditor::writeSparklineSample()

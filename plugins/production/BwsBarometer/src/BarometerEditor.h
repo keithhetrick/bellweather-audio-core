@@ -11,7 +11,7 @@
  * Bellweather Studios - gain and metering utility plugin
  *
  * Layout:
- *   - Base size: 408 × 489 px (token-driven, fixed aspect ratio)
+ *   - Base size: 408 x 535 px (token-driven, fixed aspect ratio)
  *   - Hero Gain Dial: 200px
  *   - Balance Slider: 120px wide × 24px tall (continuous control)
  * - uttons: four 24px controls (L, link, R, mono)
@@ -28,6 +28,8 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <bw_ui/foundation/GoldenRatioConstants.h>
 #include "bw_ui/Components/UiArcKnob.h"
+#include "bw_ui/Components/TooltipHub.h"
+#include "bw_ui/Components/UiToggle.h"
 #include "bw_ui/Components/UiResizeCorner.h"
 #include "bw_ui/foundation/UiTheme.h"
 #include <bw_ui/adapters/UiThemeKernelAdapter.h> // bws::ui::kernel::ThemeSnapshot for makeEditorKernelTheme
@@ -38,9 +40,11 @@
 // Weather Instrument Enhancements
 #include "bw_ui/weather/containers/ResizableEditor.h"
 #include "bw_ui/weather/controls/WeatherKnob.h"
+#include "bw_ui/weather/controls/WeatherCompactAction.h"
 #include "bw_ui/weather/displays/InteractiveDisplay.h"
 
 #include "BarometerProcessor.h"
+#include "ChannelRoutingBinding.h"
 #include <bw_ui/generated/BwTokens.h>
 #include <bw_ui/Visualizers/UiCorrelationMeter.h>
 #include <bw_ui/adapters/JuceTimerClock.h>
@@ -181,6 +185,34 @@ public:
     void weatherPresetChanged() override;
     void weatherPresetListChanged() override;
 
+    struct VisualEvidenceState
+    {
+        int stereoView {};
+        bool balanceVisible {};
+        bool widthVisible {};
+        float inputPeakDb {};
+        float outputPeakDb {};
+        float inputRmsDb {};
+        float outputRmsDb {};
+        float momentaryLufs {};
+        float shortTermLufs {};
+        float integratedLufs {};
+        float loudnessRange {};
+        bool loudnessRangeStable {};
+        float truePeakDb {};
+        float correlation {};
+        std::size_t sparklineWritePosition {};
+        int width {};
+        int height {};
+        int updateInvocations {};
+        bool fullscreenModalVisible {};
+    };
+
+    void prepareForVisualEvidenceForTesting();
+    void setStereoViewForVisualEvidenceForTesting(int view);
+    void advanceVisualEvidenceUiForTesting(double dtSeconds);
+    [[nodiscard]] VisualEvidenceState visualEvidenceStateForTesting() const;
+
 protected:
     juce::Rectangle<int> getBasePluginSize() const override { return {0, 0, kPluginWidth, kPluginBaseHeight}; }
     juce::String getPluginName() const override;
@@ -247,12 +279,22 @@ private:
     std::unique_ptr<MouseWheelSlider> widthSlider_;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> widthAttachment_;
 
+    // Visible stereo routing trio. ChannelRoutingBinding owns the coupled
+    // user-action semantics and parameter delivery.
+    std::unique_ptr<bws::ui::UiToggle> soloLeftToggle_;
+    std::unique_ptr<bws::ui::UiToggle> swapLeftRightToggle_;
+    std::unique_ptr<bws::ui::UiToggle> soloRightToggle_;
+    std::unique_ptr<bws::weather::ActionPill> measurementResetButton_;
+    std::unique_ptr<ChannelRoutingBinding> channelRoutingBinding_;
+    juce::Rectangle<int> routingBandBounds_;
+
     // Settings Gear Button (top-right corner)
     std::unique_ptr<juce::TextButton> settingsButton_;
 
     // Tooltip window (required for tooltips to display)
-    std::unique_ptr<juce::TooltipWindow> tooltipWindow_;
+    std::unique_ptr<bws::ui::TooltipHub> tooltipWindow_;
     bool tooltipsEnabled_ = true;
+    int updateCheckInvocationCount_ {};
 
     // Value display popup (hover value display)
     std::unique_ptr<ValueDisplayPopup> valueDisplayPopup_;
@@ -394,6 +436,7 @@ private:
     static constexpr int kValueLabelHeight = bws::tokens::barometer::layout::VALUE_LABEL_HEIGHT;
     static constexpr int kValueToSliderGap = bws::tokens::barometer::layout::VALUE_TO_SLIDER_GAP;
     static constexpr int kSliderLabelSpace = bws::tokens::barometer::layout::SLIDER_LABEL_SPACE;
+    static constexpr int kRoutingBandHeight = bws::tokens::barometer::layout::ROUTING_BAND_HEIGHT;
     static constexpr int kLufsReadoutHeight = bws::tokens::barometer::layout::LUFS_READOUT_HEIGHT;
     static constexpr int kCorrelationMeterHeight = bws::tokens::barometer::layout::CORRELATION_METER_HEIGHT;
 
@@ -443,8 +486,8 @@ private:
     static constexpr int kPluginWidth = bws::tokens::barometer::layout::PLUGIN_WIDTH;
     static constexpr int kPluginBaseHeight = kTopMargin + kTitleHeight + kTitleToReadoutGap + kReadoutHeight +
                                              kReadoutToDialGap + kHeroDialSize + kDialToControlsGap +
-                                             kControlsRowHeight + kSliderLabelSpace + kLufsReadoutHeight +
-                                             kCorrelationMeterHeight + 2 // +2px gap
+                                             kControlsRowHeight + kSliderLabelSpace + kRoutingBandHeight +
+                                             kLufsReadoutHeight + kCorrelationMeterHeight + 2 // +2px gap
                                              + kControlsToBrandGap + kBrandHeight + kBottomMargin;
     static constexpr int kPluginHeight = kPluginBaseHeight; // Alias for backward compat
 
@@ -593,11 +636,6 @@ private:
     };
     MeterBarHover inputMeterHover_ = MeterBarHover::None;
     MeterBarHover outputMeterHover_ = MeterBarHover::None;
-
-    // Track which meter was clicked when Solo was activated (for indicator placement)
-    // true = clicked on Input meter, false = clicked on Output meter
-    bool soloLClickedOnInput_ = true;
-    bool soloRClickedOnInput_ = true;
 
     // Legacy compatibility (used by some existing code)
     bool inputMeterHovered_ = false;

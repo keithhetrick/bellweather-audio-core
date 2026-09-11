@@ -395,19 +395,6 @@ void BarometerEditor::weatherPresetListChanged()
 void BarometerEditor::setTooltipsEnabled(bool enabled)
 {
     tooltipsEnabled_ = enabled;
-
-    if (tooltipsEnabled_)
-    {
-        // Create tooltip window if it doesn't exist
-        if (!tooltipWindow_)
-            tooltipWindow_ = std::make_unique<juce::TooltipWindow>(this);
-    }
-    else
-    {
-        // Destroy tooltip window to disable tooltips
-        tooltipWindow_.reset();
-    }
-
     saveTooltipPreference();
 }
 
@@ -426,10 +413,6 @@ void BarometerEditor::loadTooltipPreference()
     {
         tooltipsEnabled_ = props->getBoolValue("tooltipsEnabled", true); // Default: enabled
     }
-
-    // Create tooltip window if enabled
-    if (tooltipsEnabled_)
-        tooltipWindow_ = std::make_unique<juce::TooltipWindow>(this);
 }
 
 float BarometerEditor::getLufsTargetValue() const

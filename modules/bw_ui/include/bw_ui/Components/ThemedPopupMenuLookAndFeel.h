@@ -72,7 +72,7 @@ namespace dropdown_internal
 /** Scale-aware tick glyph radius. Linear in font height × factor, with a
  *  hard minimum readability floor. Factor is sourced from
  *  UiDropdownMetrics::tickGlyphFactor in production. */
-float tickGlyphRadius(float fontHeight, float tickGlyphFactor) noexcept;
+float tickGlyphRadius(float fontHeight, float tickGlyphFactor, float minTickGlyphRadius) noexcept;
 
 /** Reserves text width + left/right padding + tick-glyph right-reserve.
  *  Matches the layout drawPopupMenuItem uses. */

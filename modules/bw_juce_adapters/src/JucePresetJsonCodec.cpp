@@ -75,11 +75,53 @@ juce::String base64FromState(const bws::preset::PresetStateBytes& state)
 
 std::optional<bws::preset::PresetStateBytes> stateFromBase64(const juce::String& encoded)
 {
-    juce::MemoryOutputStream decoded;
-    if (!juce::Base64::convertFromBase64(decoded, encoded) || decoded.getDataSize() == 0)
+    constexpr std::size_t kMaxDecodedStateBytes = 3u * 1024u * 1024u;
+    const auto encodedSize = static_cast<std::size_t>(encoded.length());
+    if (encodedSize == 0u || (encodedSize % 4u) != 0u || encodedSize > 4u * ((kMaxDecodedStateBytes + 2u) / 3u))
         return std::nullopt;
 
-    return bws::preset::PresetStateBytes(decoded.getData(), decoded.getDataSize());
+    const auto* raw = encoded.toRawUTF8();
+    if (std::strlen(raw) != encodedSize)
+        return std::nullopt;
+
+    const auto sextet = [](juce::juce_wchar c) -> int {
+        if (c >= 'A' && c <= 'Z')
+            return static_cast<int>(c - 'A');
+        if (c >= 'a' && c <= 'z')
+            return static_cast<int>(c - 'a' + 26);
+        if (c >= '0' && c <= '9')
+            return static_cast<int>(c - '0' + 52);
+        if (c == '+')
+            return 62;
+        if (c == '/')
+            return 63;
+        return -1;
+    };
+    std::size_t padding = 0;
+    if (raw[encodedSize - 1u] == '=')
+        ++padding;
+    if (raw[encodedSize - 2u] == '=')
+        ++padding;
+    for (std::size_t i = 0; i < encodedSize; ++i)
+    {
+        const auto c = static_cast<juce::juce_wchar>(raw[i]);
+        const bool paddingPosition = i >= encodedSize - padding;
+        if ((c == '=') != paddingPosition || (!paddingPosition && sextet(c) < 0))
+            return std::nullopt;
+    }
+    if ((padding == 2u && (sextet(raw[encodedSize - 3u]) & 0x0f) != 0) ||
+        (padding == 1u && (sextet(raw[encodedSize - 2u]) & 0x03) != 0))
+        return std::nullopt;
+    const auto decodedSize = (encodedSize / 4u) * 3u - padding;
+    if (decodedSize == 0u || decodedSize > kMaxDecodedStateBytes)
+        return std::nullopt;
+
+    juce::MemoryBlock storage(decodedSize, true);
+    juce::MemoryOutputStream decoded(storage.getData(), storage.getSize());
+    if (!juce::Base64::convertFromBase64(decoded, encoded) || decoded.getDataSize() != decodedSize)
+        return std::nullopt;
+
+    return bws::preset::PresetStateBytes(storage.getData(), decodedSize);
 }
 
 bws::preset::PresetSource sourceFromFactoryFlag(bool factory)
@@ -159,6 +201,13 @@ bws::preset::PresetStorageValueResult<bws::preset::PresetRecord> JucePresetJsonC
             metadata.cleanStarter = static_cast<bool>(metadataObject->getProperty("is_clean_starter"));
         }
     }
+
+    // Factory catalog identity is immutable and must never fall back to a
+    // mutable name/category tuple. Legacy-ID assumptions are a product-level,
+    // hash-allowlisted load decision, not a generic codec default.
+    if (metadata.isFactory() && !metadata.identity.hasStableId())
+        return bws::preset::PresetStorageValueResult<bws::preset::PresetRecord>::failure(
+            bws::preset::PresetStorageStatus::InvalidArgument, "factory preset is missing stable identity");
 
     return bws::preset::PresetStorageValueResult<bws::preset::PresetRecord>::success(
         bws::preset::PresetRecord {std::move(metadata), *state});

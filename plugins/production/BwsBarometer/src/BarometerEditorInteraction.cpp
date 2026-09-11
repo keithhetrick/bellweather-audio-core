@@ -169,85 +169,21 @@ void BarometerEditor::mouseDown(const juce::MouseEvent& e)
 {
     const auto pos = e.getPosition();
 
-    // Helper lambda to handle solo toggle based on which bar (L or R) was clicked
-    // Click on left bar of meter = Solo L, click on right bar = Solo R
-    // isInputMeter: true if click is on input meter, false if on output meter
-    auto handleMeterClick = [this, &e](const juce::Rectangle<int>& meterBounds, int clickX, bool isInputMeter) {
-        if (e.mods.isCommandDown())
-        {
-            // Cmd+Click: Toggle Swap L/R
-            toggleBoolParameter(BarometerProcessor::kSwapLRParamId);
-        }
-        else
-        {
-            // Determine which bar was clicked (L is left half, R is right half)
-            const int meterCenterX = meterBounds.getCentreX();
-            const bool clickedLeftBar = clickX < meterCenterX;
+    const auto handleMeterClick = [this, &e](const juce::Rectangle<int>& meterBounds, int clickX) {
+        if (channelRoutingBinding_ == nullptr)
+            return;
 
-            auto* soloLParam = processor_.getApvts().getParameter(BarometerProcessor::kSoloLParamId);
-            auto* soloRParam = processor_.getApvts().getParameter(BarometerProcessor::kSoloRParamId);
-
-            if (clickedLeftBar)
-            {
-                // Click on L bar: Toggle Solo Left
-                if (soloLParam)
-                {
-                    const bool currentSoloL = soloLParam->getValue() > 0.5f;
-
-                    // Begin gesture for automation recording
-                    soloLParam->beginChangeGesture();
-
-                    if (!currentSoloL && soloRParam)
-                    {
-                        // Turning Solo L on, turn Solo R off (mutual exclusion)
-                        soloRParam->beginChangeGesture();
-                        soloRParam->setValueNotifyingHost(0.0f);
-                        soloRParam->endChangeGesture();
-                    }
-                    soloLParam->setValueNotifyingHost(currentSoloL ? 0.0f : 1.0f);
-                    soloLParam->endChangeGesture();
-
-                    // Track which meter was clicked (only when turning on)
-                    if (!currentSoloL)
-                    {
-                        soloLClickedOnInput_ = isInputMeter;
-                    }
-                }
-            }
-            else
-            {
-                // Click on R bar: Toggle Solo Right
-                if (soloRParam)
-                {
-                    const bool currentSoloR = soloRParam->getValue() > 0.5f;
-
-                    // Begin gesture for automation recording
-                    soloRParam->beginChangeGesture();
-
-                    if (!currentSoloR && soloLParam)
-                    {
-                        // Turning Solo R on, turn Solo L off (mutual exclusion)
-                        soloLParam->beginChangeGesture();
-                        soloLParam->setValueNotifyingHost(0.0f);
-                        soloLParam->endChangeGesture();
-                    }
-                    soloRParam->setValueNotifyingHost(currentSoloR ? 0.0f : 1.0f);
-                    soloRParam->endChangeGesture();
-
-                    // Track which meter was clicked (only when turning on)
-                    if (!currentSoloR)
-                    {
-                        soloRClickedOnInput_ = isInputMeter;
-                    }
-                }
-            }
-        }
+        const auto action = e.mods.isCommandDown()
+                                ? ChannelRoutingAction::SwapLeftRight
+                                : (clickX < meterBounds.getCentreX() ? ChannelRoutingAction::SoloLeft
+                                                                     : ChannelRoutingAction::SoloRight);
+        channelRoutingBinding_->performUserAction(action);
     };
 
     // Check if click is on input meter (left of dial)
     if (inputMeterBounds_.contains(pos))
     {
-        handleMeterClick(inputMeterBounds_, pos.x, true); // true = input meter
+        handleMeterClick(inputMeterBounds_, pos.x);
         repaint();
         return;
     }
@@ -255,7 +191,7 @@ void BarometerEditor::mouseDown(const juce::MouseEvent& e)
     // Check if click is on output meter (right of dial)
     if (meterBounds_.contains(pos))
     {
-        handleMeterClick(meterBounds_, pos.x, false); // false = output meter
+        handleMeterClick(meterBounds_, pos.x);
         repaint();
         return;
     }
@@ -263,8 +199,9 @@ void BarometerEditor::mouseDown(const juce::MouseEvent& e)
     // Double-click on LUFS readout strip: reset integrated LUFS + true-peak hold
     if (lufsReadoutBounds_.contains(pos) && e.getNumberOfClicks() >= 2)
     {
-        processor_.resetIntegratedLufs();
-        processor_.resetTruePeakHold();
+        processor_.requestMeasurementReset();
+        sparklineHistory_.fill(-100.0f);
+        sparklineWritePos_ = 0;
         repaint(lufsReadoutBounds_);
         return;
     }

@@ -118,7 +118,8 @@ namespace barometer {
         constexpr int VALUE_LABEL_HEIGHT = 14;
         constexpr int VALUE_TO_SLIDER_GAP = 8;
         constexpr int SLIDER_LABEL_SPACE = 14;
-        constexpr int LUFS_READOUT_HEIGHT = 58;
+        constexpr int ROUTING_BAND_HEIGHT = 32;
+        constexpr int LUFS_READOUT_HEIGHT = 72;
         constexpr int CORRELATION_METER_HEIGHT = 20;
         constexpr int CONTROLS_ROW_HEIGHT = 24;
         constexpr float MIN_SCALE = 0.75f;
@@ -524,8 +525,8 @@ namespace shared {
         struct UiDropdownMetricsTokens { float height; float padding; float arrowBoxWidth; float cornerRadius; float outlineThickness; float popupFontScale; float minPopupWidth; float rowHeightFactor; float tickGlyphFactor; float minTickGlyphRadius; float separatorInsetX; float shadowAlpha; float shadowBlur; float shadowOffsetY; };
         constexpr UiDropdownMetricsTokens STANDARD = { 36.0f, 12.0f, 28.0f, 8.0f, 1.2f, 0.98f, 128.0f, 1.8f, 0.22f, 1.5f, 8.0f, 0.36f, 10.0f, 2.0f };
         constexpr UiDropdownMetricsTokens UTILITY_MENU = { 30.0f, 8.0f, 22.0f, 7.0f, 1.0f, 0.94f, 112.0f, 1.55f, 0.22f, 1.5f, 8.0f, 0.36f, 10.0f, 2.0f };
-        constexpr UiDropdownMetricsTokens COMPACT = { 32.0f, 10.0f, 24.0f, 7.0f, 1.1f, 0.94f, 128.0f, 1.8f, 0.22f, 1.5f, 8.0f, 0.36f, 10.0f, 2.0f };
-        constexpr UiDropdownMetricsTokens OVERLAY = { 22.0f, 6.0f, 14.0f, 4.0f, 0.6f, 1.0f, 128.0f, 1.8f, 0.22f, 1.5f, 8.0f, 0.36f, 10.0f, 2.0f };
+        constexpr UiDropdownMetricsTokens COMPACT = { 32.0f, 10.0f, 24.0f, 7.0f, 1.1f, 0.94f, 120.0f, 1.8f, 0.22f, 1.5f, 8.0f, 0.36f, 10.0f, 2.0f };
+        constexpr UiDropdownMetricsTokens OVERLAY = { 22.0f, 6.0f, 14.0f, 4.0f, 0.6f, 1.0f, 96.0f, 1.5f, 0.22f, 1.5f, 8.0f, 0.36f, 10.0f, 2.0f };
         namespace standard {
             constexpr float HEIGHT = 36.0f;
             constexpr float PADDING = 12.0f;
@@ -565,7 +566,7 @@ namespace shared {
             constexpr float CORNER_RADIUS = 7.0f;
             constexpr float OUTLINE_THICKNESS = 1.1f;
             constexpr float POPUP_FONT_SCALE = 0.94f;
-            constexpr float MIN_POPUP_WIDTH = 128.0f;
+            constexpr float MIN_POPUP_WIDTH = 120.0f;
             constexpr float ROW_HEIGHT_FACTOR = 1.8f;
             constexpr float TICK_GLYPH_FACTOR = 0.22f;
             constexpr float MIN_TICK_GLYPH_RADIUS = 1.5f;
@@ -581,8 +582,8 @@ namespace shared {
             constexpr float CORNER_RADIUS = 4.0f;
             constexpr float OUTLINE_THICKNESS = 0.6f;
             constexpr float POPUP_FONT_SCALE = 1.0f;
-            constexpr float MIN_POPUP_WIDTH = 128.0f;
-            constexpr float ROW_HEIGHT_FACTOR = 1.8f;
+            constexpr float MIN_POPUP_WIDTH = 96.0f;
+            constexpr float ROW_HEIGHT_FACTOR = 1.5f;
             constexpr float TICK_GLYPH_FACTOR = 0.22f;
             constexpr float MIN_TICK_GLYPH_RADIUS = 1.5f;
             constexpr float SEPARATOR_INSET_X = 8.0f;

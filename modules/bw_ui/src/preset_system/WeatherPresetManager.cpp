@@ -16,7 +16,12 @@
 #include <bw_preset_core/PresetNavigation.h>
 #include <bw_preset_core/PresetUuid.h>
 
+#include <juce_cryptography/juce_cryptography.h>
+
 #include <cstdlib>
+#include <array>
+#include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <tuple>
 
@@ -128,9 +133,24 @@ bws::preset::PresetStateBytes withEmbeddedPresetMetadata(const bws::preset::Pres
     if (stateBytes.empty())
         return stateBytes;
 
+    constexpr std::size_t cap = 3u * 1024u * 1024u;
+    constexpr std::size_t frameOverhead = 9u;
+    if (stateBytes.size() < frameOverhead || stateBytes.size() > cap)
+        return {};
+    const auto* framed = reinterpret_cast<const std::uint8_t*>(stateBytes.data());
+    if (framed[0] != 'V' || framed[1] != 'C' || framed[2] != '2' || framed[3] != '!')
+        return {};
+    std::uint32_t payloadSize = 0;
+    for (std::size_t byte = 0; byte < 4; ++byte)
+        payloadSize |= static_cast<std::uint32_t>(framed[4 + byte]) << (byte * 8u);
+    if (payloadSize == 0u || payloadSize > cap - frameOverhead ||
+        static_cast<std::size_t>(payloadSize) + frameOverhead != stateBytes.size() || framed[8u + payloadSize] != 0u ||
+        std::memchr(framed + 8u, 0, payloadSize) != nullptr)
+        return {};
+
     auto xml = juce::AudioProcessor::getXmlFromBinary(stateBytes.data(), static_cast<int>(stateBytes.size()));
     if (xml == nullptr)
-        return stateBytes;
+        return {};
 
     xml->setAttribute("currentPresetName", presetName);
     xml->setAttribute("currentPresetCategory", presetCategory);
@@ -141,8 +161,26 @@ bws::preset::PresetStateBytes withEmbeddedPresetMetadata(const bws::preset::Pres
     else
         xml->removeAttribute("currentPresetId");
 
-    juce::MemoryBlock normalizedState;
-    juce::AudioProcessor::copyXmlToBinary(*xml, normalizedState);
+    juce::MemoryBlock normalizedState(cap, true);
+    juce::MemoryOutputStream output(normalizedState.getData(), normalizedState.getSize());
+    constexpr std::array<std::byte, 8> header {std::byte {'V'}, std::byte {'C'}, std::byte {'2'}, std::byte {'!'},
+                                               std::byte {0},   std::byte {0},   std::byte {0},   std::byte {0}};
+    if (!output.write(header.data(), header.size()))
+        return {};
+    xml->writeTo(output, juce::XmlElement::TextFormat().singleLine());
+    if (!output.writeByte(0))
+        return {};
+    const auto totalSize = output.getDataSize();
+    if (totalSize < frameOverhead || totalSize > cap)
+        return {};
+    const auto rewrittenPayloadSize = totalSize - frameOverhead;
+    if (rewrittenPayloadSize == 0u || rewrittenPayloadSize > UINT32_MAX)
+        return {};
+    auto* rewritten = static_cast<std::byte*>(normalizedState.getData());
+    const auto payload32 = static_cast<std::uint32_t>(rewrittenPayloadSize);
+    for (std::size_t byte = 0; byte < 4; ++byte)
+        rewritten[4 + byte] = static_cast<std::byte>((payload32 >> (byte * 8u)) & 0xffu);
+    normalizedState.setSize(totalSize, false);
     return bws::preset::PresetStateBytes(normalizedState.getData(), normalizedState.getSize());
 }
 
@@ -273,7 +311,7 @@ void WeatherPresetManager::initialize()
     loadLibraryState();
     scanForPresets();
 
-    if (!presets_.empty())
+    if (!presets_.empty() && shouldLoadStartupPreset())
     {
         int initialIndex = 0;
         if (!libraryState_.startupPresetKey.empty())
@@ -290,6 +328,9 @@ void WeatherPresetManager::initialize()
         }
         loadPresetByIndexInternal(initialIndex, LoadReason::StartupDefault);
     }
+
+    if (shouldActivateStateBridgeDuringInitialize() && !activatePresetStateBridge())
+        return;
 
     isInitialized_ = true;
 }
@@ -450,6 +491,12 @@ bool WeatherPresetManager::savePreset(const juce::String& name, const juce::Stri
     if (!canSavePreset() || name.isEmpty())
         return false;
 
+    // Capture before allocating identity/timestamp metadata or touching the
+    // repository. Empty is never a valid processor state.
+    const auto capturedStateBytes = capturePresetStateBytes();
+    if (capturedStateBytes.empty())
+        return false;
+
     Preset preset;
     preset.name = name;
     preset.category = presetCategoryOrDefault(category, bws::preset::kDefaultUserPresetCategory);
@@ -491,8 +538,28 @@ bool WeatherPresetManager::savePreset(const juce::String& name, const juce::Stri
         bws::preset::PresetIdentity::legacy(pluginName_.toStdString(), preset.name.toStdString(),
                                             preset.category.toStdString()),
         exactOverwriteMetadata, bws::preset::generateUuidV4()));
-    const auto presetStateBytes =
-        withEmbeddedPresetMetadata(capturePresetStateBytes(), preset.name, preset.category, preset.presetId, false);
+    bws::preset::PresetStateBytes presetStateBytes;
+    if (presetStateBridge_ != nullptr)
+    {
+        const auto metadataResult = presetStateBridge_->embedPresetMetadataResult(
+            capturedStateBytes.view(),
+            {std::string_view(preset.name.toRawUTF8(), static_cast<std::size_t>(preset.name.length())),
+             std::string_view(preset.category.toRawUTF8(), static_cast<std::size_t>(preset.category.length())),
+             std::string_view(preset.presetId.toRawUTF8(), static_cast<std::size_t>(preset.presetId.length())), false});
+        lastStateCaptureStatus_ = metadataResult.status;
+        if (metadataResult.verified())
+            presetStateBytes = metadataResult.bytes;
+        else if (metadataResult.status == bws::preset::StateCaptureStatus::unsupported)
+            presetStateBytes =
+                withEmbeddedPresetMetadata(capturedStateBytes, preset.name, preset.category, preset.presetId, false);
+        else
+            return false;
+    }
+    else
+        presetStateBytes =
+            withEmbeddedPresetMetadata(capturedStateBytes, preset.name, preset.category, preset.presetId, false);
+    if (presetStateBytes.empty())
+        return false;
     preset.format = Preset::Format::Json;
     preset.state =
         makePresetStateTree(pluginName_, preset.name, preset.category, preset.author, preset.description,
@@ -572,19 +639,12 @@ bool WeatherPresetManager::loadPresetByIndexInternal(int index, LoadReason reaso
         return false;
 
     const auto& preset = presets_[static_cast<size_t>(index)];
-    const auto base64 = preset.state.getProperty("state").toString();
-    if (base64.isEmpty())
+    const auto intent = reason == LoadReason::Preview ? bws::preset::ColdStateIntent::previewApply
+                                                      : bws::preset::ColdStateIntent::presetFile;
+    // applyProcessorState performs the one strict decode before entering any
+    // bridge suppression or mutating processor/catalog metadata.
+    if (!applyProcessorState(preset.state, intent, &preset))
         return false;
-
-    juce::MemoryOutputStream stream;
-    if (!decodeBase64State(base64, stream))
-        return false;
-
-    {
-        ScopedDirtyTrackingSuppression dirtyGuard(*this);
-        ScopedCallbackSuppression callbackGuard(*this);
-        applyProcessorState(preset.state);
-    }
 
     currentPreset_ = preset;
     currentPresetFile_ = preset.file;
@@ -962,6 +1022,8 @@ void WeatherPresetManager::setPresetStateBridge(std::unique_ptr<bws::preset::IPr
         return;
 
     presetStateSubscription_ = presetStateBridge_->subscribeToDirtyChanges([this] { markAsModified(); });
+    if (isInitialized_ && !presetStateBridge_->activate())
+        return;
     resetDirtyTrackingState(currentPreset_.name.isNotEmpty());
 }
 
@@ -969,7 +1031,19 @@ void WeatherPresetManager::clearPresetStateBridge()
 {
     activeRestoreSuppressions_.clear();
     presetStateSubscription_.reset();
+    if (presetStateBridge_ != nullptr)
+        presetStateBridge_->deactivate();
     presetStateBridge_.reset();
+}
+
+bool WeatherPresetManager::activatePresetStateBridge()
+{
+    if (presetStateBridge_ == nullptr)
+        return true;
+    if (!presetStateBridge_->activate())
+        return false;
+    resetDirtyTrackingState(currentPreset_.name.isNotEmpty());
+    return true;
 }
 
 void WeatherPresetManager::setPresetRepository(std::unique_ptr<bws::preset::IPresetRepository> repository)
@@ -1330,11 +1404,12 @@ bool WeatherPresetManager::cancelPreviewSession()
     const auto committedPreset = previewSession_.committedPreset;
     const auto committedPresetFile = previewSession_.committedPresetFile;
     const bool committedHadUnsavedChanges = previewSession_.committedHadUnsavedChanges;
-    previewSession_ = {};
     {
         ScopedDirtyTrackingSuppression dirtyGuard(*this);
-        applyProcessorState(snapshot);
+        if (!applyProcessorState(snapshot, bws::preset::ColdStateIntent::previewCancel))
+            return false;
     }
+    previewSession_ = {};
     currentPreset_ = committedPreset;
     currentPresetFile_ = committedPresetFile;
     hasUnsavedChanges_ = committedHadUnsavedChanges;
@@ -1470,12 +1545,75 @@ juce::PropertiesFile* WeatherPresetManager::getPropertiesFile() const
     return propertiesFile_.get();
 }
 
-bool WeatherPresetManager::decodeBase64State(const juce::String& base64, juce::MemoryOutputStream& stream) const
+bool WeatherPresetManager::decodeBase64State(const juce::String& base64, juce::MemoryBlock& decoded) const
 {
+    decoded.reset();
     if (base64.isEmpty())
         return false;
 
-    return juce::Base64::convertFromBase64(stream, base64) && stream.getDataSize() > 0;
+    const auto encodedSize = static_cast<std::size_t>(base64.length());
+    if ((encodedSize % 4u) != 0u)
+        return false;
+
+    const auto* raw = base64.toRawUTF8();
+    if (std::strlen(raw) != encodedSize)
+        return false;
+
+    const auto cap = maximumDecodedPresetStateBytes();
+    if (cap != std::numeric_limits<std::size_t>::max())
+    {
+        const auto maxEncoded = 4u * ((cap + 2u) / 3u);
+        if (encodedSize > maxEncoded)
+            return false;
+    }
+
+    const auto sextet = [](juce::juce_wchar c) -> int {
+        if (c >= 'A' && c <= 'Z')
+            return static_cast<int>(c - 'A');
+        if (c >= 'a' && c <= 'z')
+            return static_cast<int>(c - 'a' + 26);
+        if (c >= '0' && c <= '9')
+            return static_cast<int>(c - '0' + 52);
+        if (c == '+')
+            return 62;
+        if (c == '/')
+            return 63;
+        return -1;
+    };
+
+    std::size_t padding = 0;
+    if (raw[encodedSize - 1u] == '=')
+        ++padding;
+    if (encodedSize >= 2u && raw[encodedSize - 2u] == '=')
+        ++padding;
+    for (std::size_t i = 0; i < encodedSize; ++i)
+    {
+        const auto c = static_cast<juce::juce_wchar>(raw[i]);
+        const bool paddingPosition = i >= encodedSize - padding;
+        if ((c == '=') != paddingPosition || (!paddingPosition && sextet(c) < 0))
+            return false;
+    }
+    if (padding == 2u && (sextet(raw[encodedSize - 3u]) & 0x0f) != 0)
+        return false;
+    if (padding == 1u && (sextet(raw[encodedSize - 2u]) & 0x03) != 0)
+        return false;
+
+    const auto decodedSize = (encodedSize / 4u) * 3u - padding;
+    if (decodedSize == 0u || decodedSize > cap)
+        return false;
+    decoded.setSize(decodedSize, true);
+    juce::MemoryOutputStream stream(decoded.getData(), decoded.getSize());
+    if (!juce::Base64::convertFromBase64(stream, base64))
+    {
+        decoded.reset();
+        return false;
+    }
+    if (stream.getDataSize() != decodedSize)
+    {
+        decoded.reset();
+        return false;
+    }
+    return true;
 }
 
 int WeatherPresetManager::findUniquePresetIndexByName(const juce::String& name) const
@@ -1514,40 +1652,67 @@ int WeatherPresetManager::findUniqueUserPresetIndexByName(const juce::String& na
 bws::preset::PresetStateBytes WeatherPresetManager::capturePresetStateBytes() const
 {
     if (presetStateBridge_ != nullptr)
-        return presetStateBridge_->captureState();
+    {
+        auto result = presetStateBridge_->captureStateResult();
+        lastStateCaptureStatus_ = result.status;
+        if (result.verified() || result.status == bws::preset::StateCaptureStatus::capturedUnverified)
+            return std::move(result.bytes);
+        return {};
+    }
 
-    return stateBytesFromProcessorState(processor_);
+    auto bytes = stateBytesFromProcessorState(processor_);
+    lastStateCaptureStatus_ =
+        bytes.empty() ? bws::preset::StateCaptureStatus::failed : bws::preset::StateCaptureStatus::capturedUnverified;
+    return bytes;
 }
 
 juce::ValueTree WeatherPresetManager::captureProcessorState() const
 {
+    const auto bytes = capturePresetStateBytes();
+    if (bytes.empty())
+        return {};
     juce::ValueTree state("ProcessorState");
-    state.setProperty("data", base64FromStateBytes(capturePresetStateBytes()), nullptr);
+    state.setProperty("data", base64FromStateBytes(bytes), nullptr);
     return state;
 }
 
-void WeatherPresetManager::applyProcessorState(const juce::ValueTree& state)
+bool WeatherPresetManager::applyProcessorState(const juce::ValueTree& state, bws::preset::ColdStateIntent intent,
+                                               const Preset* trustedPreset)
 {
     auto base64 = state.getProperty("data").toString();
     if (base64.isEmpty())
         base64 = state.getProperty("state").toString();
 
-    juce::MemoryOutputStream stream;
-    if (!decodeBase64State(base64, stream))
-        return;
+    juce::MemoryBlock decoded;
+    if (!decodeBase64State(base64, decoded))
+        return false;
 
     if (presetStateBridge_ != nullptr)
     {
-        std::vector<std::byte> bytes(static_cast<size_t>(stream.getDataSize()));
-        std::memcpy(bytes.data(), stream.getData(), bytes.size());
-        presetStateBridge_->applyState(
-            bws::domain::BwStateBlob {std::span<const std::byte>(bytes.data(), bytes.size())});
+        bws::preset::ColdStateIdentityContext identity;
+        std::string stateSha256;
+        if (trustedPreset != nullptr)
+        {
+            stateSha256 = juce::SHA256(decoded.getData(), decoded.getSize()).toHexString().toStdString();
+            identity = {std::string_view(pluginName_.toRawUTF8(), static_cast<std::size_t>(pluginName_.length())),
+                        std::string_view(trustedPreset->presetId.toRawUTF8(),
+                                         static_cast<std::size_t>(trustedPreset->presetId.length())),
+                        stateSha256, trustedPreset->isFactory};
+        }
+        const auto result = presetStateBridge_->applyStateResultWithContext(
+            bws::domain::BwStateBlob {
+                std::span<const std::byte>(static_cast<const std::byte*>(decoded.getData()), decoded.getSize())},
+            intent, identity);
+        lastStateApplyStatus_ = result.status;
+        return result.verifiedCommit() || result.status == bws::preset::StateApplyStatus::appliedUnverified;
     }
     else
     {
         ScopedDirtyTrackingSuppression dirtyGuard(*this);
         ScopedCallbackSuppression callbackGuard(*this);
-        processor_.setStateInformation(stream.getData(), static_cast<int>(stream.getDataSize()));
+        processor_.setStateInformation(decoded.getData(), static_cast<int>(decoded.getSize()));
+        lastStateApplyStatus_ = bws::preset::StateApplyStatus::appliedUnverified;
+        return true; // Legacy void JUCE path is applied but unverified.
     }
 }
 

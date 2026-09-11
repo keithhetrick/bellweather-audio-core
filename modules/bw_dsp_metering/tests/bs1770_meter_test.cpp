@@ -268,6 +268,47 @@ struct WhiteNoise
 
 } // namespace
 
+TEST_CASE(": retained live maxima require complete windows and reset on the producer",
+          "[bs1770][lufs][maxima][contract]")
+{
+    bws::audio::Bs1770Meter meter;
+    meter.prepare(kSampleRate, kNumChannels);
+
+    pushSineSeconds(meter, kSampleRate, 0.395, -12.0f);
+    auto snapshot = meter.getLiveLoudnessSnapshot();
+    CHECK_FALSE(snapshot.momentaryMaximumValid);
+    CHECK_FALSE(snapshot.shortTermMaximumValid);
+
+    pushSineSeconds(meter, kSampleRate, 0.010, -12.0f);
+    snapshot = meter.getLiveLoudnessSnapshot();
+    REQUIRE(snapshot.momentaryMaximumValid);
+    CHECK(snapshot.momentaryMaximumLufs > -20.0f);
+    CHECK_FALSE(snapshot.shortTermMaximumValid);
+
+    pushSineSeconds(meter, kSampleRate, 2.60, -30.0f);
+    snapshot = meter.getLiveLoudnessSnapshot();
+    REQUIRE(snapshot.shortTermMaximumValid);
+    const float retainedMomentary = snapshot.momentaryMaximumLufs;
+    const float retainedShortTerm = snapshot.shortTermMaximumLufs;
+
+    pushSineSeconds(meter, kSampleRate, 0.50, -40.0f);
+    snapshot = meter.getLiveLoudnessSnapshot();
+    CHECK(snapshot.momentaryMaximumLufs == retainedMomentary);
+    CHECK(snapshot.shortTermMaximumLufs == retainedShortTerm);
+
+    meter.requestLiveMaximaReset();
+    snapshot = meter.getLiveLoudnessSnapshot();
+    CHECK_FALSE(snapshot.momentaryMaximumValid);
+    CHECK_FALSE(snapshot.shortTermMaximumValid);
+
+    pushSilenceSeconds(meter, kSampleRate, 0.01);
+    snapshot = meter.getLiveLoudnessSnapshot();
+    REQUIRE(snapshot.momentaryMaximumValid);
+    REQUIRE(snapshot.shortTermMaximumValid);
+    CHECK(snapshot.momentaryMaximumLufs < retainedMomentary);
+    CHECK(snapshot.shortTermMaximumLufs <= retainedShortTerm);
+}
+
 // The synth fixtures are calibrated to TRUE loudness (the K-weighting gain at
 // 1 kHz is divided out - see synth_tech3341.py), so the meter must hit the EBU
 // Tech 3341 PUBLISHED absolute targets. case_4 validates the -70 absolute gate

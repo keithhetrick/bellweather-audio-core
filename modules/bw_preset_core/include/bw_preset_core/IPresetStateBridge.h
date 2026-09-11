@@ -4,6 +4,7 @@
 #pragma once
 
 #include <bw_state_types/BwStateBlob.h>
+#include <bw_preset_core/IColdStateTransaction.h>
 #include <bw_preset_core/PresetState.h>
 
 #include <functional>
@@ -106,8 +107,35 @@ class IPresetStateBridge
 public:
     virtual ~IPresetStateBridge() = default;
 
+    // Listener/timer adapters are constructed inert. Stateless legacy
+    // implementations retain this no-op lifecycle for compatibility.
+    [[nodiscard]] virtual bool activate() { return true; }
+    virtual void deactivate() noexcept {}
+
     [[nodiscard]] virtual PresetStateBytes captureState() const = 0;
+    [[nodiscard]] virtual StateCaptureResult captureStateResult() const
+    {
+        auto bytes = captureState();
+        return {bytes.empty() ? StateCaptureStatus::failed : StateCaptureStatus::capturedUnverified, std::move(bytes)};
+    }
+    [[nodiscard]] virtual StateCaptureResult embedPresetMetadataResult(bws::domain::BwStateBlob,
+                                                                       PresetMetadataContext) const
+    {
+        return {StateCaptureStatus::unsupported, {}};
+    }
     virtual bool applyState(bws::domain::BwStateBlob state) = 0;
+    virtual bool applyStateWithIntent(bws::domain::BwStateBlob state, ColdStateIntent) { return applyState(state); }
+    virtual bool applyStateWithContext(bws::domain::BwStateBlob state, ColdStateIntent intent, ColdStateIdentityContext)
+    {
+        return applyStateWithIntent(state, intent);
+    }
+    [[nodiscard]] virtual StateApplyResult applyStateResultWithContext(bws::domain::BwStateBlob state,
+                                                                       ColdStateIntent intent,
+                                                                       ColdStateIdentityContext context)
+    {
+        return {applyStateWithContext(state, intent, context) ? StateApplyStatus::appliedUnverified
+                                                              : StateApplyStatus::rejected};
+    }
 
     [[nodiscard]] virtual PresetStateSubscription subscribeToDirtyChanges(std::function<void()> callback) = 0;
 

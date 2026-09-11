@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
 set(_bws_visibility_cmake "${CMAKE_SOURCE_DIR}/cmake/BwsVisibility.cmake")
 if (NOT EXISTS "${_bws_visibility_cmake}")
     set(_bws_visibility_cmake "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/BwsVisibility.cmake")
@@ -13,19 +15,26 @@ endif()
 # Manual: python3 bds/tools/generate_tokens.py --products bds/tokens/products/ \
 #           --output-cpp modules/bw_ui/include/bw_ui/generated/BwTokens.h
 file(GLOB _bw_token_jsons "${CMAKE_SOURCE_DIR}/bds/tokens/products/*.tokens.json")
-add_custom_command(
-    OUTPUT "${CMAKE_SOURCE_DIR}/modules/bw_ui/include/bw_ui/generated/BwTokens.h"
-    COMMAND python3 "${CMAKE_SOURCE_DIR}/bds/tools/generate_tokens.py"
-        --products "${CMAKE_SOURCE_DIR}/bds/tokens/products/"
-        --output-cpp "${CMAKE_SOURCE_DIR}/modules/bw_ui/include/bw_ui/generated/BwTokens.h"
-    DEPENDS
-        "${CMAKE_SOURCE_DIR}/bds/tools/generate_tokens.py"
-        ${_bw_token_jsons}
-    COMMENT "Generating BwTokens.h from bds/tokens/products/*.tokens.json"
-)
-add_custom_target(bw_tokens DEPENDS
-    "${CMAKE_SOURCE_DIR}/modules/bw_ui/include/bw_ui/generated/BwTokens.h"
-)
+set(_bw_tokens_header "${CMAKE_SOURCE_DIR}/modules/bw_ui/include/bw_ui/generated/BwTokens.h")
+option(BWS_REGENERATE_TOKENS "Regenerate committed design tokens during the build" ON)
+if (BWS_REGENERATE_TOKENS)
+    add_custom_command(
+        OUTPUT "${_bw_tokens_header}"
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/bds/tools/generate_tokens.py"
+            --products "${CMAKE_SOURCE_DIR}/bds/tokens/products/"
+            --output-cpp "${_bw_tokens_header}"
+        DEPENDS
+            "${CMAKE_SOURCE_DIR}/bds/tools/generate_tokens.py"
+            ${_bw_token_jsons}
+        COMMENT "Generating BwTokens.h from bds/tokens/products/*.tokens.json"
+    )
+    add_custom_target(bw_tokens DEPENDS "${_bw_tokens_header}")
+else()
+    if (NOT EXISTS "${_bw_tokens_header}")
+        message(FATAL_ERROR "BWS_REGENERATE_TOKENS=OFF requires committed BwTokens.h")
+    endif()
+    add_custom_target(bw_tokens)
+endif()
 # ── /Token codegen ──────────────────────────────────────────────────────────
 
 # ── bw_ui_tokens: header-only design-token leaf (generated/ + tokens/ + colors/) ──
@@ -88,7 +97,7 @@ set(_bw_ui_font_subset_files
 add_custom_command(
     OUTPUT ${_bw_ui_font_subset_files}
     COMMAND ${CMAKE_COMMAND} -E make_directory "${_bw_ui_font_subset_dir}"
-    COMMAND python3 "${_bw_ui_font_subset_script}"
+    COMMAND "${Python3_EXECUTABLE}" "${_bw_ui_font_subset_script}"
         --source-dir "${_bw_ui_font_source_dir}"
         --output-dir "${_bw_ui_font_subset_dir}"
         --level "${BWS_FONT_SUBSET}"
@@ -135,6 +144,7 @@ add_library(bw_ui_foundation STATIC
     src/ScaledImageCache.cpp
     src/localization/LocalizationManager.cpp
     src/localization/LocalizationHelpers.cpp
+    src/preferences/EditorPreferences.cpp
     src/UI/OptimizedMouseHandler.cpp
     src/UI/PaintGuard.cpp
     src/interaction/InteractionLogging.cpp
@@ -201,6 +211,24 @@ target_link_libraries(bw_ui_rendering
         juce::juce_events
         juce::juce_core
 )
+if(APPLE AND BWS_BUILD_METAL_GPU)
+    target_sources(bw_ui_rendering PRIVATE
+        src/rendering/MetalContext.mm
+        src/rendering/MetalGpuDevice.mm
+        src/rendering/BwsNSViewEmbed.mm
+    )
+    set_source_files_properties(
+        src/rendering/MetalContext.mm
+        src/rendering/MetalGpuDevice.mm
+        src/rendering/BwsNSViewEmbed.mm
+        PROPERTIES COMPILE_OPTIONS "-fobjc-arc"
+    )
+    target_link_libraries(bw_ui_rendering PRIVATE
+        "-framework Metal"
+        "-framework QuartzCore"
+        "-framework AppKit"
+    )
+endif()
 set_property(TARGET bw_ui_rendering PROPERTY CXX_STANDARD 20)
 set_property(TARGET bw_ui_rendering PROPERTY CXX_EXTENSIONS OFF)
 bws_apply_hidden_visibility(bw_ui_rendering)
@@ -231,6 +259,7 @@ add_library(bw_ui_controls STATIC
     src/UI/Components/UiDropdown.cpp
     src/UI/Components/ThemedPopupMenuLookAndFeel.cpp
     src/UI/Components/ThemedTooltipWindow.cpp
+    src/UI/Components/TooltipHub.cpp
     src/UI/Components/UiTabs.cpp
     src/UI/Components/UiPanel.cpp
     src/Components/UiArcKnob.cpp

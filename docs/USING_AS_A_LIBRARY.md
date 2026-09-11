@@ -141,6 +141,8 @@ The meter API - `#include <bw_dsp_metering/Bs1770Meter.h>`, namespace `bws::audi
   `getNumChannels()`, `getNumSamples()`, and `getReadPointer(int)` (as in `Block`
   above); the test helper `PlanarBufferView` is the same shape.
 - `getMomentaryLufs()` / `getShortTermLufs()` - lock-free real-time readings.
+- `getLiveLoudnessSnapshot()` - coherent live M/S plus retained Max M/Max S validity and values.
+- `requestLiveMaximaReset()` - immediately masks retained maxima and lets the audio producer consume the reset without clearing the live windows.
 - `getIntegratedLufs()` - the gated integrated measurement; drain
   `serviceAnalytics()` first to finalize it.
 

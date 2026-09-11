@@ -170,6 +170,9 @@ public:
 
     /** ForTesting: the formatted text a segment currently renders. */
     juce::String getItemValueTextForTesting(int index) const;
+    int getNumItemsForTesting() const;
+    juce::String getItemParamIdForTesting(int index) const;
+    bool isItemLockedForTesting(int index) const;
 
     /** ForTesting: drive a segment's gesture by index (headless, no MouseEvent).
         Each returns the resulting normalized parameter value. The characterization

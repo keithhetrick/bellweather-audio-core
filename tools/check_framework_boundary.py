@@ -11,7 +11,6 @@ import pathlib
 import re
 import sys
 
-
 PATTERN = re.compile(
     r"juce::"
     r"|#\s*include\s*[<\"].*juce"
@@ -61,7 +60,10 @@ def main() -> int:
     for module in REUSABLE_MODULES:
         module_dir = modules_dir / module
         if not (module_dir / "include").is_dir():
-            print(f"FAIL: reusable module include directory not found: {module_dir / 'include'}", file=sys.stderr)
+            print(
+                f"FAIL: reusable module include directory not found: {module_dir / 'include'}",
+                file=sys.stderr,
+            )
             return 1
         for source_dir in (module_dir / "include", module_dir / "src"):
             if not source_dir.is_dir():

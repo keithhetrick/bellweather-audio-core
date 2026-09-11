@@ -71,7 +71,7 @@ enum class SizePreset
 /**
  * @brief Resizable editor base class for Weather Instrument plugins.
  *
- * Provides FabFilter-style resize and scale functionality:
+ * Provides flagship-style resize and scale functionality:
  * - Size presets via right-click menu or resize corner
  * - Scaling from 75% to 200%
  * - Full-screen mode (ESC to exit)

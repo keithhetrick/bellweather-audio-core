@@ -138,7 +138,14 @@ private:
         std::function<void()> onRequestTextEntry;
 
         bws::ui::interaction::InteractionPolicy policy_ {
-            .doubleClick = {.action = DoubleClickAction::TextEntry},
+            .doubleClick =
+                {
+                    .action = DoubleClickAction::TextEntry,
+                    .onTextEntry = {},
+                    .reset = {bws::ui::interaction::NoReset {}},
+                    .onCustom = {},
+                },
+            .diagnosticName = {},
         };
 
     private:

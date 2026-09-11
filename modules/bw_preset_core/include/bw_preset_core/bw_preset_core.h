@@ -4,6 +4,7 @@
 #pragma once
 
 #include <bw_preset_core/IPresetStateBridge.h>
+#include <bw_preset_core/IColdStateTransaction.h>
 #include <bw_preset_core/PresetCatalog.h>
 #include <bw_preset_core/PresetCodec.h>
 #include <bw_preset_core/PresetDirtyTracking.h>

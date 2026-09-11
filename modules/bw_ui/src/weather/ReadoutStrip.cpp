@@ -239,6 +239,25 @@ juce::String ReadoutStrip::getItemValueTextForTesting(int index) const
     return formatItemValue(parameters_[static_cast<size_t>(index)]);
 }
 
+int ReadoutStrip::getNumItemsForTesting() const
+{
+    return static_cast<int>(parameters_.size());
+}
+
+juce::String ReadoutStrip::getItemParamIdForTesting(int index) const
+{
+    if (index < 0 || index >= static_cast<int>(parameters_.size()))
+        return {};
+    return parameters_[static_cast<size_t>(index)].paramId;
+}
+
+bool ReadoutStrip::isItemLockedForTesting(int index) const
+{
+    if (index < 0 || index >= static_cast<int>(parameters_.size()))
+        return false;
+    return parameters_[static_cast<size_t>(index)].availability == bws::ui::kernel::AvailabilityState::Locked;
+}
+
 float ReadoutStrip::dragSegmentForTesting(int index, int pixelsUp, bws::ui::kernel::ModSet mods)
 {
     if (index < 0 || index >= static_cast<int>(parameters_.size()) || !parameters_[static_cast<size_t>(index)].vi)

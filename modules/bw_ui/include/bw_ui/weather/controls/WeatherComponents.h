@@ -170,7 +170,7 @@ private:
 // =============================================================================
 
 /**
- * FabFilter-quality circular brass toggle button for hero section controls.
+ * Flagship-quality circular brass toggle button for hero section controls.
  *
  * Visual:
  *   - Circular brass button with embossed 3D effect

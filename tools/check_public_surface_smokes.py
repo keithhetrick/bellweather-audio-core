@@ -11,7 +11,6 @@ import pathlib
 import re
 import sys
 
-
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MODULES_DOC = ROOT / "docs" / "MODULES.md"
 
@@ -19,7 +18,9 @@ MODULES_DOC = ROOT / "docs" / "MODULES.md"
 def _stable_modules() -> set[str]:
     text = MODULES_DOC.read_text(encoding="utf-8")
     modules: set[str] = set()
-    for match in re.finditer(r"^### `([^`]+)`\n(?P<body>.*?)(?=^### `|\Z)", text, flags=re.M | re.S):
+    for match in re.finditer(
+        r"^### `([^`]+)`\n(?P<body>.*?)(?=^### `|\Z)", text, flags=re.M | re.S
+    ):
         name = match.group(1)
         body = match.group("body")
         if re.search(r"^- Maturity: Stable/reusable\.", body, flags=re.M):
@@ -47,9 +48,13 @@ def main() -> int:
     missing = sorted(stable - smokes)
     extra = sorted(smokes - stable)
     if missing:
-        failures.append("Stable/reusable modules without public-surface smoke tests: " + ", ".join(missing))
+        failures.append(
+            "Stable/reusable modules without public-surface smoke tests: " + ", ".join(missing)
+        )
     if extra:
-        failures.append("Smoke tests for modules not documented as Stable/reusable: " + ", ".join(extra))
+        failures.append(
+            "Smoke tests for modules not documented as Stable/reusable: " + ", ".join(extra)
+        )
 
     if failures:
         print("\n".join("ERROR: " + failure for failure in failures), file=sys.stderr)

@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "contract": "docs/testing/contracts/bws-barometer-behavioral-lock.md",
+  "sonic_critical_files": ["plugins/production/BwsBarometer/src/BarometerProcessor.cpp"],
+  "sonic_critical_dsp_modules": [
+    "modules/bw_dsp_processors/include/bw_dsp_processors/StereoBalancer.h",
+    "modules/bw_dsp_processors/include/bw_dsp_processors/MonoSum.h",
+    "modules/bw_dsp_processors/include/bw_dsp_processors/ChannelSwap.h",
+    "modules/bw_dsp_processors/include/bw_dsp_processors/ChannelSolo.h",
+    "modules/bw_dsp_core/include/bw_dsp_core/PhaseInverter.h"
+  ],
+  "co_owned_modules_not_hashed": {
+    "modules/bw_dsp_processors/include/bw_dsp_processors/StereoWidth.h": "Also consumed by BwsPressure, bw_dsp_effects and bw_bpts_core. A file hash here would turn any Pressure-driven edit into a Barometer lock failure, training re-blessing without reading. Its behaviour for Barometer is covered by I9 and I10 and by the audio-output SHA, which fire only when output actually moves."
+  },
+  "sonic_critical_params": [
+    "gain",
+    "phaseL",
+    "phaseR",
+    "balance",
+    "dc_filter",
+    "mono",
+    "width",
+    "swapLR",
+    "soloL",
+    "soloR",
+    "outTrim"
+  ],
+  "evidence_params": ["phaseLink"],
+  "evidence_files": [
+    "plugins/production/BwsBarometer/tests/baselines/dsp_lock_baseline.json",
+    "plugins/production/BwsBarometer/tests/baselines/audio_output_baseline.json"
+  ],
+  "volatile_allowlist": [],
+  "bol_missing_baseline": "skip"
+}

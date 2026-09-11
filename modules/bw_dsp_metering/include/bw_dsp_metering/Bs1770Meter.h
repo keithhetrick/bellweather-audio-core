@@ -46,6 +46,17 @@ class Bs1770Meter : public detail::LoudnessAnalyticsBridge<Bs1770Meter>
 public:
     using AnalyticsMode = detail::AnalyticsMode;
 
+    struct LiveLoudnessSnapshot
+    {
+        float momentaryLufs {detail::kMinLufs};
+        float shortTermLufs {detail::kMinLufs};
+        float momentaryMaximumLufs {detail::kMinLufs};
+        float shortTermMaximumLufs {detail::kMinLufs};
+        bool momentaryMaximumValid {false};
+        bool shortTermMaximumValid {false};
+        bool coherent {false};
+    };
+
     static constexpr int kMaxChannels = 2;
     static constexpr float kMinLufs = detail::kMinLufs;
     static constexpr float kAbsoluteThresholdLufs = detail::kAbsoluteThresholdLufs;
@@ -141,10 +152,34 @@ public:
                 ++historyCount_;
 
             const double momentaryMeanSquare = windowMeanSquare(kMomentarySubSteps);
-            momentaryLufs_.store(clampLufs(momentaryMeanSquare), std::memory_order_relaxed);
-
             const double shortTermMeanSquare = windowMeanSquare(kShortTermSubSteps);
-            shortTermLufs_.store(clampLufs(shortTermMeanSquare), std::memory_order_relaxed);
+            const float momentary = clampLufs(momentaryMeanSquare);
+            const float shortTerm = clampLufs(shortTermMeanSquare);
+            const bool resetMaxima = liveMaximaResetPending_.exchange(false, std::memory_order_acq_rel);
+            if (resetMaxima)
+            {
+                momentaryMaximumLufs_.store(kMinLufs, std::memory_order_relaxed);
+                shortTermMaximumLufs_.store(kMinLufs, std::memory_order_relaxed);
+                momentaryMaximumValid_.store(false, std::memory_order_relaxed);
+                shortTermMaximumValid_.store(false, std::memory_order_relaxed);
+            }
+
+            liveSnapshotSequence_.fetch_add(1, std::memory_order_acq_rel);
+            momentaryLufs_.store(momentary, std::memory_order_relaxed);
+            shortTermLufs_.store(shortTerm, std::memory_order_relaxed);
+            if (historyCount_ >= static_cast<std::size_t>(kMomentarySubSteps))
+            {
+                momentaryMaximumLufs_.store(std::max(momentaryMaximumLufs_.load(std::memory_order_relaxed), momentary),
+                                            std::memory_order_relaxed);
+                momentaryMaximumValid_.store(true, std::memory_order_relaxed);
+            }
+            if (historyCount_ >= static_cast<std::size_t>(kShortTermSubSteps))
+            {
+                shortTermMaximumLufs_.store(std::max(shortTermMaximumLufs_.load(std::memory_order_relaxed), shortTerm),
+                                            std::memory_order_relaxed);
+                shortTermMaximumValid_.store(true, std::memory_order_relaxed);
+            }
+            liveSnapshotSequence_.fetch_add(1, std::memory_order_release);
 
             // Emit one gating block per 100 ms (every 20 sub-steps), using the
             // current 400 ms momentary / 3 s short-term windows.
@@ -169,6 +204,37 @@ public:
 
     float getMomentaryLufs() const noexcept { return momentaryLufs_.load(std::memory_order_relaxed); }
     float getShortTermLufs() const noexcept { return shortTermLufs_.load(std::memory_order_relaxed); }
+
+    LiveLoudnessSnapshot getLiveLoudnessSnapshot() const noexcept
+    {
+        LiveLoudnessSnapshot snapshot;
+        for (int attempt = 0; attempt < 8; ++attempt)
+        {
+            const auto before = liveSnapshotSequence_.load(std::memory_order_acquire);
+            if ((before & 1U) != 0U)
+                continue;
+            snapshot.momentaryLufs = momentaryLufs_.load(std::memory_order_relaxed);
+            snapshot.shortTermLufs = shortTermLufs_.load(std::memory_order_relaxed);
+            snapshot.momentaryMaximumLufs = momentaryMaximumLufs_.load(std::memory_order_relaxed);
+            snapshot.shortTermMaximumLufs = shortTermMaximumLufs_.load(std::memory_order_relaxed);
+            snapshot.momentaryMaximumValid = momentaryMaximumValid_.load(std::memory_order_relaxed);
+            snapshot.shortTermMaximumValid = shortTermMaximumValid_.load(std::memory_order_relaxed);
+            const auto after = liveSnapshotSequence_.load(std::memory_order_acquire);
+            if (before == after && (after & 1U) == 0U)
+            {
+                snapshot.coherent = true;
+                break;
+            }
+        }
+        if (liveMaximaResetPending_.load(std::memory_order_acquire))
+        {
+            snapshot.momentaryMaximumValid = false;
+            snapshot.shortTermMaximumValid = false;
+        }
+        return snapshot;
+    }
+
+    void requestLiveMaximaReset() noexcept { liveMaximaResetPending_.store(true, std::memory_order_release); }
 
 private:
     struct BiquadCoeffs
@@ -312,6 +378,11 @@ private:
         gatingSubStepCounter_ = 0;
         momentaryLufs_.store(kMinLufs, std::memory_order_relaxed);
         shortTermLufs_.store(kMinLufs, std::memory_order_relaxed);
+        momentaryMaximumLufs_.store(kMinLufs, std::memory_order_relaxed);
+        shortTermMaximumLufs_.store(kMinLufs, std::memory_order_relaxed);
+        momentaryMaximumValid_.store(false, std::memory_order_relaxed);
+        shortTermMaximumValid_.store(false, std::memory_order_relaxed);
+        liveMaximaResetPending_.store(false, std::memory_order_relaxed);
     }
 
     double windowMeanSquare(std::size_t requested) const noexcept
@@ -498,6 +569,12 @@ private:
 
     std::atomic<float> momentaryLufs_ {kMinLufs};
     std::atomic<float> shortTermLufs_ {kMinLufs};
+    std::atomic<float> momentaryMaximumLufs_ {kMinLufs};
+    std::atomic<float> shortTermMaximumLufs_ {kMinLufs};
+    std::atomic<bool> momentaryMaximumValid_ {false};
+    std::atomic<bool> shortTermMaximumValid_ {false};
+    std::atomic<bool> liveMaximaResetPending_ {false};
+    std::atomic<std::uint32_t> liveSnapshotSequence_ {0};
 
     // Gating grids exist only for analytics modes (allocated in prepare(), off
     // the audio thread). LiveOnly meters leave them null and carry no gating

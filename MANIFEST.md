@@ -24,6 +24,7 @@ is empty, if junk files appear, or if a `modules/bw_*` directory lacks a
 - `.clang-tidy` - Sharpened bug-class lint config (bugprone/concurrency) for contributors.
 - `.dockerignore` - Docker build-context filter for the zero-setup quickstart and lane images.
 - `.github` - Public GitHub automation directory.
+- `.github/FUNDING.yml` - Native GitHub funding link to Bellweather's canonical voluntary-support page.
 - `.github/ISSUE_TEMPLATE` - Public issue templates for bug reports and feature requests.
 - `.github/ISSUE_TEMPLATE/bug_report.md` - Bug report template focused on reproducible library/plugin-source issues.
 - `.github/ISSUE_TEMPLATE/feature_request.md` - Feature request template for public API and reference-plugin requests.

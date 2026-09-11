@@ -1,0 +1,6 @@
+{
+  "oneLine": "Fast gain staging and loudness decisions without interrupting the session.",
+  "shortDescription": "A free metering utility for gain staging, LUFS, true peak, phase, width, balance, and rapid level checks.",
+  "longDescription": "Move from input trim to delivery confidence in one focused utility. Precision gain control, LUFS and true-peak metering, phase tools, stereo checks, channel solo, presets, and instant A/B comparison keep routine level decisions visible and fast. Zero-latency processing and a resizable interface make it equally useful while tracking, mixing, and preparing a master.",
+  "tags": ["gain staging", "loudness meter", "LUFS", "true peak", "stereo utility", "metering"]
+}

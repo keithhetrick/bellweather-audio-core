@@ -132,6 +132,7 @@ docker run --rm bellweather-audio-core:gcc-system-catch2
 - **True-peak** - BS.1770-5 §3.5 with 4× oversampling, checked against the
   Nielsen/Lund inter-sample analytic bound.
 - **Loudness range (LRA)** - EBU Tech 3342.
+- **Retained live maxima** - Maximum Momentary and Maximum Short-term update only after complete 400 ms and 3 s windows and expose a coherent lock-free snapshot.
 - **Sample-rate correctness** - 44.1, 48, 88.2, 96, 176.4, and 192 kHz, each
   matched to the 48 kHz reading, where the meter uses the published BS.1770
   coefficient table verbatim.

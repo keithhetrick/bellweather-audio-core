@@ -8,8 +8,9 @@ Deterministic from spec formulas - no RNG, no audio-file inputs. Output
 goes to the directory passed via --out (default: ./tech3341_out/). Each
 case writes <out>/case_N.wav at 48 kHz stereo float32.
 
-EBU Tech 3341 v2.0 §4.1 reference signals (subset relevant to stereo
-LUFS conformance):
+EBU Tech 3341 - 2023 (v4.0) Table 1 reference signals (subset relevant to
+stereo LUFS conformance; definitions verified against the 2023 primary text,
+values unchanged from the earlier v2.0 transcription):
 
   Case 1: 1 kHz stereo sine, 20 s, calibrated to -23.0 LUFS integrated
   Case 2: 1 kHz stereo sine, 60 s, calibrated to -33.0 LUFS integrated
@@ -18,6 +19,8 @@ LUFS conformance):
   Case 4: 10 s @-72 / 10 s @-36 / 60 s @-23 / 10 s @-36 LUFS - expected
           integrated -23.0 LUFS (-72 block dropped by the -70 absolute gate;
           -36 blocks fail the relative gate)
+  Case 5: 20 s @-26 / 20.1 s @-20 / 20 s @-26 LUFS - expected integrated
+          -23.0 LUFS (all blocks pass both gates; energy-weighted mean)
 
 Stereo mono-content (L=R) calibration:
   LUFS = -0.691 + 10·log10(Σ Gi·zi) = -0.691 + 20·log10(A) + 20·log10|H_K(1kHz)|
@@ -37,7 +40,8 @@ import sys
 from pathlib import Path
 
 import numpy as np
-
+from bw_audiotest.analysis import independent_true_peak_db as _independent_true_peak_db
+from bw_audiotest.analysis import windowed_sinc_lowpass as _lowpass_taps
 
 SAMPLE_RATE = 48000
 NUM_CHANNELS = 2
@@ -79,7 +83,7 @@ def amplitude_for_lufs(target_lufs: float) -> float:
 
 def sine_block(seconds: float, amplitude: float) -> np.ndarray:
     """Mono 1 kHz sine of given duration + peak amplitude. Returns float32."""
-    n = int(round(seconds * SAMPLE_RATE))
+    n = round(seconds * SAMPLE_RATE)
     t = np.arange(n, dtype=np.float64) / SAMPLE_RATE
     return (amplitude * np.sin(2.0 * math.pi * FREQ_HZ * t)).astype(np.float32)
 
@@ -99,14 +103,21 @@ def to_stereo(mono: np.ndarray) -> np.ndarray:
 def write_wav_float32(path: Path, interleaved: np.ndarray) -> None:
     """Write a 32-bit float WAV (WAVE_FORMAT_IEEE_FLOAT, code 3).
     `interleaved` is a flat float32 array of [L0, R0, L1, R1, ...]."""
-    n_samples_per_ch = interleaved.size // NUM_CHANNELS
+    interleaved.size // NUM_CHANNELS
     byte_rate = SAMPLE_RATE * NUM_CHANNELS * 4
     block_align = NUM_CHANNELS * 4
     data_bytes = interleaved.tobytes()
     data_len = len(data_bytes)
     fmt_chunk = struct.pack(
         "<4sIHHIIHH",
-        b"fmt ", 16, 3, NUM_CHANNELS, SAMPLE_RATE, byte_rate, block_align, 32,
+        b"fmt ",
+        16,
+        3,
+        NUM_CHANNELS,
+        SAMPLE_RATE,
+        byte_rate,
+        block_align,
+        32,
     )
     data_chunk_hdr = struct.pack("<4sI", b"data", data_len)
     riff_size = 4 + len(fmt_chunk) + len(data_chunk_hdr) + data_len
@@ -154,31 +165,37 @@ def case_4() -> np.ndarray:
     )
 
 
+def case_5() -> np.ndarray:
+    # EBU Tech 3341 case 5: 20 s @-26 / 20.1 s @-20 / 20 s @-26. Every block
+    # passes both gates (-26 sits within 10 LU of the gated mean), so the
+    # result is the pure energy-weighted mean across levels: -23.0. A meter
+    # that wrongly gates the -26 blocks out reads -20.0 instead.
+    a_quiet = amplitude_for_lufs(-26.0)
+    a_loud = amplitude_for_lufs(-20.0)
+    return concat_blocks(
+        sine_block(20.0, a_quiet),
+        sine_block(20.1, a_loud),
+        sine_block(20.0, a_quiet),
+    )
+
+
 def _fs4_burst_in_fs6_hi(seconds: float) -> np.ndarray:
     """At 4·fs: an fs/6 sine (amp 0.50) with one period of an fs/4 sine
     (amp 1.00) replacing a window at a host zero-up crossing (value-continuous
     splice; the anti-alias filter smooths the residual slope step)."""
-    n = int(round(seconds * SR_HI))
+    n = round(seconds * SR_HI)
     t = np.arange(n, dtype=np.float64) / SR_HI
     fs6 = SAMPLE_RATE / 6.0
     fs4 = SAMPLE_RATE / 4.0
     host = 0.50 * np.sin(2.0 * math.pi * fs6 * t)
-    period = int(round(SR_HI / fs4))
+    period = round(SR_HI / fs4)
     host_period = SR_HI / fs6
-    start = int(round(math.ceil((n // 2) / host_period) * host_period))
+    start = round(math.ceil((n // 2) / host_period) * host_period)
     burst_t = np.arange(period, dtype=np.float64) / SR_HI
     burst = 1.00 * np.sin(2.0 * math.pi * fs4 * burst_t)
     sig = host.copy()
-    sig[start:start + period] = burst
+    sig[start : start + period] = burst
     return sig
-
-
-def _lowpass_taps(numtaps: int, cutoff_hz: float, fs: float, window) -> np.ndarray:
-    """Windowed-sinc lowpass, unity DC gain. fc as a fraction of fs."""
-    fc = cutoff_hz / fs
-    n = np.arange(numtaps, dtype=np.float64) - (numtaps - 1) / 2.0
-    h = 2.0 * fc * np.sinc(2.0 * fc * n) * window(numtaps)
-    return h / np.sum(h)
 
 
 def _anti_alias_decimate(sig_hi: np.ndarray, offset: int) -> np.ndarray:
@@ -187,7 +204,7 @@ def _anti_alias_decimate(sig_hi: np.ndarray, offset: int) -> np.ndarray:
     taps = _lowpass_taps(193, SAMPLE_RATE / 2.0, SR_HI, np.hamming)
     filtered = np.convolve(sig_hi, taps, mode="full")[: sig_hi.size]
     delay = (len(taps) - 1) // 2
-    return filtered[delay + offset::OVERSAMPLE_HI].astype(np.float32)
+    return filtered[delay + offset :: OVERSAMPLE_HI].astype(np.float32)
 
 
 def _embedded_isp_case(offset: int) -> np.ndarray:
@@ -210,16 +227,9 @@ def case_23() -> np.ndarray:
     return _embedded_isp_case(3)
 
 
-def independent_true_peak_db(mono: np.ndarray, oversample: int = 4) -> float:
-    """True peak via zero-stuff + Blackman-windowed-sinc interpolation - a
-    distinct window from both the Hamming synthesis filter and the C++ Hann-sinc
-    meter, so agreement across the three is meaningful."""
-    up = np.zeros(mono.size * oversample, dtype=np.float64)
-    up[::oversample] = mono.astype(np.float64)
-    taps = _lowpass_taps(193, SAMPLE_RATE / 2.0, SAMPLE_RATE * oversample, np.blackman) * oversample
-    filt = np.convolve(up, taps, mode="same")
-    peak = float(np.max(np.abs(filt)))
-    return 20.0 * math.log10(peak) if peak > 0.0 else -120.0
+# Canonical home is bw_audiotest.analysis; re-exported here so this script's
+# --verify-true-peak self-check and existing call sites keep working.
+independent_true_peak_db = _independent_true_peak_db
 
 
 CASES = {
@@ -227,6 +237,7 @@ CASES = {
     "case_2.wav": case_2,
     "case_3.wav": case_3,
     "case_4.wav": case_4,
+    "case_5.wav": case_5,
     "case_20.wav": case_20,
     "case_21.wav": case_21,
     "case_22.wav": case_22,
