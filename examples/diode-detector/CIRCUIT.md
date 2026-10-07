@@ -115,6 +115,7 @@ docker build --platform linux/amd64 -t bws-diode-reference examples/diode-detect
 docker image inspect bws-diode-reference > "$BWS_CIRCUIT_RESULTS/image.json"
 BWS_CIRCUIT_IMAGE="$(docker image inspect --format '{{.Id}}' bws-diode-reference)"
 docker run --rm --platform linux/amd64 --network none \
+  --user "$(id -u):$(id -g)" \
   -v "$PWD:/source:ro" -v "$BWS_CIRCUIT_RESULTS:/results" \
   "$BWS_CIRCUIT_IMAGE" /results/run \
   2>&1 | tee "$BWS_CIRCUIT_RESULTS/run.log"
@@ -126,6 +127,10 @@ build diagnostics and complete numerical evidence. A measured single run took
 about 130 seconds after provisioning; build caches, emulation and host load
 change runtime. Three-run qualification retained about 2.34 GB including builds;
 the reference image occupied about 385 MB. These are observations, not limits.
+
+The container runs as the invoking user so that results, including private
+temporary directories, remain readable by that user and CI artifact collection.
+Do not remove `--user` when reproducing on Linux.
 
 Build provisioning needs network access; experiment execution does not. The base
 image digest, ngspice source checksum, Catch2 commit and Python wheel hashes pin

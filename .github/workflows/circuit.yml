@@ -17,6 +17,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/circuit-results"
           docker run --rm --platform linux/amd64 --network none \
+            --user "$(id -u):$(id -g)" \
             -v "$GITHUB_WORKSPACE:/source:ro" -v "$RUNNER_TEMP/circuit-results:/results" \
             --entrypoint python bws-diode-reference /source/examples/diode-detector/qualify.py /results/run
       - name: Retain circuit evidence

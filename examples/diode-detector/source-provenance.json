@@ -85,9 +85,9 @@
   },
   {
     "canonical": "tools/dsp-modeling/CIRCUIT.md",
-    "canonical_sha256": "13d206db6c0b02beba0d46e1d1825a5830f5f6bb96cc360c64d7d4ca2a69b153",
+    "canonical_sha256": "0a5318cadd50849db02726246c1df37c0619b615186800d1aad6279d57133ebd",
     "exported": "examples/diode-detector/CIRCUIT.md",
-    "exported_sha256": "13d206db6c0b02beba0d46e1d1825a5830f5f6bb96cc360c64d7d4ca2a69b153"
+    "exported_sha256": "0a5318cadd50849db02726246c1df37c0619b615186800d1aad6279d57133ebd"
   },
   {
     "canonical": "tools/dsp-modeling/requirements.lock",
