@@ -1,0 +1,22 @@
+[
+  "CMakeLists.txt",
+  "DiodeDetector.h",
+  "render.cpp",
+  "diode_detector_test.cpp",
+  "checks.py",
+  "checks_test.py",
+  "reference.py",
+  "run_experiment.py",
+  "reproduce.py",
+  "reproduce.sh",
+  "circuit_process.py",
+  "circuit_process_test.py",
+  "simulator.py",
+  "simulator_test.py",
+  "CIRCUIT.md",
+  "requirements.lock",
+  "Dockerfile",
+  "circuit_files.json",
+  "reproduce_test.py",
+  "qualify.py"
+]

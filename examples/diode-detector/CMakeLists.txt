@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.22...3.31)
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    project(bws_diode_experiment LANGUAGES CXX)
+    include(CTest)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
+endif()
+
+add_executable(bws-diode-render render.cpp)
+target_compile_features(bws-diode-render PRIVATE cxx_std_17)
+
+if(BUILD_TESTING)
+    include(BwsCatch2)
+    bws_fetch_catch2()
+    add_executable(diode_detector_tests diode_detector_test.cpp)
+    target_compile_features(diode_detector_tests PRIVATE cxx_std_17)
+    target_link_libraries(diode_detector_tests PRIVATE Catch2::Catch2WithMain)
+    add_test(NAME diode_detector_contract COMMAND diode_detector_tests)
+endif()

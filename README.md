@@ -1,9 +1,48 @@
 # Bellweather Audio Core
 
+> **Last Verified:** 2026-10-07
+
 Bellweather Audio Core is an open-source C++ audio-core library from
 **Bellweather Studios**: BS.1770 / EBU Tech 3341 metering, framework-neutral
-DSP/core modules, real-time-safety utilities, and **Barometer** as a
-source-built JUCE reference plugin.
+DSP/core modules and real-time-safety utilities. It also contains two separate,
+optional examples: the Barometer JUCE plugin and a diode circuit model.
+
+## Choose what to run
+
+| Component             | Purpose                                                | Entry point                                  | What its results establish                                                                   |
+| --------------------- | ------------------------------------------------------ | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Audio-core libraries  | Reusable C++ audio infrastructure and metering         | Library quickstart below                     | Public API consumption, framework separation and metering conformance                        |
+| Barometer             | Transparent gain and metering plugin built with JUCE   | Optional `barometer-clang` Docker lane below | Plugin source build; Barometer is not an analog hardware model                               |
+| Diode circuit example | Native C++ implementation of a specified ideal circuit | `examples/diode-detector/CIRCUIT.md`         | Numerical comparisons with Python, analytic DC and ngspice; no named-hardware fidelity claim |
+
+The circuit example has its own build, dependencies, reproduction command and
+results. It runs without building Barometer or JUCE. Barometer does not use the
+diode model. The default library quickstart runs library checks; it does not run
+the circuit experiment. A successful Barometer build provides no circuit-model
+validation, and circuit agreement provides no plugin or DAW validation.
+
+For circuit modeling, start with `examples/diode-detector/CIRCUIT.md`.
+
+## Source ownership and examples
+
+Bellweather maintains the source in its internal monorepo and generates this
+public repository from selected source files. The diode example exports the
+same model, tests and reproduction workflow used internally. It is maintained
+as part of audio-core, with its own standalone entry point, rather than as a
+separate modeling repository or a separately rewritten demonstration.
+
+The example's `source-provenance.json` maps canonical files to exported files
+and records both hashes after export transformations. The public source archive
+contains the files needed to run the example; access to the internal repository
+is not required. Dependency provisioning is documented in its circuit guide.
+
+Each example declares its target, data origin, dependencies and supported
+conclusions. Adding a model example does not mean that Barometer uses that model.
+Public inclusion and production-plugin integration are separate decisions.
+The diode example uses generated test voltages and computed references; it does
+not include recordings or datasets from a hardware unit.
+
+## Library and plugin overview
 
 This is not a prebuilt plugin download. The libraries are the point; Barometer
 shows how the library surface is adapted into JUCE without making JUCE the
@@ -30,6 +69,9 @@ This tree is intentionally narrow:
   real-time-safety helpers, FFT support, and framework-neutral ports.
 - **Barometer reference-plugin support:** the JUCE adapter, UI, preset, and
   example support needed to build the Barometer source plugin locally.
+- **Standalone circuit example:** an ideal diode detector, its numerical
+  references and a separate reproduction workflow. It is not an installed
+  library API or part of the Barometer signal path.
 - **Not included:** commercial product services, certification helpers,
   licensing/update services, installers, prebuilt plugin binaries,
   signing/notarization artifacts, and unreleased plugin code.
@@ -48,8 +90,46 @@ proof is the library surface: public-surface compile/link checks, JUCE separatio
 validation, manifest coverage, and standards-oriented metering tests.
 
 Barometer is included as source-built reference plugin code. Bellweather Audio
-Core v1.0.0 does not publish prebuilt Barometer VST3/AU binaries, installers,
+Core does not publish prebuilt Barometer VST3/AU binaries, installers,
 codesigned artifacts, notarized packages, or redistributable plugin bundles.
+
+## Reproduce an identified revision
+
+For a review, use the full public Git commit SHA supplied with the qualification
+record. `main` is a moving branch, not an immutable experiment identity. A release
+tag is a convenient name, but retain its resolved commit SHA as well. Do not infer
+that a candidate is released from a version in `CHANGELOG.md` or an archive name.
+
+```sh
+git clone https://github.com/keithhetrick/bellweather-audio-core.git
+cd bellweather-audio-core
+# Replace REVIEW_COMMIT with the full public commit SHA from the review record.
+git checkout --detach REVIEW_COMMIT
+git rev-parse HEAD
+git status --porcelain
+```
+
+Expected: the printed SHA matches the review record and status is empty. Run the
+commands below from this repository root unless a section states otherwise.
+For an archive, verify its supplied SHA-256 before extracting; it has no Git
+metadata, so retain the archive checksum as its identity. The archive contains
+source, not downloaded dependencies or a prebuilt toolchain.
+
+Use Docker for the shortest setup path. Native builds are useful for inspecting
+the code with your own compiler. First provisioning requires internet access.
+The Docker base is pinned by digest and fetched Catch2 is pinned by commit, but
+OS package feeds and native system dependencies can change. Record the image ID
+(`docker image inspect --format '{{.Id}}' IMAGE`), compiler and CMake versions
+with the source identity. These procedures reproduce declared checks and
+their specified requirements; they do not promise identical binaries, timings, random
+signing keys or report bytes across machines. Never silently substitute a
+dependency or relax a tolerance to obtain a pass.
+
+A complete run must exit zero and print its documented success summary. Preserve
+stdout/stderr, command arguments and exit status outside the source tree. On
+failure, retain the first log, correct its stated cause, and retry in a new build
+or output directory. Passing one lane does not qualify another; see
+[TESTING.md](TESTING.md) and the actual `.github/workflows/` job definitions.
 
 ## Quickstart (Docker - no toolchain setup)
 
@@ -63,7 +143,7 @@ From any terminal:
 ```sh
 git clone https://github.com/keithhetrick/bellweather-audio-core.git
 cd bellweather-audio-core
-docker build -t bellweather-audio-core .      # builds the image, ~2 min (needs internet)
+docker build --target clang-fetch -t bellweather-audio-core . # needs internet
 docker run --rm bellweather-audio-core        # runs the proofs
 ```
 

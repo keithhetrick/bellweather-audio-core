@@ -4,6 +4,8 @@
 #include "bw_ui/Components/UiToggle.h"
 #include "bw_ui/generated/BwTokens.h"
 
+#include <algorithm>
+
 namespace bws::ui
 {
 namespace
@@ -47,6 +49,7 @@ UiToggle::UiToggle(const UiThemeResolved& themeIn, Size sizeIn)
     setInterceptsMouseClicks(true, true);
     label.setKernelTheme(kernelTheme);
     label.setTextRole(kernel::TextRole::ControlText);
+    label.setInterceptsMouseClicks(false, false);
 }
 
 void UiToggle::setTheme(const UiThemeResolved& newTheme)
@@ -88,7 +91,12 @@ void UiToggle::setLabel(const juce::String& text)
 
 void UiToggle::setDisabled(bool shouldDisable)
 {
-    state.availability = shouldDisable ? kernel::AvailabilityState::Disabled : kernel::AvailabilityState::Enabled;
+    const auto nextAvailability =
+        shouldDisable ? kernel::AvailabilityState::Disabled : kernel::AvailabilityState::Enabled;
+    if (state.availability == nextAvailability)
+        return;
+
+    state.availability = nextAvailability;
     pointerDown_ = false;
     state = kernel::resolveControlState(state);
     setInterceptsMouseClicks(kernel::isInteractive(state.availability), kernel::isInteractive(state.availability));
@@ -119,6 +127,19 @@ float UiToggle::trackWidth() const
 float UiToggle::cornerRadius() const
 {
     return trackHeight() * 0.5f;
+}
+
+float UiToggle::focusRingPad() const
+{
+    return std::max(theme.surfaces.strokeThin * 2.0f, kernelTheme.spacing.xxs * scale);
+}
+
+float UiToggle::focusRingOutset() const
+{
+    // Reserve one additional component pixel for raster antialias coverage.
+    // A mathematically tangent stroke still shades the boundary pixel, which
+    // makes the ring appear clipped against the component edge.
+    return focusRingPad() + theme.surfaces.strokeThin * 0.5f + 1.0f;
 }
 
 UiToggle::PaintSpec UiToggle::currentSpec() const
@@ -159,9 +180,9 @@ UiToggle::PaintSpec UiToggle::currentSpec() const
 
 juce::Rectangle<float> UiToggle::trackBounds() const
 {
-    const float h = trackHeight();
-    const float w = trackWidth();
-    auto bounds = getLocalBounds().toFloat();
+    auto bounds = getLocalBounds().toFloat().reduced(focusRingOutset());
+    const float h = std::min(trackHeight(), std::max(1.0f, bounds.getHeight()));
+    const float w = std::min(trackWidth(), std::max(1.0f, bounds.getWidth()));
     const float x = bounds.getX();
     const float y = bounds.getCentreY() - h * 0.5f;
     return {x, y, w, h};
@@ -196,7 +217,7 @@ void UiToggle::paint(juce::Graphics& g)
 
     if (state.focused)
     {
-        const float pad = juce::jmax(theme.surfaces.strokeThin * 2.0f, kernelTheme.spacing.xxs * scale);
+        const float pad = focusRingPad();
         auto focus = track.expanded(pad);
         g.setColour(theme.colors.accent1.withAlpha(bws::tokens::shared::opacity::ui_toggle::FOCUS_RING));
         g.drawRoundedRectangle(focus, cornerRadius() + pad, theme.surfaces.strokeThin);
@@ -209,8 +230,8 @@ void UiToggle::resized()
     if (label.isVisible())
     {
         const int gap = (int)std::round(kernelTheme.spacing.sm * scale);
-        const int trackW = (int)std::ceil(trackWidth());
-        auto trackArea = bounds.removeFromLeft(trackW + gap);
+        const int visualTrackRight = (int)std::ceil(trackBounds().getRight() + focusRingOutset());
+        auto trackArea = bounds.removeFromLeft(visualTrackRight + gap);
         juce::ignoreUnused(trackArea);
         label.setBounds(bounds);
     }

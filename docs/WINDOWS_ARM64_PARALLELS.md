@@ -185,7 +185,7 @@ prlctl exec "Windows 11" --current-user powershell.exe -NoProfile -ExecutionPoli
 Success ends with:
 
 ```text
-100% tests passed, 0 tests failed out of 161
+100% tests passed, 0 tests failed out of <registered test count>
 ```
 
 The count can increase as coverage grows. The Windows ARM64 lane is currently

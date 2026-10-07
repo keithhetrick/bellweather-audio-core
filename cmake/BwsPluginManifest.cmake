@@ -9,6 +9,7 @@ function(bws_load_plugin_manifest)
         message(FATAL_ERROR "Plugin manifest not found: ${_manifest_path}")
     endif()
     file(READ "${_manifest_path}" _json)
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_manifest_path}")
     set_property(GLOBAL PROPERTY BWS_PLUGIN_MANIFEST_JSON "${_json}")
 
     # Build the plugin name list (replaces plugins_registry.cmake)

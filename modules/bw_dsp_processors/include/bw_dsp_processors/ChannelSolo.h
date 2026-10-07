@@ -6,6 +6,7 @@
 #include <cstring>
 #include <bw_dsp_core/concepts/DspConcepts.h>
 #include <bw_audio_types/BufferView.h>
+#include <bw_audio_types/BwsLinearSmoothedValue.h>
 
 namespace bws
 {
@@ -58,15 +59,16 @@ public:
     /**
      * @brief Prepares the processor for processing
      *
-     * @param sampleRate Sample rate in Hz (unused)
+     * @param sampleRate Finite positive sample rate; rounded 10 ms length fits int
      * @param maxBlockSize Maximum block size (unused)
      *
      * @note Not real-time safe. Call before audio processing starts.
      */
     void prepare(double sampleRate, int maxBlockSize)
     {
-        (void)sampleRate;
         (void)maxBlockSize;
+        leftGain_.reset(sampleRate, 0.010);
+        rightGain_.reset(sampleRate, 0.010);
         reset();
     }
 
@@ -81,6 +83,9 @@ public:
     {
         soloLeft_.store(false, std::memory_order_relaxed);
         soloRight_.store(false, std::memory_order_relaxed);
+        leftGain_.setCurrentAndTargetValue(1.0f);
+        rightGain_.setCurrentAndTargetValue(1.0f);
+        initialized_ = false;
     }
 
     /**
@@ -123,6 +128,9 @@ public:
      * - Solo right only: Left channel muted
      * - Both soloed: Both channels pass through
      * - Neither soloed: Both channels pass through
+     * - Runtime target changes use independent 10 ms linear amplitude ramps.
+     * - First nonempty stereo call after prepare/reset applies flags immediately.
+     * - Mono/empty calls do not initialize or advance the stereo ramps.
      *
      * @param buffer Audio buffer to process
      *
@@ -139,22 +147,46 @@ public:
         const bool soloL = soloLeft_.load(std::memory_order_relaxed);
         const bool soloR = soloRight_.load(std::memory_order_relaxed);
 
-        if (soloL && !soloR)
+        const float leftTarget = soloR && !soloL ? 0.0f : 1.0f;
+        const float rightTarget = soloL && !soloR ? 0.0f : 1.0f;
+        if (!initialized_)
         {
-            // Solo left: mute right channel
-            std::memset(buffer.channel(1), 0, sizeof(float) * static_cast<size_t>(numSamples));
+            // Restored/startup Solo must not leak audio before the first ramp.
+            leftGain_.setCurrentAndTargetValue(leftTarget);
+            rightGain_.setCurrentAndTargetValue(rightTarget);
+            initialized_ = true;
         }
-        else if (soloR && !soloL)
+        else
         {
-            // Solo right: mute left channel
-            std::memset(buffer.channel(0), 0, sizeof(float) * static_cast<size_t>(numSamples));
+            leftGain_.setTargetValue(leftTarget);
+            rightGain_.setTargetValue(rightTarget);
         }
-        // If both solo'd or neither, play both channels
+        applyGain(buffer.channel(0), numSamples, leftGain_);
+        applyGain(buffer.channel(1), numSamples, rightGain_);
     }
 
 private:
+    // Contract: CS-3/5/6.
+    static void applyGain(float* samples, int count, bws::domain::BwsLinearSmoothedValue& gain)
+    {
+        if (!gain.isSmoothing())
+        {
+            if (gain.getCurrentValue() == 0.0f)
+                std::memset(samples, 0, sizeof(float) * static_cast<size_t>(count));
+            return; // Settled unity is bit-exact passthrough.
+        }
+        for (int i = 0; i < count; ++i)
+        {
+            const float value = gain.getNextValue();
+            samples[i] = value == 0.0f ? 0.0f : samples[i] * value;
+        }
+    }
+
     std::atomic<bool> soloLeft_ {false};  ///< Solo left channel flag
     std::atomic<bool> soloRight_ {false}; ///< Solo right channel flag
+    bws::domain::BwsLinearSmoothedValue leftGain_ {1.0f};
+    bws::domain::BwsLinearSmoothedValue rightGain_ {1.0f};
+    bool initialized_ {false}; // Audio-thread state; reset/prepare cannot race process.
 };
 
 } // namespace dsp

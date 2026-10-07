@@ -80,7 +80,7 @@ ReadoutStrip::ReadoutStrip(juce::AudioProcessorValueTreeState& apvts)
     setWantsKeyboardFocus(false);
 
     // Start timer for value updates (30Hz) only when visible in the hierarchy.
-    if (shouldRunReadoutTimer(*this))
+    if (!externallyDriven_ && shouldRunReadoutTimer(*this))
         startTimerHz(30);
 }
 
@@ -325,12 +325,28 @@ int ReadoutStrip::getStripHeight() const
 
 void ReadoutStrip::timerCallback()
 {
-    if (!shouldRunReadoutTimer(*this))
+    if (externallyDriven_ || !shouldRunReadoutTimer(*this))
     {
         stopTimer();
         return;
     }
 
+    refreshParameters();
+}
+
+void ReadoutStrip::setExternallyDriven(bool enabled)
+{
+    JUCE_ASSERT_MESSAGE_THREAD;
+    externallyDriven_ = enabled;
+    if (!externallyDriven_ && shouldRunReadoutTimer(*this))
+        startTimerHz(30);
+    else
+        stopTimer();
+}
+
+void ReadoutStrip::refreshParameters()
+{
+    JUCE_ASSERT_MESSAGE_THREAD;
     // Check if any parameter values have changed
     bool changed = false;
 
@@ -759,7 +775,7 @@ void ReadoutStrip::visibilityChanged()
 {
     if (!isVisible())
         cancelInteraction();
-    if (shouldRunReadoutTimer(*this))
+    if (!externallyDriven_ && shouldRunReadoutTimer(*this))
         startTimerHz(30);
     else
         stopTimer();
@@ -770,7 +786,7 @@ void ReadoutStrip::parentHierarchyChanged()
 {
     if (getParentComponent() == nullptr)
         cancelInteraction();
-    if (shouldRunReadoutTimer(*this))
+    if (!externallyDriven_ && shouldRunReadoutTimer(*this))
         startTimerHz(30);
     else
         stopTimer();

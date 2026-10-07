@@ -1,0 +1,30 @@
+name: Circuit modeling
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Provision circuit dependencies
+        run: docker build --platform linux/amd64 -t bws-diode-reference examples/diode-detector
+      - name: Reproduce from immutable source
+        run: |
+          mkdir -p "$RUNNER_TEMP/circuit-results"
+          docker run --rm --platform linux/amd64 --network none \
+            -v "$GITHUB_WORKSPACE:/source:ro" -v "$RUNNER_TEMP/circuit-results:/results" \
+            --entrypoint python bws-diode-reference /source/examples/diode-detector/qualify.py /results/run
+      - name: Retain circuit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: circuit-evidence
+          path: |
+            ${{ runner.temp }}/circuit-results/**
+            !${{ runner.temp }}/circuit-results/**/build/**
+          if-no-files-found: error

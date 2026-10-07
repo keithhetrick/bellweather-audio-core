@@ -165,7 +165,15 @@
     "readoutDim": 0.55,
     "statusBadgeFill": 0.2,
     "sparklineStroke": 0.4,
-    "signalLockDotEmpty": 0.6
+    "signalLockDotEmpty": 0.6,
+    "routingStateButton": {
+      "idleFill": 0.45,
+      "hoveredBorder": 0.78,
+      "idleBorder": 0.52,
+      "disabledFill": 0.45,
+      "disabledBorder": 0.45,
+      "disabledText": 0.48
+    }
   },
   "animation": {
     "fadeInDurationMs": 150,

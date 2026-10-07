@@ -29,7 +29,6 @@
 #include <bw_ui/foundation/GoldenRatioConstants.h>
 #include "bw_ui/Components/UiArcKnob.h"
 #include "bw_ui/Components/TooltipHub.h"
-#include "bw_ui/Components/UiToggle.h"
 #include "bw_ui/Components/UiResizeCorner.h"
 #include "bw_ui/foundation/UiTheme.h"
 #include <bw_ui/adapters/UiThemeKernelAdapter.h> // bws::ui::kernel::ThemeSnapshot for makeEditorKernelTheme
@@ -170,6 +169,27 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FadingTextButton)
 };
 
+// Barometer-local routing control. Routing state needs a stronger visual
+// hierarchy than the shared compact toggle: the complete button surface is
+// selected, while keyboard focus remains a separate blue outline.
+class RoutingStateButton final : public juce::Button
+{
+public:
+    explicit RoutingStateButton(const juce::String& label);
+
+    void setTheme(const bws::ui::UiThemeResolved& theme);
+    void setScaleFactor(float scale);
+
+    void paintButton(juce::Graphics& g, bool isMouseOver, bool isButtonDown) override;
+    bool keyPressed(const juce::KeyPress& key) override;
+
+private:
+    const bws::ui::UiThemeResolved& resolvedTheme() const;
+
+    const bws::ui::UiThemeResolved* theme_ {};
+    float scaleFactor_ {1.0f};
+};
+
 class BarometerEditor
     : public ::bws::weather::ResizableEditor
     , public juce::SettableTooltipClient
@@ -212,6 +232,12 @@ public:
     void setStereoViewForVisualEvidenceForTesting(int view);
     void advanceVisualEvidenceUiForTesting(double dtSeconds);
     [[nodiscard]] VisualEvidenceState visualEvidenceStateForTesting() const;
+    [[nodiscard]] juce::Rectangle<float> paintedGainFaceForCapture() const
+    {
+        return gainKnob_ != nullptr && gainKnob_->isVisible()
+                   ? getLocalArea(gainKnob_.get(), gainKnob_->lastPaintedFaceBounds())
+                   : juce::Rectangle<float>();
+    }
 
 protected:
     juce::Rectangle<int> getBasePluginSize() const override { return {0, 0, kPluginWidth, kPluginBaseHeight}; }
@@ -281,9 +307,9 @@ private:
 
     // Visible stereo routing trio. ChannelRoutingBinding owns the coupled
     // user-action semantics and parameter delivery.
-    std::unique_ptr<bws::ui::UiToggle> soloLeftToggle_;
-    std::unique_ptr<bws::ui::UiToggle> swapLeftRightToggle_;
-    std::unique_ptr<bws::ui::UiToggle> soloRightToggle_;
+    std::unique_ptr<RoutingStateButton> soloLeftToggle_;
+    std::unique_ptr<RoutingStateButton> swapLeftRightToggle_;
+    std::unique_ptr<RoutingStateButton> soloRightToggle_;
     std::unique_ptr<bws::weather::ActionPill> measurementResetButton_;
     std::unique_ptr<ChannelRoutingBinding> channelRoutingBinding_;
     juce::Rectangle<int> routingBandBounds_;

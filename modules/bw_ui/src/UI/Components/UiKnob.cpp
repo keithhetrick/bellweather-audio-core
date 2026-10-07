@@ -331,12 +331,13 @@ void paintDirectionalFaceResponse(juce::Graphics& g, const juce::Rectangle<float
     }
 }
 
-void paintEmbeddedKnobFace(juce::Graphics& g, const juce::Rectangle<float>& knobArea, juce::Colour rim,
-                           juce::Colour rimHighlight, juce::Colour rimShadow, juce::Colour faceTop,
-                           juce::Colour faceBottom, juce::Colour innerEdge, juce::Colour innerContour,
-                           juce::Colour bowlShadow, juce::Colour bowlHighlight, juce::Colour seatShadow,
-                           float ringThickness, float shineAlpha, float lowerShadowAlpha, float faceResponseAngle,
-                           float faceResponseAlpha)
+juce::Rectangle<float> paintEmbeddedKnobFace(juce::Graphics& g, const juce::Rectangle<float>& knobArea,
+                                             juce::Colour rim, juce::Colour rimHighlight, juce::Colour rimShadow,
+                                             juce::Colour faceTop, juce::Colour faceBottom, juce::Colour innerEdge,
+                                             juce::Colour innerContour, juce::Colour bowlShadow,
+                                             juce::Colour bowlHighlight, juce::Colour seatShadow, float ringThickness,
+                                             float shineAlpha, float lowerShadowAlpha, float faceResponseAngle,
+                                             float faceResponseAlpha)
 {
     const auto ringBounds = knobArea.reduced(bws::tokens::shared::geometry::STROKE_FULL_PX);
     const auto faceBounds = knobArea.reduced(juce::jmax(1.35f, ringThickness * 1.08f));
@@ -371,6 +372,7 @@ void paintEmbeddedKnobFace(juce::Graphics& g, const juce::Rectangle<float>& knob
         faceResponseAlpha, faceResponseAlpha * 0.85f);
     paintTopShine(g, faceBounds, shineAlpha);
     paintBottomShadow(g, faceBounds, lowerShadowAlpha);
+    return faceBounds;
 }
 } // namespace
 
@@ -604,6 +606,7 @@ void UiKnob::KnobLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, 
                                                float sliderPosProportional, float rotaryStartAngle,
                                                float rotaryEndAngle, juce::Slider& sliderRef)
 {
+    paintedFaceBounds = {};
     juce::ignoreUnused(sliderPosProportional);
     if (theme == nullptr || scalePtr == nullptr)
         return;
@@ -701,10 +704,10 @@ void UiKnob::KnobLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, 
                                          secondaryStyle.responsiveLift) *
                                         (visuallyLocked ? disabledVisualAlpha : 1.0f));
 
-        paintEmbeddedKnobFace(g, knobArea, rim, rimHighlight, rimShadow, faceTop, faceBottom, innerEdge, innerContour,
-                              bowlShadow, bowlHighlight, seatShadow, juce::jmax(0.8f, ring * 0.92f),
-                              secondaryStyle.topShineAlpha, secondaryStyle.lowerShadowAlpha, angle,
-                              secondaryStyle.faceResponseAlpha);
+        paintedFaceBounds = paintEmbeddedKnobFace(
+            g, knobArea, rim, rimHighlight, rimShadow, faceTop, faceBottom, innerEdge, innerContour, bowlShadow,
+            bowlHighlight, seatShadow, juce::jmax(0.8f, ring * 0.92f), secondaryStyle.topShineAlpha,
+            secondaryStyle.lowerShadowAlpha, angle, secondaryStyle.faceResponseAlpha);
 
         juce::Path guidePath;
         guidePath.addCentredArc(centre.x, centre.y, trackRadius, trackRadius, 0.0f, rotaryStartAngle, rotaryEndAngle,
@@ -1185,6 +1188,7 @@ UiReadout::CompactAppearance resolveCompanionCompactAppearance(UiKnobRole role, 
 
 void UiKnob::resized()
 {
+    knobLnf.paintedFaceBounds = {};
     const auto bounds = getLocalBounds();
     if (bounds.getWidth() == 0 || bounds.getHeight() == 0)
         return;

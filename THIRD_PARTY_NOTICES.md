@@ -40,3 +40,22 @@ bundled assets in this repository.
 
 Each component remains under its respective license; Apache-2.0 applies to the
 Bellweather Audio Core source.
+
+## Optional circuit experiment dependencies
+
+The diode example downloads ngspice 47 and the Python distributions pinned in
+`examples/diode-detector/requirements.lock`. These dependencies are not bundled
+in the source archive and are not covered by Bellweather's Apache-2.0 license.
+
+- **ngspice** - circuit simulator. The Docker recipe verifies the release
+  archive checksum. Its upstream license and copyright notices are in the
+  release's `COPYING` file. <https://ngspice.sourceforge.io/>
+- **NumPy, SciPy, Matplotlib** - numerical arrays, root solving and plots.
+  Their releases include their respective license texts and third-party notices.
+  <https://numpy.org/> · <https://scipy.org/> · <https://matplotlib.org/>
+- **contourpy, cycler, fonttools, kiwisolver, packaging, pillow, pyparsing,
+  python-dateutil, six** - transitive Python dependencies. Their installed
+  distribution metadata and release archives supply their individual notices.
+
+The source archive includes dependency identities and download instructions,
+not a redistribution of these dependency binaries or an audio dataset.

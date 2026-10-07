@@ -137,6 +137,7 @@ void UiArcKnob::paint(juce::Graphics& g)
     const float inset = 4.0f;
     const auto knobBounds = bounds.reduced(inset);
     const auto faceBounds = knobBounds.reduced(bws::tokens::shared::spacing::XXS);
+    paintedFaceBounds_ = faceBounds;
     const float faceRadius = juce::jmin(faceBounds.getWidth(), faceBounds.getHeight()) * 0.5f;
     const auto geometry = kernel::resolveArcGeometry(knobRole_);
 

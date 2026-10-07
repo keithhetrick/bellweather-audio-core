@@ -19,9 +19,10 @@ namespace bw
 struct SystemInfo
 {
     std::string os;                   // OS display name, truncated to 50 chars
-    std::string deviceId;             // Platform hardware UUID (raw, unhashed)
+    std::string deviceId;             // Legacy runtime device identifier (platform-dependent)
     std::string machineName;          // Human-readable hostname (optional; empty = omit on the wire)
     std::filesystem::path appDataDir; // User application data directory
+    std::string stableOsIdentifier;   // Local-only canonical OS source; never a receipt binding
 };
 
 } // namespace bw

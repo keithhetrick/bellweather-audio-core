@@ -110,9 +110,9 @@ ctest --test-dir build-library -L framework-boundary --output-on-failure   # JUC
 100% tests passed, 0 tests failed out of <platform count>
 ```
 
-The exact count can move as coverage grows. The current suite reports 164 tests
-on macOS and Linux. Windows registration differs by platform and must be
-remeasured for each release. The public-surface lane reports one passing smoke test
+The exact count varies by revision and platform. Use `ctest --test-dir
+build-library -N` to enumerate this checkout; retain the executed CTest summary
+with its source identity. A test count alone is not correctness evidence. The public-surface lane reports one passing smoke test
 per Stable/reusable module in `docs/MODULES.md`, and the framework-boundary lane
 prints:
 
@@ -242,5 +242,21 @@ Most failures fall into one of these gates:
 This suite demonstrates conformance, determinism, and the allocation-free audio
 path - the properties `ctest` can prove on your machine. It is the metering
 proof, not the whole test surface; it makes the README's metering claims
-reproducible rather than asserted. The public v1.0.0 proof is source/library
+reproducible rather than asserted. The public proof is source/library
 proof, not prebuilt plugin binary proof.
+
+## Independent circuit evidence
+
+The root library tests do not run the diode experiment. Its standalone command,
+dependencies, generated voltages and result interpretation are documented in
+`examples/diode-detector/CIRCUIT.md` in the public repository. Its assertions trace to
+DDM-1 through DDM-9 in
+`docs/testing/contracts/diode-detector-modeling.md` in the public repository.
+
+The integration workflow supplies the main numerical evidence. Small component
+tests cover state/configuration boundaries and comparator calibration. The
+complete qualification adds real-tool controls, child-process cleanup, an
+actual native model mutation and restored-source reproduction. Same-equation
+Python agreement, analytic DC and SPICE comparisons have different evidence
+roles; none establishes fidelity to physical hardware. The separate
+`.github/workflows/circuit.yml` runs this optional example.

@@ -167,11 +167,6 @@ void BarometerEditor::paintOutputMeter(juce::Graphics& g, juce::Rectangle<int> b
     const auto kernelTheme = makeEditorKernelTheme(getTheme());
     const float leftPeakDb = processor_.getLeftPeakDb();
     const float rightPeakDb = processor_.getRightPeakDb();
-    const bool soloRActive =
-        processor_.getApvts().getRawParameterValue(BarometerProcessor::kSoloRParamId)->load() > 0.5f;
-    const bool swapActive =
-        processor_.getApvts().getRawParameterValue(BarometerProcessor::kSwapLRParamId)->load() > 0.5f;
-
     constexpr float minDb = -60.0f;
     constexpr float maxDb = 6.0f;
     constexpr float rangeDb = maxDb - minDb;
@@ -209,7 +204,7 @@ void BarometerEditor::paintOutputMeter(juce::Graphics& g, juce::Rectangle<int> b
         r.fillRoundedRect(e.getX(), e.getY(), e.getWidth(), e.getHeight(), 2.0f);
     }
 
-    if (outputMeterHovered_ || soloRActive || swapActive)
+    if (outputMeterHovered_)
     {
         r.setColour(bp::withAlpha(tok::accent::BRASS,
                                   outputMeterHovered_ ? tok::opacity::METER_HOVER : tok::opacity::METER_NORMAL));
@@ -254,32 +249,6 @@ void BarometerEditor::paintOutputMeter(juce::Graphics& g, juce::Rectangle<int> b
                static_cast<float>(leftBarBounds.getWidth()), scaledF(8.0f), bws::ui::rendering::Justification::Centre);
     r.drawText("R", static_cast<float>(rightBarBounds.getX()), static_cast<float>(bounds.getBottom() + scaled(1)),
                static_cast<float>(rightBarBounds.getWidth()), scaledF(8.0f), bws::ui::rendering::Justification::Centre);
-
-    // Solo / swap indicator dots
-    const bool soloLActive =
-        processor_.getApvts().getRawParameterValue(BarometerProcessor::kSoloLParamId)->load() > 0.5f;
-    const float dotSize = scaledF(4.0f);
-    const float dotInset = scaledF(2.0f);
-    if (soloLActive)
-    {
-        r.setColour(tok::indicator::SOLO_YELLOW);
-        r.fillEllipse(static_cast<float>(leftBarBounds.getCentreX()) - dotInset,
-                      static_cast<float>(bounds.getY() + scaled(2)), dotSize, dotSize);
-    }
-    if (soloRActive)
-    {
-        r.setColour(tok::indicator::SOLO_YELLOW);
-        r.fillEllipse(static_cast<float>(rightBarBounds.getCentreX()) - dotInset,
-                      static_cast<float>(bounds.getY() + scaled(2)), dotSize, dotSize);
-    }
-    if (swapActive)
-    {
-        const bool anySoloOnOutput = soloLActive || soloRActive;
-        const float dotY = anySoloOnOutput ? static_cast<float>(bounds.getY() + scaled(8))
-                                           : static_cast<float>(bounds.getY() + scaled(2));
-        r.setColour(tok::accent::BRASS);
-        r.fillEllipse(static_cast<float>(bounds.getX() + scaled(2)), dotY, dotSize, dotSize);
-    }
 
     // dB scale ticks on the right side
     g.setFont(bws::ui::adapters::makeFont(kernelTheme, bws::ui::kernel::TextRole::Annotation, getScaleFactor()));

@@ -374,6 +374,11 @@
     "text": {
       "sectionHeader": 0.85
     },
+    "productDemo": {
+      "bypassBackdrop": 0.78,
+      "bypassTitle": 0.96,
+      "bypassRule": 0.42
+    },
     "scrollbar": {
       "track": 0.15,
       "thumb": 0.55

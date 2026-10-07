@@ -154,6 +154,14 @@ namespace barometer {
         constexpr float STATUS_BADGE_FILL = 0.2f;
         constexpr float SPARKLINE_STROKE = 0.4f;
         constexpr float SIGNAL_LOCK_DOT_EMPTY = 0.6f;
+        namespace routing_state_button {
+            constexpr float IDLE_FILL = 0.45f;
+            constexpr float HOVERED_BORDER = 0.78f;
+            constexpr float IDLE_BORDER = 0.52f;
+            constexpr float DISABLED_FILL = 0.45f;
+            constexpr float DISABLED_BORDER = 0.45f;
+            constexpr float DISABLED_TEXT = 0.48f;
+        }
     }
     namespace animation {
         constexpr int FADE_IN_DURATION_MS = 150;
@@ -668,6 +676,11 @@ namespace shared {
         }
         namespace text {
             constexpr float SECTION_HEADER = 0.85f;
+        }
+        namespace product_demo {
+            constexpr float BYPASS_BACKDROP = 0.78f;
+            constexpr float BYPASS_TITLE = 0.96f;
+            constexpr float BYPASS_RULE = 0.42f;
         }
         namespace scrollbar {
             constexpr float TRACK = 0.15f;

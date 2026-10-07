@@ -107,6 +107,12 @@ public:
     void setDisplayValue(double newValue);
 
     void resized() override;
+    // UI-thread capture observation for the embedded Secondary face.
+    [[nodiscard]] juce::Rectangle<float> lastPaintedFaceBounds() const noexcept
+    {
+        return knobLnf.paintedFaceBounds.isEmpty() ? juce::Rectangle<float>()
+                                                   : getLocalArea(&slider, knobLnf.paintedFaceBounds);
+    }
 
 #if BWS_TESTING
     juce::Rectangle<int> testReadoutBounds() const { return readout.getBounds(); }
@@ -160,6 +166,7 @@ private:
     {
     public:
         KnobLookAndFeel(const UiThemeResolved* themeIn, UiKnobRole roleIn, float* scaleRef);
+        juce::Rectangle<float> paintedFaceBounds;
         void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPosProportional,
                               float rotaryStartAngle, float rotaryEndAngle, juce::Slider& slider) override;
 

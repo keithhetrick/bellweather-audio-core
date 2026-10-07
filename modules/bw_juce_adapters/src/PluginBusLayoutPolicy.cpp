@@ -68,7 +68,7 @@ bool isBusesLayoutSupported(PluginChannelLayoutPolicy policy, const juce::AudioP
         return isStereo(mainIn) && isStereo(mainOut);
 
     case PluginChannelLayoutPolicy::MatchedMonoStereo:
-        return isMatchedMonoStereoMain(layouts);
+        return layouts.inputBuses.size() == 1 && layouts.outputBuses.size() == 1 && isMatchedMonoStereoMain(layouts);
 
     case PluginChannelLayoutPolicy::MatchedMonoStereoSidechain:
         return isMatchedMonoStereoMain(layouts) && isValidOptionalMonoStereoSidechain(layouts);

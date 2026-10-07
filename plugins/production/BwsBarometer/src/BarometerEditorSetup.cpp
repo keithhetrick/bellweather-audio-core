@@ -18,6 +18,101 @@
 
 namespace bws::barometer
 {
+namespace
+{
+const bws::ui::UiThemeResolved& defaultRoutingTheme()
+{
+    static const auto kDefault = bws::ui::resolveTheme(bws::ui::defaultUiThemeBase(), {});
+    return kDefault;
+}
+} // namespace
+
+RoutingStateButton::RoutingStateButton(const juce::String& label)
+    : juce::Button(label)
+{
+    setButtonText(label);
+    setTriggeredOnMouseDown(false);
+    setClickingTogglesState(true);
+    setWantsKeyboardFocus(true);
+    setMouseCursor(juce::MouseCursor::PointingHandCursor);
+}
+
+void RoutingStateButton::setTheme(const bws::ui::UiThemeResolved& theme)
+{
+    theme_ = &theme;
+    repaint();
+}
+
+void RoutingStateButton::setScaleFactor(float scale)
+{
+    scaleFactor_ = scale;
+    repaint();
+}
+
+void RoutingStateButton::paintButton(juce::Graphics& g, bool isMouseOver, bool isButtonDown)
+{
+    const auto& theme = resolvedTheme();
+    const auto& colors = theme.weatherColors;
+    const bool active = getToggleState();
+    const bool enabled = isEnabled();
+    const float radius = juce::jmax(5.0f, colors.radiusMd * scaleFactor_);
+    const auto bounds = getLocalBounds().toFloat().reduced(0.5f);
+
+    namespace routingOpacity = bws::tokens::barometer::opacity::routing_state_button;
+
+    auto fill = active ? colors.accent : colors.bgRaised.withAlpha(routingOpacity::IDLE_FILL);
+    if (isButtonDown)
+        fill = fill.darker(0.12f);
+    else if (isMouseOver)
+        fill = fill.brighter(active ? 0.08f : 0.04f);
+
+    auto border = active ? colors.accent.brighter(0.16f)
+                         : colors.borderLight.withAlpha(isMouseOver ? routingOpacity::HOVERED_BORDER
+                                                                    : routingOpacity::IDLE_BORDER);
+    auto text = active ? colors.bgMain : colors.textSecondary;
+    if (!enabled)
+    {
+        fill = fill.withMultipliedAlpha(routingOpacity::DISABLED_FILL);
+        border = border.withMultipliedAlpha(routingOpacity::DISABLED_BORDER);
+        text = text.withMultipliedAlpha(routingOpacity::DISABLED_TEXT);
+    }
+
+    g.setColour(fill);
+    g.fillRoundedRectangle(bounds, radius);
+    g.setColour(border);
+    g.drawRoundedRectangle(bounds, radius, 1.0f);
+
+    const auto kernelTheme = bws::ui::adapters::makeKernelThemeSnapshot(theme);
+    const auto label =
+        bws::ui::adapters::applyTextCasing(kernelTheme, bws::ui::kernel::TextRole::ControlText, getButtonText());
+    g.setFont(bws::ui::adapters::makeFont(kernelTheme, bws::ui::kernel::TextRole::ControlText, scaleFactor_));
+    g.setColour(text);
+    g.drawFittedText(label, getLocalBounds(), juce::Justification::centred, 1);
+
+    if (hasKeyboardFocus(true))
+    {
+        g.setColour(juce::Colour(bws::tokens::barometer::accent::LINK_BLUE));
+        g.drawRoundedRectangle(bounds.reduced(1.5f), juce::jmax(2.0f, radius - 1.5f), 1.5f);
+    }
+}
+
+bool RoutingStateButton::keyPressed(const juce::KeyPress& key)
+{
+    if (!isEnabled())
+        return false;
+
+    if (key == juce::KeyPress::spaceKey || key == juce::KeyPress::returnKey)
+    {
+        triggerClick();
+        return true;
+    }
+    return false;
+}
+
+const bws::ui::UiThemeResolved& RoutingStateButton::resolvedTheme() const
+{
+    return theme_ != nullptr ? *theme_ : defaultRoutingTheme();
+}
 
 bws::ui::kernel::ThemeSnapshot BarometerEditor::makeEditorKernelTheme(const bws::ui::UiThemeResolved& theme)
 {
@@ -425,12 +520,12 @@ void BarometerEditor::setupControls()
     // =========================================================================
     // Discoverable stereo routing controls (BWS-BAROMETER-ROUTING-1)
     // =========================================================================
-    soloLeftToggle_ = std::make_unique<bws::ui::UiToggle>(getTheme(), bws::ui::UiToggle::Size::Dense);
-    swapLeftRightToggle_ = std::make_unique<bws::ui::UiToggle>(getTheme(), bws::ui::UiToggle::Size::Dense);
-    soloRightToggle_ = std::make_unique<bws::ui::UiToggle>(getTheme(), bws::ui::UiToggle::Size::Dense);
-    soloLeftToggle_->setLabel("Solo L");
-    swapLeftRightToggle_->setLabel("Swap L/R");
-    soloRightToggle_->setLabel("Solo R");
+    soloLeftToggle_ = std::make_unique<RoutingStateButton>("Solo L");
+    swapLeftRightToggle_ = std::make_unique<RoutingStateButton>(juce::String::fromUTF8("L \xe2\x87\x84 R"));
+    soloRightToggle_ = std::make_unique<RoutingStateButton>("Solo R");
+    soloLeftToggle_->setTheme(getTheme());
+    swapLeftRightToggle_->setTheme(getTheme());
+    soloRightToggle_->setTheme(getTheme());
     addAndMakeVisible(*soloLeftToggle_);
     addAndMakeVisible(*swapLeftRightToggle_);
     addAndMakeVisible(*soloRightToggle_);
@@ -569,9 +664,9 @@ void BarometerEditor::layoutComponents()
         soloLeftToggle_->setTheme(getTheme());
         swapLeftRightToggle_->setTheme(getTheme());
         soloRightToggle_->setTheme(getTheme());
-        soloLeftToggle_->setScale(getScaleFactor());
-        swapLeftRightToggle_->setScale(getScaleFactor());
-        soloRightToggle_->setScale(getScaleFactor());
+        soloLeftToggle_->setScaleFactor(getScaleFactor());
+        swapLeftRightToggle_->setScaleFactor(getScaleFactor());
+        soloRightToggle_->setScaleFactor(getScaleFactor());
     }
     if (measurementResetButton_)
         measurementResetButton_->setScaleFactor(getScaleFactor());

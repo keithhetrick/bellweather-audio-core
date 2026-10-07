@@ -86,3 +86,12 @@ if(BUILD_TESTING)
         add_subdirectory(tests)
     endif()
 endif()
+
+# Native bundle channel-layout contract, shared across production plugins.
+if(BUILD_TESTING AND TARGET bw_clap_layout_host_tests AND TARGET BwsBarometer_CLAP)
+    add_custom_target(BwsBarometerClapLayoutHostTests
+        DEPENDS bw_clap_layout_host_tests BwsBarometer_CLAP)
+    add_test(NAME BwsBarometerClapLayoutHostTests_gate
+        COMMAND bw_clap_layout_host_tests "$<TARGET_FILE:BwsBarometer_CLAP>" 1)
+    set_tests_properties(BwsBarometerClapLayoutHostTests_gate PROPERTIES LABELS "bpts_gate;plugin_test")
+endif()

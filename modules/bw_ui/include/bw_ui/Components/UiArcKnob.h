@@ -193,6 +193,13 @@ public:
 
     // --- juce::Slider overrides ---
     void paint(juce::Graphics& g) override;
+    // UI-thread capture observation. Empty until a paint at the current size.
+    [[nodiscard]] juce::Rectangle<float> lastPaintedFaceBounds() const noexcept { return paintedFaceBounds_; }
+    void resized() override
+    {
+        paintedFaceBounds_ = {};
+        juce::Slider::resized();
+    }
     bool hitTest(int x, int y) override;
     void mouseDown(const juce::MouseEvent& e) override;
     void mouseDrag(const juce::MouseEvent& e) override;
@@ -208,6 +215,7 @@ public:
     bool keyPressed(const juce::KeyPress& key) override;
 
 private:
+    juce::Rectangle<float> paintedFaceBounds_;
     /** Draw an arc segment (IRenderer path: arcTo + strokePath) */
     void drawArc(rendering::IRenderer& r, float startAngle, float endAngle, float radius, float thickness,
                  juce::Colour colour);

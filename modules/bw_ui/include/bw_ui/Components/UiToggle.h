@@ -60,6 +60,8 @@ private:
     float trackHeight() const;
     float trackWidth() const;
     float cornerRadius() const;
+    float focusRingPad() const;
+    float focusRingOutset() const;
     void updatePressedState(bool shouldPress);
     void updateHoverState(bool isHovered);
     void commitToggleChange(bool newValue, bool fromUserInteraction);

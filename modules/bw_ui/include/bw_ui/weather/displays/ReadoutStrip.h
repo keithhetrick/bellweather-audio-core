@@ -187,6 +187,10 @@ public:
     /** Cancel active drag gesture without emitting edits. */
     void cancelInteraction();
 
+    /** Message-thread capture owner replaces autonomous parameter polling. */
+    void setExternallyDriven(bool enabled);
+    void refreshParameters();
+
     using DoubleClickAction = bws::ui::DoubleClickAction;
     using InteractionPolicy = bws::ui::interaction::InteractionPolicy;
 
@@ -218,6 +222,7 @@ public:
     void parentHierarchyChanged() override;
 
 private:
+    bool externallyDriven_ = false;
     //==========================================================================
     // INTERNAL TYPES
     //==========================================================================

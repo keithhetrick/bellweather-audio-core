@@ -20,6 +20,20 @@ surface:
 
 The default is the library surface. That path is the public reusable API.
 
+## Independent circuit example
+
+`examples/diode-detector/` is a separately configurable CMake project. Its native
+model exposes prepare/reset/process and owns its numerical state. The Python
+entry point owns provisioning diagnostics, build/test orchestration, reference
+comparisons and evidence files. It is an optional example, not an installed
+`bws::` target. Neither the default library build nor Barometer links it.
+
+The circuit contract owns equations and tolerances; the renderer and independent
+reference tools supply observations. The comparator returns pass, fail or
+inconclusive under that contract. Model code does not own its acceptance oracle.
+See `examples/diode-detector/CIRCUIT.md` from the public repository root for the explicit
+source-to-result path and the limits of solver independence.
+
 ## Layer map
 
 ```text
@@ -183,4 +197,5 @@ different runtime checker owns that responsibility.
 - no unreleased plugin source.
 
 The release is source, tests, build scripts, and documentation for the reusable
-audio-core library plus a source-built JUCE reference plugin.
+audio-core library, a source-built JUCE reference plugin and an independent
+circuit example.

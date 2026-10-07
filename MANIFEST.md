@@ -144,3 +144,12 @@ Barometer/JUCE build option.
 - `tools/docker_lanes.sh` - Builds and runs every shipped Docker build lane.
 - `tools/fonts` - Font-processing helpers for the Barometer UI build.
 - `tools/fonts/subset_ui_fonts.py` - Subsets shipped UI fonts before JUCE binary-data embedding.
+
+## Circuit modeling example
+
+- `examples` - Optional runnable examples.
+- `examples/diode-detector/**` - Native circuit, numerical references, tests, locked dependencies and reproduction guide.
+- `docs/testing` - Quantitative experiment contracts.
+- `docs/testing/contracts` - Named numerical requirements.
+- `docs/testing/contracts/diode-detector-modeling.md` - Circuit modeling contract.
+- `.github/workflows/circuit.yml` - Isolated circuit reproduction.

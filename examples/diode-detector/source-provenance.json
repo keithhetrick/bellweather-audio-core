@@ -1,0 +1,134 @@
+[
+  {
+    "canonical": "tools/dsp-modeling/CMakeLists.txt",
+    "canonical_sha256": "0889f956468d00d608067ac187937cdee55c6a0f0f4e912167614a8be85418e1",
+    "exported": "examples/diode-detector/CMakeLists.txt",
+    "exported_sha256": "0889f956468d00d608067ac187937cdee55c6a0f0f4e912167614a8be85418e1"
+  },
+  {
+    "canonical": "tools/dsp-modeling/DiodeDetector.h",
+    "canonical_sha256": "6431a9254f63c08ecec71ea218629ce0bf18fd8ad7623dbfefd282cac21a835e",
+    "exported": "examples/diode-detector/DiodeDetector.h",
+    "exported_sha256": "c4d51f2fafdb27a9f48b491ffedcc1e2053f92b7b63955c2926c75f09b673442"
+  },
+  {
+    "canonical": "tools/dsp-modeling/render.cpp",
+    "canonical_sha256": "daba9b792159c3750c907700cc575d13b0e9bda1fbed23da0acf4c935f2ca99e",
+    "exported": "examples/diode-detector/render.cpp",
+    "exported_sha256": "0a508e9b4d21f113d3afb9e31eb2cfbb8691f2b58abfd245aa8fccafd71356ab"
+  },
+  {
+    "canonical": "tools/dsp-modeling/diode_detector_test.cpp",
+    "canonical_sha256": "06df890eaeaedc658efb64cb172463db358dbb7d12b58c97a976a907273b49d6",
+    "exported": "examples/diode-detector/diode_detector_test.cpp",
+    "exported_sha256": "d6e2655e3fd0f1fd431f7b3e7a070d6615c5cbbf402cbdc4cbe4c3b5ebb41a60"
+  },
+  {
+    "canonical": "tools/dsp-modeling/checks.py",
+    "canonical_sha256": "8951843e896ad93c26a9c798555c8ee26545a23e9f46999d65e9012fd63f2c4f",
+    "exported": "examples/diode-detector/checks.py",
+    "exported_sha256": "c855ea8c6189f253872ad008d9e51715c098d40a3aea45099f6838fa54421732"
+  },
+  {
+    "canonical": "tools/dsp-modeling/checks_test.py",
+    "canonical_sha256": "c3527b38ac5ad805683603ce6abb37e04eab422716dd3a7c0edc207bb9b93ef1",
+    "exported": "examples/diode-detector/checks_test.py",
+    "exported_sha256": "b268bc0630e61fcae1a0eec344c841519a39a9289c0465decde2efb92417b34f"
+  },
+  {
+    "canonical": "tools/dsp-modeling/reference.py",
+    "canonical_sha256": "82592cdd451196b4f1138e6f3cd279d94d81d97a2de49fbb828bced3369d7f63",
+    "exported": "examples/diode-detector/reference.py",
+    "exported_sha256": "4585dc9abad0be24a938fc785e6e4edb0fe704ff9d84f3d3f808865b672c697a"
+  },
+  {
+    "canonical": "tools/dsp-modeling/run_experiment.py",
+    "canonical_sha256": "b2ead0621b9705e424c95581c36ccf28d21a594e619dcd15340fa5cd1b5ff8d1",
+    "exported": "examples/diode-detector/run_experiment.py",
+    "exported_sha256": "8f44a7190c0ebce1ce1b6fe763f18a1decffecbb3d5b780bd4f0be124ae4ece8"
+  },
+  {
+    "canonical": "tools/dsp-modeling/reproduce.py",
+    "canonical_sha256": "d60ea0ee46944cada4e89b9db2f72e525ab3401fafc9d26c06cbfeb3cb78660c",
+    "exported": "examples/diode-detector/reproduce.py",
+    "exported_sha256": "84ea3d04523fb1d0b87a2a7e2b635b11ab740025543ecadf0ac5a1b97d44c636"
+  },
+  {
+    "canonical": "tools/dsp-modeling/reproduce.sh",
+    "canonical_sha256": "fef294b4db4947729a03b4823d8bea77114e0a907933b1f20c5b6af65d9540e3",
+    "exported": "examples/diode-detector/reproduce.sh",
+    "exported_sha256": "fef294b4db4947729a03b4823d8bea77114e0a907933b1f20c5b6af65d9540e3"
+  },
+  {
+    "canonical": "tools/dsp-modeling/circuit_process.py",
+    "canonical_sha256": "cfc172f377f6269f88bf9ac0918199beea4045f6b41acd40481c3e321d8942b7",
+    "exported": "examples/diode-detector/circuit_process.py",
+    "exported_sha256": "bb7c37f0ed308dfd70afa4d358a40e7fbc39bc0d467d0dc1090ad62d56334a44"
+  },
+  {
+    "canonical": "tools/dsp-modeling/circuit_process_test.py",
+    "canonical_sha256": "3ec136dd79112c93a5ade0eeb1e8124a82154dd6125cc52488068263f5f33056",
+    "exported": "examples/diode-detector/circuit_process_test.py",
+    "exported_sha256": "479dc81c63d63afdca30fb54be7f24e99d48cc0421aab8a77551276e936d371c"
+  },
+  {
+    "canonical": "tools/dsp-modeling/simulator.py",
+    "canonical_sha256": "adc308103b7b0b4d79207b32f049b885704362c3f072de763d8cf1bfdc3daa40",
+    "exported": "examples/diode-detector/simulator.py",
+    "exported_sha256": "6a304bcc6cec9f85ffc7d234782c7d41c4ea0ed33f2f49ac34051f63574712ac"
+  },
+  {
+    "canonical": "tools/dsp-modeling/simulator_test.py",
+    "canonical_sha256": "997f54ea14ab9c197f5d4d6caf0203607fec250310377b374db1d20eafada915",
+    "exported": "examples/diode-detector/simulator_test.py",
+    "exported_sha256": "23b38700f402efed1c64fc400ef6bf4fc4873eae4dc8f0ebea48165c8b780d47"
+  },
+  {
+    "canonical": "tools/dsp-modeling/CIRCUIT.md",
+    "canonical_sha256": "13d206db6c0b02beba0d46e1d1825a5830f5f6bb96cc360c64d7d4ca2a69b153",
+    "exported": "examples/diode-detector/CIRCUIT.md",
+    "exported_sha256": "13d206db6c0b02beba0d46e1d1825a5830f5f6bb96cc360c64d7d4ca2a69b153"
+  },
+  {
+    "canonical": "tools/dsp-modeling/requirements.lock",
+    "canonical_sha256": "b2a6ed9e0d32ea03e34a577b1e61fa9f56cc9f409df190e7500cc9c1e7a3dc62",
+    "exported": "examples/diode-detector/requirements.lock",
+    "exported_sha256": "b2a6ed9e0d32ea03e34a577b1e61fa9f56cc9f409df190e7500cc9c1e7a3dc62"
+  },
+  {
+    "canonical": "tools/dsp-modeling/Dockerfile",
+    "canonical_sha256": "b6fa3d024a705af10d2e43a36bbf5a907aeadec59e6aef10dbfa946532946e17",
+    "exported": "examples/diode-detector/Dockerfile",
+    "exported_sha256": "b6fa3d024a705af10d2e43a36bbf5a907aeadec59e6aef10dbfa946532946e17"
+  },
+  {
+    "canonical": "tools/dsp-modeling/circuit_files.json",
+    "canonical_sha256": "433bf2d31ab6b9a3ae3266b29c06b4c654c4e7dfab9522e8ccfd4618e5f2fa8b",
+    "exported": "examples/diode-detector/circuit_files.json",
+    "exported_sha256": "433bf2d31ab6b9a3ae3266b29c06b4c654c4e7dfab9522e8ccfd4618e5f2fa8b"
+  },
+  {
+    "canonical": "tools/dsp-modeling/reproduce_test.py",
+    "canonical_sha256": "0b2493196a8f9ebee929ee9dfa841906e9cd02330efea8552bf6f5c1de346b40",
+    "exported": "examples/diode-detector/reproduce_test.py",
+    "exported_sha256": "787e8ea5a56d02724532b3b46b752442184a04bdada5aae442c19345b0266017"
+  },
+  {
+    "canonical": "tools/dsp-modeling/qualify.py",
+    "canonical_sha256": "ada4ee1109edfb4cc90ebd89207464440d248ee9c542819eca1b8fa18f5b6115",
+    "exported": "examples/diode-detector/qualify.py",
+    "exported_sha256": "261c671fe519d63f0697b972aed83a884accdfc721d3e6bc67716ce230ffa3b5"
+  },
+  {
+    "canonical": "docs/testing/contracts/diode-detector-modeling.md",
+    "canonical_sha256": "d9b603d8c3abdf5b7f9bd7acf756e4b3229e2e95baee3a11e25ee3334ec79965",
+    "exported": "docs/testing/contracts/diode-detector-modeling.md",
+    "exported_sha256": "d9b603d8c3abdf5b7f9bd7acf756e4b3229e2e95baee3a11e25ee3334ec79965"
+  },
+  {
+    "canonical": "cmake/BwsCatch2.cmake",
+    "canonical_sha256": "b91dbcf2ae002a77ea891768f447076d1133d538df6b7c482cbdfc84db3f5052",
+    "exported": "cmake/BwsCatch2.cmake",
+    "exported_sha256": "b91dbcf2ae002a77ea891768f447076d1133d538df6b7c482cbdfc84db3f5052"
+  }
+]
