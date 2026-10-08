@@ -199,3 +199,20 @@ different runtime checker owns that responsibility.
 The release is source, tests, build scripts, and documentation for the reusable
 audio-core library, a source-built JUCE reference plugin and an independent
 circuit example.
+
+## Independent hardware gain example
+
+`examples/g384/` is a standalone native C++ renderer plus an offline Python
+measurement workflow. It compares fixed nominal/calibrated parameters against
+three revision-pinned hardware gain recordings. The model receives stereo audio
+input; only the comparator receives reference CV. It shares no runtime signal
+path with Barometer and introduces no installed library API. Its contract and
+complete reproduction/qualification commands are in that directory.
+
+The internal monorepo owns its source. The existing extractor selects an
+explicit file closure, copies the shared process helper and Python lock, and
+records canonical/exported provenance after transformations. The public source
+contains retrieval metadata, not acquired music or private research files.
+A favorable relative gain-error result establishes neither circuit identity nor
+complete audio emulation. It is independent of the diode experiment's numerical
+circuit agreement and Audio Attest's regression evidence.

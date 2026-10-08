@@ -4,16 +4,18 @@
 
 Bellweather Audio Core is an open-source C++ audio-core library from
 **Bellweather Studios**: BS.1770 / EBU Tech 3341 metering, framework-neutral
-DSP/core modules and real-time-safety utilities. It also contains two separate,
-optional examples: the Barometer JUCE plugin and a diode circuit model.
+DSP/core modules and real-time-safety utilities. It also contains separate,
+optional examples: the Barometer JUCE plugin, a diode circuit model and a fixed
+G384 hardware gain prediction experiment.
 
 ## Choose what to run
 
-| Component             | Purpose                                                | Entry point                                  | What its results establish                                                                   |
-| --------------------- | ------------------------------------------------------ | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Audio-core libraries  | Reusable C++ audio infrastructure and metering         | Library quickstart below                     | Public API consumption, framework separation and metering conformance                        |
-| Barometer             | Transparent gain and metering plugin built with JUCE   | Optional `barometer-clang` Docker lane below | Plugin source build; Barometer is not an analog hardware model                               |
-| Diode circuit example | Native C++ implementation of a specified ideal circuit | `examples/diode-detector/CIRCUIT.md`         | Numerical comparisons with Python, analytic DC and ngspice; no named-hardware fidelity claim |
+| Component             | Purpose                                                         | Entry point                                  | What its results establish                                                                   |
+| --------------------- | --------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Audio-core libraries  | Reusable C++ audio infrastructure and metering                  | Library quickstart below                     | Public API consumption, framework separation and metering conformance                        |
+| Barometer             | Transparent gain and metering plugin built with JUCE            | Optional `barometer-clang` Docker lane below | Plugin source build; Barometer is not an analog hardware model                               |
+| Diode circuit example | Native C++ implementation of a specified ideal circuit          | `examples/diode-detector/CIRCUIT.md`         | Numerical comparisons with Python, analytic DC and ngspice; no named-hardware fidelity claim |
+| G384 gain prediction  | Fixed behavioral model evaluated against measured hardware gain | `examples/g384/README.md`                    | Per-record gain error and locally generated audio comparisons; no full audio-emulation claim |
 
 The circuit example has its own build, dependencies, reproduction command and
 results. It runs without building Barometer or JUCE. Barometer does not use the
@@ -22,6 +24,9 @@ the circuit experiment. A successful Barometer build provides no circuit-model
 validation, and circuit agreement provides no plugin or DAW validation.
 
 For circuit modeling, start with `examples/diode-detector/CIRCUIT.md`.
+For measured hardware gain prediction, start with `examples/g384/README.md`.
+The G384 command retrieves a pinned subset separately; source archives contain
+no music. Ordinary library and Barometer builds do not run either experiment.
 
 ## Source ownership and examples
 

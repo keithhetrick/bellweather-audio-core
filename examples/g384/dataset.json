@@ -1,0 +1,60 @@
+{
+  "revision": "64f1aebb431da651fa0792956eade9516fb35ef3",
+  "files": [
+    {
+      "path": "audio_in/clip_00131.wav",
+      "bytes": 7938044,
+      "sha256": "fc500d215f1ab90b0caf7707cac98bf10c9e0d81094e65d1352d47beaf4a3b09",
+      "url": "https://huggingface.co/datasets/bthomp23/SSL_bus_compressor_control_voltage_dataset/resolve/64f1aebb431da651fa0792956eade9516fb35ef3/audio_in/clip_00131.wav"
+    },
+    {
+      "path": "audio_in/clip_00143.wav",
+      "bytes": 7938044,
+      "sha256": "43cec67e6be93f022da59972517246df4852c368799a3af11e74050cd681695a",
+      "url": "https://huggingface.co/datasets/bthomp23/SSL_bus_compressor_control_voltage_dataset/resolve/64f1aebb431da651fa0792956eade9516fb35ef3/audio_in/clip_00143.wav"
+    },
+    {
+      "path": "audio_in/clip_00209.wav",
+      "bytes": 7938044,
+      "sha256": "68fbcac6db366b882a360ef49ef1179a792f8efb50fdd2863c22b28907050195",
+      "url": "https://huggingface.co/datasets/bthomp23/SSL_bus_compressor_control_voltage_dataset/resolve/64f1aebb431da651fa0792956eade9516fb35ef3/audio_in/clip_00209.wav"
+    },
+    {
+      "path": "cv/p063/clip_00131_p063.wav",
+      "bytes": 5292080,
+      "sha256": "e7cb7c98f4af7101d14fd37926f301b02cbaf7d8690c2c5f1ae94bfe9c762b59",
+      "url": "https://huggingface.co/datasets/bthomp23/SSL_bus_compressor_control_voltage_dataset/resolve/64f1aebb431da651fa0792956eade9516fb35ef3/cv/p063/clip_00131_p063.wav"
+    },
+    {
+      "path": "cv/p063/clip_00143_p063.wav",
+      "bytes": 5292080,
+      "sha256": "9f87b5d45dcbad00fd2ccbb26868df8213fbda7e24e0294a5662eac9d696f703",
+      "url": "https://huggingface.co/datasets/bthomp23/SSL_bus_compressor_control_voltage_dataset/resolve/64f1aebb431da651fa0792956eade9516fb35ef3/cv/p063/clip_00143_p063.wav"
+    },
+    {
+      "path": "cv/p063/clip_00209_p063.wav",
+      "bytes": 5292080,
+      "sha256": "e3a2021e79e631b006de68fcedb7e1c4d0989d2ab8c89e0691dea3fd767245a3",
+      "url": "https://huggingface.co/datasets/bthomp23/SSL_bus_compressor_control_voltage_dataset/resolve/64f1aebb431da651fa0792956eade9516fb35ef3/cv/p063/clip_00209_p063.wav"
+    },
+    {
+      "path": "audio_out/p063/clip_00131_p063.wav",
+      "bytes": 7938044,
+      "sha256": "01e417d228659ad14d1b309136ef43ac89ae741e9fa8ad427c8ba4d57e8628e1",
+      "url": "https://huggingface.co/datasets/bthomp23/SSL_bus_compressor_control_voltage_dataset/resolve/64f1aebb431da651fa0792956eade9516fb35ef3/audio_out/p063/clip_00131_p063.wav"
+    },
+    {
+      "path": "audio_out/p063/clip_00143_p063.wav",
+      "bytes": 7938044,
+      "sha256": "24018466fd6d82806fac2add369d284fb36ef90fe9f02e68189d26420b057874",
+      "url": "https://huggingface.co/datasets/bthomp23/SSL_bus_compressor_control_voltage_dataset/resolve/64f1aebb431da651fa0792956eade9516fb35ef3/audio_out/p063/clip_00143_p063.wav"
+    },
+    {
+      "path": "audio_out/p063/clip_00209_p063.wav",
+      "bytes": 7938044,
+      "sha256": "8bb5ba0ac5255820958e595c21d06c5aa222f76fa3eb2e8eb298de4dfd47bc1f",
+      "url": "https://huggingface.co/datasets/bthomp23/SSL_bus_compressor_control_voltage_dataset/resolve/64f1aebb431da651fa0792956eade9516fb35ef3/audio_out/p063/clip_00209_p063.wav"
+    }
+  ],
+  "total_bytes": 63504504
+}

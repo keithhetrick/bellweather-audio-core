@@ -1,0 +1,42 @@
+name: Hardware gain prediction
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  g384:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Archive exact source and provision dependencies
+        run: |
+          set -euo pipefail
+          git archive --format=tar HEAD > "$RUNNER_TEMP/source.tar"
+          sha256sum "$RUNNER_TEMP/source.tar" > "$RUNNER_TEMP/source.sha256"
+          mkdir -p "$RUNNER_TEMP/source archive" "$RUNNER_TEMP/g384-results"
+          tar -xf "$RUNNER_TEMP/source.tar" -C "$RUNNER_TEMP/source archive"
+          docker build --platform linux/amd64 -t bws-g384-reference "$RUNNER_TEMP/source archive/examples/g384"
+          docker image inspect bws-g384-reference > "$RUNNER_TEMP/g384-results/container-image.json"
+      - name: Qualify archive with read-only source
+        run: |
+          set -euo pipefail
+          docker run --rm --platform linux/amd64 --user "$(id -u):$(id -g)" \
+            -v "$RUNNER_TEMP/source archive/examples/g384:/source:ro" \
+            -v "$RUNNER_TEMP/g384-results:/results" \
+            bws-g384-reference /source/qualify.py /results/qualification
+      - name: Retain numerical evidence without music
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: g384-evidence
+          path: |
+            ${{ runner.temp }}/source.sha256
+            ${{ runner.temp }}/g384-results/**/*.json
+            ${{ runner.temp }}/g384-results/**/*.log
+            !${{ runner.temp }}/g384-results/**/data/**
+            !${{ runner.temp }}/g384-results/**/corrupt-data/**
+          if-no-files-found: error

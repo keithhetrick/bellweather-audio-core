@@ -153,3 +153,5 @@ Barometer/JUCE build option.
 - `docs/testing/contracts` - Named numerical requirements.
 - `docs/testing/contracts/diode-detector-modeling.md` - Circuit modeling contract.
 - `.github/workflows/circuit.yml` - Isolated circuit reproduction.
+- `examples/g384/**` - Fixed behavioral model, pinned dataset retrieval, gain comparison, detection controls and reproduction guide; no recorded music is shipped.
+- `.github/workflows/g384.yml` - Read-only source-archive hardware gain evaluation and recovery qualification.

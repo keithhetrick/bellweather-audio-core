@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.22)
+project(g384_baseline LANGUAGES CXX)
+add_executable(g384-baseline render.cpp)
+target_compile_features(g384-baseline PRIVATE cxx_std_17)
+target_compile_options(g384-baseline PRIVATE -Wall -Wextra -Wpedantic -Werror)

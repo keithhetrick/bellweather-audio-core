@@ -1,0 +1,98 @@
+[
+  {
+    "canonical": "tools/dsp-modeling/g384/Baseline.h",
+    "canonical_sha256": "88ee89af15d3b23fdd5bc22cc03c45c21584fa48620819cfb7cdaa63bf7e9e34",
+    "exported": "examples/g384/Baseline.h",
+    "exported_sha256": "648c139b98d123e91ca6e2f0ab68b2a20eea24c8359005ae5eb591e8a043653c"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/CMakeLists.txt",
+    "canonical_sha256": "9fffacc97b483d320d48efe3eb6d833691ed7dfb09244c7d2b1777771bf9db8d",
+    "exported": "examples/g384/CMakeLists.txt",
+    "exported_sha256": "9fffacc97b483d320d48efe3eb6d833691ed7dfb09244c7d2b1777771bf9db8d"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/CONTRACT.md",
+    "canonical_sha256": "4f47c9dcf9b7860dd8029f9ee320f970a63cc470368f23d3a9a32e53949bddb7",
+    "exported": "examples/g384/CONTRACT.md",
+    "exported_sha256": "4f47c9dcf9b7860dd8029f9ee320f970a63cc470368f23d3a9a32e53949bddb7"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/Dockerfile",
+    "canonical_sha256": "60a4c94b5deccca0526e9e7047f0717d3883c2b47eb4e6df0268b2df5b1925c8",
+    "exported": "examples/g384/Dockerfile",
+    "exported_sha256": "60a4c94b5deccca0526e9e7047f0717d3883c2b47eb4e6df0268b2df5b1925c8"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/README.md",
+    "canonical_sha256": "3816ee101fbe68cf4ce741284f08965fcdafeb648ff482b26fa33fdb2451534d",
+    "exported": "examples/g384/README.md",
+    "exported_sha256": "3816ee101fbe68cf4ce741284f08965fcdafeb648ff482b26fa33fdb2451534d"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/candidate.json",
+    "canonical_sha256": "85861a70178d45fedaeada2f963d7ea8257459803e689ea0c49b2ef6cce8d7e1",
+    "exported": "examples/g384/candidate.json",
+    "exported_sha256": "85861a70178d45fedaeada2f963d7ea8257459803e689ea0c49b2ef6cce8d7e1"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/dataset.json",
+    "canonical_sha256": "5a1fc3b8f85d243cd24d85fb0a61a6fc2da8c12a7d3407d41af35d7cec8e8420",
+    "exported": "examples/g384/dataset.json",
+    "exported_sha256": "5a1fc3b8f85d243cd24d85fb0a61a6fc2da8c12a7d3407d41af35d7cec8e8420"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/evaluation_test.py",
+    "canonical_sha256": "b1af957abb2d4ed7c1b55c3ae280ed8bb813b75e210089ee61af2cb9b1b99a5d",
+    "exported": "examples/g384/evaluation_test.py",
+    "exported_sha256": "e247c512f3aa72151a315f8cd2cf1873e52e386634e4b832f25102bcec370a59"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/files.json",
+    "canonical_sha256": "58f09d76d7119356a8ebd3071fb4b9330234b00b0c48cbd24e1b8f266957b676",
+    "exported": "examples/g384/files.json",
+    "exported_sha256": "58f09d76d7119356a8ebd3071fb4b9330234b00b0c48cbd24e1b8f266957b676"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/lifecycle_test.py",
+    "canonical_sha256": "6281df9b1497a5df5b324d2e2aaa216dcca05c7929e2b60a9f7d119c267de5af",
+    "exported": "examples/g384/lifecycle_test.py",
+    "exported_sha256": "87a1595b22d461b7dcf887e4c216c082df7e7e085112159b05d213b0a3c9f413"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/native_test.py",
+    "canonical_sha256": "caebc9203333e56883091229b86b3fd97f60587259f5183f2ede22ab50a459bf",
+    "exported": "examples/g384/native_test.py",
+    "exported_sha256": "b4262700133f3ad549246896705f38080622101e8955d59a56795f865337586f"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/qualify.py",
+    "canonical_sha256": "c603058e2b28fb60f28da90c0d26c0ad971431c71ba3ed72fe7e0c8d22ff96ce",
+    "exported": "examples/g384/qualify.py",
+    "exported_sha256": "facb89fa6b35517ed7fa6d403d0be8ccab4466e6f4e27f738403870f8ab34a51"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/render.cpp",
+    "canonical_sha256": "c0844758787f396d1dbe09333d92103511c01119fa4430e656e1f8a2a097f812",
+    "exported": "examples/g384/render.cpp",
+    "exported_sha256": "1807d47d904f635a9b0ae4d4adb0c6e31b2bc05749d149ccd91a6d1feaab4fba"
+  },
+  {
+    "canonical": "tools/dsp-modeling/g384/reproduce.py",
+    "canonical_sha256": "997784f2bf4988a39778592658740d800825f245a6ce0fefb16e7ea311562813",
+    "exported": "examples/g384/reproduce.py",
+    "exported_sha256": "2252ba6ac1c122ea8132af8e50074c6cc2585c2d242c9230978e2bfb45cd8b00"
+  },
+  {
+    "canonical": "tools/dsp-modeling/circuit_process.py",
+    "canonical_sha256": "cfc172f377f6269f88bf9ac0918199beea4045f6b41acd40481c3e321d8942b7",
+    "exported": "examples/g384/circuit_process.py",
+    "exported_sha256": "bb7c37f0ed308dfd70afa4d358a40e7fbc39bc0d467d0dc1090ad62d56334a44"
+  },
+  {
+    "canonical": "tools/dsp-modeling/requirements.lock",
+    "canonical_sha256": "b2a6ed9e0d32ea03e34a577b1e61fa9f56cc9f409df190e7500cc9c1e7a3dc62",
+    "exported": "examples/g384/requirements.lock",
+    "exported_sha256": "b2a6ed9e0d32ea03e34a577b1e61fa9f56cc9f409df190e7500cc9c1e7a3dc62"
+  }
+]

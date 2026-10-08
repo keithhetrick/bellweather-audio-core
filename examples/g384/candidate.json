@@ -1,0 +1,19 @@
+{
+  "parameters": {
+    "threshold_dB": -22.27245273028678,
+    "ratio": 2.9931498991416357,
+    "attack_s": 0.006451108164319741,
+    "release_s": 0.13376127824803438
+  },
+  "makeup_dB": 0.2525259881,
+  "sample_rate": 44100,
+  "reference_offset_samples": 2,
+  "nominal": {
+    "threshold_dB": -23.823639042,
+    "ratio": 4.0,
+    "attack_s": 0.01,
+    "release_s": 0.3
+  },
+  "development_candidate_sha256": "7421c6fd1054ab75d894f13fe7124e05c2fd0cbb402d34eabaa9857c6b100492",
+  "development_model_sha256": "74331ba362a78c22af55139bc2436bcbc92d26ae93b2e114f37ff5a243d05d09"
+}
